@@ -142,7 +142,6 @@ public class TileEntityCrudeOilExtractor extends TileEntityMekanism {
             }
             currentTarget = scanForNextSource();
             if (currentTarget == null) {
-                scanDelay = 40; // Wait 2 seconds before rescanning entire volume
                 setActive(false);
                 status = ExtractorStatus.NO_OIL;
                 return;
@@ -163,6 +162,11 @@ public class TileEntityCrudeOilExtractor extends TileEntityMekanism {
 
     private void completeExtraction() {
         if (level == null || currentTarget == null) return;
+
+        // Precondition check: Ensure resources are still available to prevent fluid duplication or voiding
+        if (waterTank.getFluidAmount() < WATER_CONSUMPTION || crudeOilTank.getNeeded() < OIL_PRODUCED) {
+            return;
+        }
 
         // Drain water and produce crude oil
         waterTank.extract(WATER_CONSUMPTION, Action.EXECUTE, AutomationType.INTERNAL);
@@ -213,12 +217,12 @@ public class TileEntityCrudeOilExtractor extends TileEntityMekanism {
             scanIndex = 0;
         }
 
-        // Check up to 128 positions per tick to avoid freezing server tick
+        // Check up to 512 positions per tick to balance server performance and responsiveness
         int checked = 0;
         int diameter = SCAN_RADIUS * 2 + 1;
         int maxIndex = diameter * diameter;
 
-        while (checked < 128) {
+        while (checked < 512) {
             int dx = (scanIndex % diameter) - SCAN_RADIUS;
             int dz = (scanIndex / diameter) - SCAN_RADIUS;
 
@@ -237,7 +241,8 @@ public class TileEntityCrudeOilExtractor extends TileEntityMekanism {
                 scanY--;
                 if (scanY < minY) {
                     scanY = maxY;
-                    return null; // Full volume scanned, none found
+                    scanDelay = 40; // Entire volume scanned without finding any oil; wait 40 ticks before rescanning
+                    return null;
                 }
             }
         }

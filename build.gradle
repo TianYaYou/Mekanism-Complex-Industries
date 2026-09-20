@@ -111,9 +111,11 @@ tasks.named('processResources', ProcessResources).configure {
 
 // Custom task to deploy the built jar directly to the test modpack
 tasks.register('deployToModpack', Copy) {
-    dependsOn tasks.named('jar')
-    from tasks.named('jar')
+    dependsOn tasks.named('reobfJar')
+    from tasks.named('reobfJar')
     into file(project.property('modpack_mods_dir'))
+
+    outputs.upToDateWhen { false }
 
     doFirst {
         def targetDir = file(project.property('modpack_mods_dir'))
@@ -128,6 +130,6 @@ tasks.register('deployToModpack', Copy) {
     }
 
     doLast {
-        println "Successfully deployed ${tasks.named('jar').get().archiveFileName.get()} to ${project.property('modpack_mods_dir')}"
+        println "Successfully deployed reobfuscated jar to ${project.property('modpack_mods_dir')}"
     }
 }
