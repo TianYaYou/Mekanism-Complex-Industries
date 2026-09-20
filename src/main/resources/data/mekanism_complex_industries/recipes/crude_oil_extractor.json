@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CAC",
+    "PMD",
+    "ABA"
+  ],
+  "key": {
+    "C": {
+      "item": "mekanism:ultimate_control_circuit"
+    },
+    "A": {
+      "item": "mekanism:atomic_alloy"
+    },
+    "P": {
+      "item": "mekanism:ultimate_mechanical_pipe"
+    },
+    "M": {
+      "item": "mekanism:digital_miner"
+    },
+    "D": {
+      "item": "mekanism:ultimate_mechanical_pipe"
+    },
+    "B": {
+      "item": "minecraft:netherite_block"
+    }
+  },
+  "result": {
+    "item": "mekanism_complex_industries:crude_oil_extractor",
+    "count": 1
+  }
+}

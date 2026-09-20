@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "active=false,facing=north": { "model": "mekanism_complex_industries:block/crude_oil_extractor" },
+    "active=false,facing=south": { "model": "mekanism_complex_industries:block/crude_oil_extractor", "y": 180 },
+    "active=false,facing=west":  { "model": "mekanism_complex_industries:block/crude_oil_extractor", "y": 270 },
+    "active=false,facing=east":  { "model": "mekanism_complex_industries:block/crude_oil_extractor", "y": 90 },
+    "active=true,facing=north":  { "model": "mekanism_complex_industries:block/crude_oil_extractor_active" },
+    "active=true,facing=south":  { "model": "mekanism_complex_industries:block/crude_oil_extractor_active", "y": 180 },
+    "active=true,facing=west":   { "model": "mekanism_complex_industries:block/crude_oil_extractor_active", "y": 270 },
+    "active=true,facing=east":   { "model": "mekanism_complex_industries:block/crude_oil_extractor_active", "y": 90 }
+  }
+}

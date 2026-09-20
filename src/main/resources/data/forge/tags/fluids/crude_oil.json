@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "mekanism_complex_industries:crude_oil",
+    "mekanism_complex_industries:crude_oil_flowing"
+  ]
+}

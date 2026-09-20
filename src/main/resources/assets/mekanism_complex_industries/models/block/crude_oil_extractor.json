@@ -1,0 +1,12 @@
+{
+  "parent": "mekanism:block/machine",
+  "textures": {
+    "sides": "mekanism_complex_industries:block/crude_oil_extractor/side",
+    "front": "mekanism_complex_industries:block/crude_oil_extractor/front",
+    "west": "mekanism_complex_industries:block/crude_oil_extractor/side",
+    "east": "mekanism_complex_industries:block/crude_oil_extractor/side",
+    "south": "mekanism_complex_industries:block/crude_oil_extractor/back",
+    "up": "mekanism_complex_industries:block/crude_oil_extractor/top",
+    "down": "mekanism_complex_industries:block/crude_oil_extractor/bottom"
+  }
+}

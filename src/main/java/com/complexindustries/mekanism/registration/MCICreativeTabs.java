@@ -14,11 +14,14 @@ public final class MCICreativeTabs {
     public static final RegistryObject<CreativeModeTab> MCI_TAB = CREATIVE_TABS.register("main",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + MCIConstants.MODID))
-                    .icon(() -> MCIItems.COMPLEX_ALLOY.get().getDefaultInstance())
+                    .icon(() -> MCIBlocks.CRUDE_OIL_EXTRACTOR.getItemStack())
                     .displayItems((parameters, output) -> {
+                        output.accept(MCIBlocks.CRUDE_OIL_EXTRACTOR.getItemStack());
+                        output.accept(MCIItems.CRUDE_OIL_BUCKET.get());
+                        output.accept(MCIBlocks.COMPLEX_CASING.getItemStack());
                         output.accept(MCIItems.COMPLEX_ALLOY.get());
                         output.accept(MCIItems.INDUSTRIAL_CIRCUIT.get());
-                        output.accept(MCIBlocks.COMPLEX_CASING.get());
+                        output.accept(MCIItems.DEBUG_WAND.get());
                     })
                     .build());
 
