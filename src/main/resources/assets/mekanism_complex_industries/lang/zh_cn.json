@@ -1,0 +1,9 @@
+{
+  "itemGroup.mekanism_complex_industries": "通用机械：复合工业 (Complex Industries)",
+  "item.mekanism_complex_industries.complex_alloy": "复合工业合金",
+  "item.mekanism_complex_industries.industrial_circuit": "工业控制电路板",
+  "block.mekanism_complex_industries.complex_casing": "复合机器外壳",
+  "tooltip.mekanism_complex_industries.complex_alloy": "§7一种专为极端工业设备研发的高致密度复合合金。",
+  "tooltip.mekanism_complex_industries.stored": "储存: %s / %s mB",
+  "tooltip.mekanism_complex_industries.usage": "能耗: +%s J/t"
+}

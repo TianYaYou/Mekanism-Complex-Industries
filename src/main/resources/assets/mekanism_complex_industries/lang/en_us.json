@@ -1,0 +1,9 @@
+{
+  "itemGroup.mekanism_complex_industries": "Mekanism: Complex Industries",
+  "item.mekanism_complex_industries.complex_alloy": "Complex Alloy",
+  "item.mekanism_complex_industries.industrial_circuit": "Industrial Circuit",
+  "block.mekanism_complex_industries.complex_casing": "Complex Machine Casing",
+  "tooltip.mekanism_complex_industries.complex_alloy": "§7A high-density composite alloy engineered for extreme industrial machinery.",
+  "tooltip.mekanism_complex_industries.stored": "Stored: %s / %s mB",
+  "tooltip.mekanism_complex_industries.usage": "Usage: +%s J/t"
+}

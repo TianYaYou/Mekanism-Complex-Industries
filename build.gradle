@@ -1,0 +1,133 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev.legacyforge' version '2.0.146'
+}
+
+group = property('mod_group_id')
+version = property('mod_version')
+
+base {
+    archivesName = property('mod_id')
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+legacyForge {
+    version = "${property('minecraft_version')}-${property('forge_version')}"
+    validateAccessTransformers = true
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.logging.console.level', 'debug'
+            systemProperty 'forge.logging.console.level', 'debug'
+        }
+        server {
+            server()
+            systemProperty 'neoforge.logging.console.level', 'debug'
+            systemProperty 'forge.logging.console.level', 'debug'
+        }
+        data {
+            data()
+            programArguments.addAll '--mod', property('mod_id'), '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+    }
+
+    mods {
+        "${property('mod_id')}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    mavenLocal()
+    maven {
+        name = 'BMCLAPI'
+        url = 'https://bmclapi2.bangbang93.com/maven/'
+    }
+    mavenCentral()
+    maven {
+        name = 'MinecraftForge'
+        url = 'https://maven.minecraftforge.net/'
+    }
+    maven {
+        name = 'NeoForged'
+        url = 'https://maven.neoforged.net/releases'
+    }
+    maven {
+        name = 'ModMaven'
+        url = 'https://modmaven.dev/'
+    }
+    maven {
+        name = 'CurseMaven'
+        url = 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
+}
+
+dependencies {
+    // Mekanism API & Mod
+    modImplementation "mekanism:Mekanism:${property('mekanism_version')}"
+    modRuntimeOnly "mekanism:Mekanism:${property('mekanism_version')}:generators"
+    modRuntimeOnly "mekanism:Mekanism:${property('mekanism_version')}:additions"
+    modRuntimeOnly "mekanism:Mekanism:${property('mekanism_version')}:tools"
+
+    // JEI for recipe viewer integration (compileOnly)
+    compileOnly "mezz.jei:jei-${property('minecraft_version')}-forge-api:${property('jei_version')}"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// Automatically process resources with token replacement
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+        minecraft_version   : project.property('minecraft_version'),
+        forge_version       : project.property('forge_version'),
+        mod_id              : project.property('mod_id'),
+        mod_name            : project.property('mod_name'),
+        mod_version         : project.property('mod_version'),
+        mod_license         : project.property('mod_license'),
+        mod_authors         : project.property('mod_authors'),
+        mod_description     : project.property('mod_description'),
+        mekanism_version    : project.property('mekanism_version')
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties
+    }
+}
+
+// Custom task to deploy the built jar directly to the test modpack
+tasks.register('deployToModpack', Copy) {
+    dependsOn tasks.named('jar')
+    from tasks.named('jar')
+    into file(project.property('modpack_mods_dir'))
+
+    doFirst {
+        def targetDir = file(project.property('modpack_mods_dir'))
+        if (targetDir.exists()) {
+            targetDir.listFiles({ file ->
+                file.name.startsWith(project.property('mod_id').toString()) && file.name.endsWith('.jar')
+            } as FileFilter).each { oldJar ->
+                println "Deleting old mod jar: ${oldJar.name}"
+                oldJar.delete()
+            }
+        }
+    }
+
+    doLast {
+        println "Successfully deployed ${tasks.named('jar').get().archiveFileName.get()} to ${project.property('modpack_mods_dir')}"
+    }
+}
