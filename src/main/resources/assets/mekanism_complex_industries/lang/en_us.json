@@ -1,11 +1,9 @@
 {
   "itemGroup.mekanism_complex_industries": "Mekanism: Complex Industries",
-  "item.mekanism_complex_industries.complex_alloy": "Complex Alloy",
-  "item.mekanism_complex_industries.industrial_circuit": "Industrial Circuit",
   "item.mekanism_complex_industries.crude_oil_bucket": "Crude Oil Bucket",
   "item.mekanism_complex_industries.debug_wand": "MCI Debug Wand",
-  "block.mekanism_complex_industries.complex_casing": "Complex Machine Casing",
   "block.mekanism_complex_industries.crude_oil_extractor": "Crude Oil Extractor",
+  "container.mekanism_complex_industries.crude_oil_extractor": "Crude Oil Extractor",
   "fluid.mekanism_complex_industries.crude_oil": "Crude Oil",
   "description.mekanism_complex_industries.crude_oil_extractor": "A heavy hydraulic drilling and pumping facility. Uses high-pressure water injection to extract underground crude oil reservoirs.",
   "status.mekanism_complex_industries.extracting": "Extracting...",
@@ -15,7 +13,6 @@
   "status.mekanism_complex_industries.tank_full": "Crude Oil Tank Full",
   "status.mekanism_complex_industries.no_oil": "No Oil in Range",
   "status.mekanism_complex_industries.disabled": "Disabled by Redstone",
-  "tooltip.mekanism_complex_industries.complex_alloy": "§7A high-density composite alloy engineered for extreme industrial machinery.",
   "tooltip.mekanism_complex_industries.stored": "Stored: %s / %s mB",
   "tooltip.mekanism_complex_industries.usage": "Usage: +%s J/t"
 }

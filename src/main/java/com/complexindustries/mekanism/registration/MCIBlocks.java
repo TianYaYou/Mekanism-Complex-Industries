@@ -24,11 +24,7 @@ public final class MCIBlocks {
     public static final DeferredRegister<Block> FLUID_BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, MCIConstants.MODID);
 
-    public static final BlockRegistryObject<Block, BlockItem> COMPLEX_CASING = BLOCKS.register("complex_casing",
-            () -> new Block(BlockBehaviour.Properties.of()
-                    .strength(5.0F, 12.0F)
-                    .sound(SoundType.METAL)
-                    .requiresCorrectToolForDrops()));
+
 
     public static final BlockRegistryObject<BlockTile<TileEntityCrudeOilExtractor, BlockTypeTile<TileEntityCrudeOilExtractor>>, ItemBlockMachine> CRUDE_OIL_EXTRACTOR =
             BLOCKS.register("crude_oil_extractor",

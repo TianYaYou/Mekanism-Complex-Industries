@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "mekanism_complex_industries:item/complex_alloy"
-  }
-}

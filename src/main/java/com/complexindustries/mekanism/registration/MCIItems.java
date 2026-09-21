@@ -14,11 +14,7 @@ public final class MCIItems {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, MCIConstants.MODID);
 
-    public static final RegistryObject<Item> COMPLEX_ALLOY = ITEMS.register("complex_alloy",
-            () -> new Item(new Item.Properties().rarity(Rarity.RARE)));
 
-    public static final RegistryObject<Item> INDUSTRIAL_CIRCUIT = ITEMS.register("industrial_circuit",
-            () -> new Item(new Item.Properties().rarity(Rarity.UNCOMMON)));
 
     public static final RegistryObject<BucketItem> CRUDE_OIL_BUCKET = ITEMS.register("crude_oil_bucket",
             () -> new BucketItem(MCIFluids.CRUDE_OIL_SOURCE,

@@ -18,9 +18,6 @@ public final class MCICreativeTabs {
                     .displayItems((parameters, output) -> {
                         output.accept(MCIBlocks.CRUDE_OIL_EXTRACTOR.getItemStack());
                         output.accept(MCIItems.CRUDE_OIL_BUCKET.get());
-                        output.accept(MCIBlocks.COMPLEX_CASING.getItemStack());
-                        output.accept(MCIItems.COMPLEX_ALLOY.get());
-                        output.accept(MCIItems.INDUSTRIAL_CIRCUIT.get());
                         output.accept(MCIItems.DEBUG_WAND.get());
                     })
                     .build());

@@ -17,11 +17,15 @@ import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.SyncableEnum;
+import mekanism.api.RelativeSide;
 import mekanism.common.inventory.container.sync.SyncableInt;
 import mekanism.common.inventory.slot.FluidInventorySlot;
 import mekanism.common.inventory.slot.OutputInventorySlot;
+import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.registries.MekanismSounds;
-import mekanism.common.tile.base.TileEntityMekanism;
+import mekanism.common.tile.component.TileComponentConfig;
+import mekanism.common.tile.component.TileComponentEjector;
+import mekanism.common.tile.prefab.TileEntityConfigurableMachine;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.core.BlockPos;
@@ -37,7 +41,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
-public class TileEntityCrudeOilExtractor extends TileEntityMekanism {
+public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine {
 
     public static final int BASE_TICKS_REQUIRED = 40;
     public static final int WATER_CONSUMPTION = 2000;
@@ -64,12 +68,18 @@ public class TileEntityCrudeOilExtractor extends TileEntityMekanism {
 
     public TileEntityCrudeOilExtractor(BlockPos pos, BlockState state) {
         super(MCIBlocks.CRUDE_OIL_EXTRACTOR, pos, state);
+        configComponent = new TileComponentConfig(this, TransmissionType.FLUID, TransmissionType.ENERGY);
+        configComponent.setupIOConfig(TransmissionType.FLUID, waterTank, crudeOilTank, RelativeSide.RIGHT).setEjecting(true);
+        configComponent.setupInputConfig(TransmissionType.ENERGY, energyContainer);
+
+        ejectorComponent = new TileComponentEjector(this);
+        ejectorComponent.setOutputData(configComponent, TransmissionType.FLUID);
     }
 
     @NotNull
     @Override
     protected IFluidTankHolder getInitialFluidTanks(IContentsListener listener) {
-        FluidTankHelper builder = FluidTankHelper.forSide(this::getDirection);
+        FluidTankHelper builder = FluidTankHelper.forSideWithConfig(this::getDirection, this::getConfig);
         builder.addTank(waterTank = BasicFluidTank.input(16_000, fluid -> fluid.getFluid() == Fluids.WATER, fluid -> fluid.getFluid() == Fluids.WATER, listener));
         builder.addTank(crudeOilTank = BasicFluidTank.output(16_000, listener));
         return builder.build();
@@ -78,7 +88,7 @@ public class TileEntityCrudeOilExtractor extends TileEntityMekanism {
     @NotNull
     @Override
     protected IEnergyContainerHolder getInitialEnergyContainers(IContentsListener listener) {
-        EnergyContainerHelper builder = EnergyContainerHelper.forSide(this::getDirection);
+        EnergyContainerHelper builder = EnergyContainerHelper.forSideWithConfig(this::getDirection, this::getConfig);
         builder.addContainer(energyContainer = MachineEnergyContainer.input(this, listener));
         return builder.build();
     }

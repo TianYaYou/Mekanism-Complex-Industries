@@ -2,7 +2,7 @@ package com.complexindustries.mekanism.client.gui;
 
 import com.complexindustries.mekanism.content.extractor.CrudeOilExtractorContainer;
 import com.complexindustries.mekanism.content.extractor.TileEntityCrudeOilExtractor;
-import mekanism.client.gui.GuiMekanismTile;
+import mekanism.client.gui.GuiConfigurableTile;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiEnergyGauge;
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class GuiCrudeOilExtractor extends GuiMekanismTile<TileEntityCrudeOilExtractor, CrudeOilExtractorContainer> {
+public class GuiCrudeOilExtractor extends GuiConfigurableTile<TileEntityCrudeOilExtractor, CrudeOilExtractorContainer> {
 
     public GuiCrudeOilExtractor(CrudeOilExtractorContainer container, Inventory inv, Component title) {
         super(container, inv, title);
@@ -29,28 +29,25 @@ public class GuiCrudeOilExtractor extends GuiMekanismTile<TileEntityCrudeOilExtr
 
     @Override
     protected void addGuiElements() {
-        // 1. Mount generic side tabs: UpgradeTab, RedstoneControl, SecurityTab
+        // 1. Mount generic and configurable side tabs
         super.addGuiElements();
 
         // 2. Water Section (Left)
         addRenderableWidget(new GuiSlot(SlotType.INPUT, this, 7, 19).with(SlotOverlay.PLUS));
         addRenderableWidget(new GuiSlot(SlotType.OUTPUT, this, 7, 51).with(SlotOverlay.MINUS));
-        addRenderableWidget(new GuiFluidGauge(() -> tile.waterTank, () -> tile.getFluidTanks(null), GaugeType.STANDARD, this, 28, 18)
-                .setLabel(Component.translatable("block.minecraft.water")));
+        addRenderableWidget(new GuiFluidGauge(() -> tile.waterTank, () -> tile.getFluidTanks(null), GaugeType.STANDARD, this, 28, 18));
 
         // 3. Energy Section
         addRenderableWidget(new GuiEnergyGauge(tile.getEnergyContainer(), GaugeType.STANDARD, this, 48, 18));
 
         // 4. Center Diagnostic HUD & Pumping Progress
         addRenderableWidget(new GuiInnerScreen(this, 68, 18, 58, 36, () -> List.of(
-                MekanismLang.STATUS.translate(),
-                tile.getExtractorStatus().getComponent()
+                MekanismLang.STATUS.translate(tile.getExtractorStatus().getComponent())
         )));
         addRenderableWidget(new GuiProgress(tile::getScaledProgress, ProgressType.LARGE_RIGHT, this, 81, 58));
 
         // 5. Crude Oil Section (Right)
-        addRenderableWidget(new GuiFluidGauge(() -> tile.crudeOilTank, () -> tile.getFluidTanks(null), GaugeType.STANDARD, this, 128, 18)
-                .setLabel(Component.translatable("fluid.mekanism_complex_industries.crude_oil")));
+        addRenderableWidget(new GuiFluidGauge(() -> tile.crudeOilTank, () -> tile.getFluidTanks(null), GaugeType.STANDARD, this, 128, 18));
         addRenderableWidget(new GuiSlot(SlotType.INPUT, this, 149, 19).with(SlotOverlay.MINUS));
         addRenderableWidget(new GuiSlot(SlotType.OUTPUT, this, 149, 51).with(SlotOverlay.PLUS));
     }

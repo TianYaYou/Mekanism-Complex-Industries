@@ -1,11 +1,9 @@
 {
   "itemGroup.mekanism_complex_industries": "通用机械：复合工业 (Complex Industries)",
-  "item.mekanism_complex_industries.complex_alloy": "复合工业合金",
-  "item.mekanism_complex_industries.industrial_circuit": "工业控制电路板",
   "item.mekanism_complex_industries.crude_oil_bucket": "原油桶",
   "item.mekanism_complex_industries.debug_wand": "MCI 调试测试权杖",
-  "block.mekanism_complex_industries.complex_casing": "复合机器外壳",
   "block.mekanism_complex_industries.crude_oil_extractor": "原油抽取器",
+  "container.mekanism_complex_industries.crude_oil_extractor": "原油抽取器",
   "fluid.mekanism_complex_industries.crude_oil": "原油",
   "description.mekanism_complex_industries.crude_oil_extractor": "重型水力深层钻探与采油设施。利用高压注水开采地底有限的原油矿藏。",
   "status.mekanism_complex_industries.extracting": "采油运转中...",
@@ -15,7 +13,6 @@
   "status.mekanism_complex_industries.tank_full": "原油储罐已满",
   "status.mekanism_complex_industries.no_oil": "范围内未检测到原油",
   "status.mekanism_complex_industries.disabled": "红石信号已禁用",
-  "tooltip.mekanism_complex_industries.complex_alloy": "§7一种专为极端工业设备研发的高致密度复合合金。",
   "tooltip.mekanism_complex_industries.stored": "储存: %s / %s mB",
   "tooltip.mekanism_complex_industries.usage": "能耗: +%s J/t"
 }
