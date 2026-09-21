@@ -49,6 +49,12 @@ def main():
     # Tokenize arguments for Windows and strip outer quotes
     cmd_args = shlex.split(cmd_str, posix=False)
     cmd_args = [a[1:-1] if a.startswith('"') and a.endswith('"') else a for a in cmd_args]
+    if "--world" in sys.argv:
+        idx = sys.argv.index("--world")
+        if idx + 1 < len(sys.argv):
+            world_name = sys.argv[idx + 1]
+            cmd_args.extend(["--quickPlaySingleplayer", world_name])
+            log(f"Quick play singleplayer world: {world_name}")
     log(f"Command binary: {cmd_args[0]}")
     log(f"Binary exists: {os.path.exists(cmd_args[0])}")
     log(f"Total arguments: {len(cmd_args)}")
@@ -81,6 +87,7 @@ def main():
     common_setup_done = False
     client_setup_done = False
     game_loaded = False
+    world_joined = False
     crashed = False
     crash_reason = ""
 
@@ -88,7 +95,7 @@ def main():
     timeout = 180  # 3 minutes maximum timeout for launch
 
     def check_line(line_clean):
-        nonlocal mod_discovered, mod_constructed, common_setup_done, client_setup_done, game_loaded, crashed, crash_reason
+        nonlocal mod_discovered, mod_constructed, common_setup_done, client_setup_done, game_loaded, world_joined, crashed, crash_reason
         if not line_clean:
             return
 
@@ -120,6 +127,10 @@ def main():
             client_setup_done = True
         if "Game took" in line_clean or "OpenAL initialized" in line_clean or "Sound engine started" in line_clean:
             game_loaded = True
+
+        if "joined the game" in line_clean or "Loaded 0 advancements" in line_clean or "Changing dimension from" in line_clean:
+            world_joined = True
+            log(f"[IN-GAME] Successfully joined singleplayer world: {line_clean}")
 
         if "NoSuchFieldError" in line_clean or "Failed to create mod instance" in line_clean or "Mod Loading has failed" in line_clean:
             crashed = True
