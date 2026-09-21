@@ -1,5 +1,6 @@
 package com.complexindustries.mekanism.client.gui;
 
+import com.complexindustries.mekanism.client.gui.element.MCIUpgradeWindowTab;
 import com.complexindustries.mekanism.content.extractor.CrudeOilExtractorContainer;
 import com.complexindustries.mekanism.content.extractor.TileEntityCrudeOilExtractor;
 import mekanism.client.gui.GuiConfigurableTile;
@@ -9,10 +10,8 @@ import mekanism.client.gui.element.gauge.GuiEnergyGauge;
 import mekanism.client.gui.element.gauge.GuiFluidGauge;
 import mekanism.client.gui.element.progress.GuiProgress;
 import mekanism.client.gui.element.progress.ProgressType;
-import mekanism.client.gui.element.slot.GuiSlot;
-import mekanism.client.gui.element.slot.SlotType;
+import mekanism.client.gui.element.tab.GuiRedstoneControlTab;
 import mekanism.common.MekanismLang;
-import mekanism.common.inventory.container.slot.SlotOverlay;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -22,9 +21,22 @@ import java.util.List;
 
 public class GuiCrudeOilExtractor extends GuiConfigurableTile<TileEntityCrudeOilExtractor, CrudeOilExtractorContainer> {
 
+    private MCIUpgradeWindowTab upgradeWindowTab;
+
     public GuiCrudeOilExtractor(CrudeOilExtractorContainer container, Inventory inv, Component title) {
         super(container, inv, title);
-        this.inventoryLabelY = this.imageHeight - 94;
+        this.dynamicSlots = true;
+        this.inventoryLabelY = 72;
+    }
+
+    @Override
+    protected void addGenericTabs() {
+        if (tile.supportsUpgrades()) {
+            upgradeWindowTab = addRenderableWidget(new MCIUpgradeWindowTab(this, tile, () -> upgradeWindowTab));
+        }
+        if (tile.supportsRedstone()) {
+            addRenderableWidget(new GuiRedstoneControlTab(this, tile));
+        }
     }
 
     @Override
@@ -33,8 +45,6 @@ public class GuiCrudeOilExtractor extends GuiConfigurableTile<TileEntityCrudeOil
         super.addGuiElements();
 
         // 2. Water Section (Left)
-        addRenderableWidget(new GuiSlot(SlotType.INPUT, this, 7, 19).with(SlotOverlay.PLUS));
-        addRenderableWidget(new GuiSlot(SlotType.OUTPUT, this, 7, 51).with(SlotOverlay.MINUS));
         addRenderableWidget(new GuiFluidGauge(() -> tile.waterTank, () -> tile.getFluidTanks(null), GaugeType.STANDARD, this, 28, 18));
 
         // 3. Energy Section
@@ -42,14 +52,16 @@ public class GuiCrudeOilExtractor extends GuiConfigurableTile<TileEntityCrudeOil
 
         // 4. Center Diagnostic HUD & Pumping Progress
         addRenderableWidget(new GuiInnerScreen(this, 68, 18, 58, 36, () -> List.of(
-                MekanismLang.STATUS.translate(tile.getExtractorStatus().getComponent())
+                MekanismLang.STATUS.translate(""),
+                tile.getExtractorStatus().getComponent(),
+                Component.translatable("gui.mekanism_complex_industries.extractor.cycle_summary")
+        )).spacing(2).tooltip(() -> List.of(
+                Component.translatable("gui.mekanism_complex_industries.extractor.tooltip.details")
         )));
         addRenderableWidget(new GuiProgress(tile::getScaledProgress, ProgressType.LARGE_RIGHT, this, 81, 58));
 
         // 5. Crude Oil Section (Right)
         addRenderableWidget(new GuiFluidGauge(() -> tile.crudeOilTank, () -> tile.getFluidTanks(null), GaugeType.STANDARD, this, 128, 18));
-        addRenderableWidget(new GuiSlot(SlotType.INPUT, this, 149, 19).with(SlotOverlay.MINUS));
-        addRenderableWidget(new GuiSlot(SlotType.OUTPUT, this, 149, 51).with(SlotOverlay.PLUS));
     }
 
     @Override

@@ -19,6 +19,7 @@ import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.SyncableEnum;
 import mekanism.api.RelativeSide;
 import mekanism.common.inventory.container.sync.SyncableInt;
+import mekanism.common.inventory.container.slot.SlotOverlay;
 import mekanism.common.inventory.slot.FluidInventorySlot;
 import mekanism.common.inventory.slot.OutputInventorySlot;
 import mekanism.common.lib.transmitter.TransmissionType;
@@ -101,6 +102,10 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine {
         builder.addSlot(waterOutputSlot = OutputInventorySlot.at(listener, 8, 52));
         builder.addSlot(oilInputSlot = FluidInventorySlot.fill(crudeOilTank, listener, 150, 20));
         builder.addSlot(oilOutputSlot = OutputInventorySlot.at(listener, 150, 52));
+        waterInputSlot.setSlotOverlay(SlotOverlay.PLUS);
+        waterOutputSlot.setSlotOverlay(SlotOverlay.MINUS);
+        oilInputSlot.setSlotOverlay(SlotOverlay.MINUS);
+        oilOutputSlot.setSlotOverlay(SlotOverlay.PLUS);
         return builder.build();
     }
 

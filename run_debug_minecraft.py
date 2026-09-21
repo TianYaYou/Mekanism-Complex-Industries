@@ -103,7 +103,10 @@ def main():
             "OpenAL initialized",
             "Setting user",
             "Game took",
-            "Sound engine started"
+            "Sound engine started",
+            "RecipeManager",
+            "Parsing error",
+            "crude_oil_extractor"
         ]):
             log(f"[LOG] {line_clean}")
 
