@@ -13,7 +13,19 @@ public enum MCILang implements ILangEntry {
     STATUS_NO_ENERGY("status", "no_energy"),
     STATUS_TANK_FULL("status", "tank_full"),
     STATUS_NO_OIL("status", "no_oil"),
-    STATUS_DISABLED("status", "disabled");
+    STATUS_DISABLED("status", "disabled"),
+    STATUS_STOPPED("status", "stopped"),
+    STATUS_FINISHED("status", "finished"),
+    GUI_START("gui", "start"),
+    GUI_STOP("gui", "stop"),
+    GUI_CONFIG("gui", "config"),
+    GUI_RESET("gui", "reset"),
+    GUI_RADIUS("gui", "radius"),
+    GUI_MIN_Y("gui", "min_y"),
+    GUI_MAX_Y("gui", "max_y"),
+    GUI_RANGE_TITLE("gui", "range_title"),
+    GUI_EXTRACTED("gui", "extracted"),
+    GUI_RANGE_STAT("gui", "range_stat");
 
     private final String key;
 

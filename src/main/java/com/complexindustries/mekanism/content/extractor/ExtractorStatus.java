@@ -11,7 +11,9 @@ public enum ExtractorStatus {
     NO_ENERGY(MCILang.STATUS_NO_ENERGY),
     TANK_FULL(MCILang.STATUS_TANK_FULL),
     NO_OIL(MCILang.STATUS_NO_OIL),
-    DISABLED(MCILang.STATUS_DISABLED);
+    DISABLED(MCILang.STATUS_DISABLED),
+    STOPPED(MCILang.STATUS_STOPPED),
+    FINISHED(MCILang.STATUS_FINISHED);
 
     private static final ExtractorStatus[] VALUES = values();
     private final ILangEntry langEntry;

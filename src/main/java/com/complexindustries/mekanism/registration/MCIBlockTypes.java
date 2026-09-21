@@ -15,7 +15,7 @@ public final class MCIBlockTypes {
             .createBlock(() -> MCIBlockEntityTypes.CRUDE_OIL_EXTRACTOR, MCILang.CRUDE_OIL_EXTRACTOR_DESCRIPTION)
             .withEnergyConfig(() -> FloatingLong.createConst(8_000), () -> FloatingLong.createConst(160_000))
             .withGui(() -> MCIMenuTypes.CRUDE_OIL_EXTRACTOR)
-            .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.MUFFLING, Upgrade.STONE_GENERATOR))
+            .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.MUFFLING, Upgrade.STONE_GENERATOR, Upgrade.ANCHOR))
             .with(
                     new AttributeStateFacing(),
                     Attributes.ACTIVE_LIGHT,

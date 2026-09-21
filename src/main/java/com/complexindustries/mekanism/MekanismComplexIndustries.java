@@ -42,6 +42,7 @@ public class MekanismComplexIndustries {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            com.complexindustries.mekanism.network.MCIPacketHandler.initialize();
             MCIConstants.LOGGER.info("{} common setup completed.", MCIConstants.MOD_NAME);
         });
     }

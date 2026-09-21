@@ -21,7 +21,8 @@ public class MCISupportedUpgrades extends GuiElement {
             Upgrade.SPEED,
             Upgrade.ENERGY,
             Upgrade.MUFFLING,
-            Upgrade.STONE_GENERATOR
+            Upgrade.STONE_GENERATOR,
+            Upgrade.ANCHOR
     );
 
     private final Set<Upgrade> supportedUpgrades;
