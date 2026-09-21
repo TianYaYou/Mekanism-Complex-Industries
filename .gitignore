@@ -29,3 +29,6 @@ src/generated/
 Thumbs.db
 
 AgentTemp/*
+
+# Archives
+archive/*.zip

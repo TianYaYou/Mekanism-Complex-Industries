@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "mekanism_complex_industries:item/debug_wand"
-  }
-}

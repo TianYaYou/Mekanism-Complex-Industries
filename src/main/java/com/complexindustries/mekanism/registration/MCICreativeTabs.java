@@ -4,6 +4,8 @@ import com.complexindustries.mekanism.MCIConstants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -14,11 +16,9 @@ public final class MCICreativeTabs {
     public static final RegistryObject<CreativeModeTab> MCI_TAB = CREATIVE_TABS.register("main",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + MCIConstants.MODID))
-                    .icon(() -> MCIBlocks.CRUDE_OIL_EXTRACTOR.getItemStack())
+                    .icon(() -> new ItemStack(Items.IRON_INGOT))
                     .displayItems((parameters, output) -> {
-                        output.accept(MCIBlocks.CRUDE_OIL_EXTRACTOR.getItemStack());
-                        output.accept(MCIItems.CRUDE_OIL_BUCKET.get());
-                        output.accept(MCIItems.DEBUG_WAND.get());
+                        // Items will be populated here as new features are designed
                     })
                     .build());
 
