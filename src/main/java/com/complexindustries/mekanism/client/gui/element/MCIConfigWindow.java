@@ -20,7 +20,6 @@ public class MCIConfigWindow extends GuiWindow {
         super(gui, x, y, 140, 90, SelectedWindowData.WindowType.UNSPECIFIED);
         this.tile = tile;
         this.interactionStrategy = InteractionStrategy.ALL;
-        addCloseButton();
 
         // Row 1: Radius stepper buttons (-, +)
         addChild(new MekanismButton(gui, relativeX + 85, relativeY + 18, 16, 14, Component.literal("-"),

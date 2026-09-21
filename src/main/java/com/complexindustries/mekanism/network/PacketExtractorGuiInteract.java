@@ -1,5 +1,6 @@
 package com.complexindustries.mekanism.network;
 
+import com.complexindustries.mekanism.content.extractor.CrudeOilExtractorContainer;
 import com.complexindustries.mekanism.content.extractor.TileEntityCrudeOilExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -51,7 +52,9 @@ public class PacketExtractorGuiInteract {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player != null && player.level().isLoaded(msg.pos)) {
-                if (player.distanceToSqr(msg.pos.getX() + 0.5, msg.pos.getY() + 0.5, msg.pos.getZ() + 0.5) <= 64.0) {
+                boolean containerOpen = player.containerMenu instanceof CrudeOilExtractorContainer container &&
+                        container.getTileEntity().getBlockPos().equals(msg.pos);
+                if (containerOpen || player.distanceToSqr(msg.pos.getX() + 0.5, msg.pos.getY() + 0.5, msg.pos.getZ() + 0.5) <= 64.0) {
                     BlockEntity tile = player.level().getBlockEntity(msg.pos);
                     if (tile instanceof TileEntityCrudeOilExtractor extractor) {
                         switch (msg.action) {

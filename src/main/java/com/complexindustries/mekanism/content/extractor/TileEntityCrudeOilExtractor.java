@@ -37,11 +37,15 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
@@ -56,6 +60,7 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
     public static final int WATER_CONSUMPTION = 2000;
     public static final int OIL_PRODUCED = 1000;
     public static final int SCAN_RADIUS = 16;
+    private static final TagKey<Fluid> FORGE_CRUDE_OIL = FluidTags.create(new ResourceLocation("forge", "crude_oil"));
 
     public BasicFluidTank waterTank;
     public BasicFluidTank crudeOilTank;
@@ -81,7 +86,7 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
     private BlockPos currentTarget = null;
     private int scanDelay = 0;
     private int scanIndex = 0;
-    private int scanY = 0;
+    private int scanY = Integer.MAX_VALUE;
 
     public TileEntityCrudeOilExtractor(BlockPos pos, BlockState state) {
         super(MCIBlocks.CRUDE_OIL_EXTRACTOR, pos, state);
@@ -170,6 +175,15 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
 
     public void start() {
         this.running = true;
+        if (this.status == ExtractorStatus.STOPPED || this.status == ExtractorStatus.FINISHED) {
+            this.status = ExtractorStatus.IDLE;
+        }
+        int effMinY = level != null ? level.getMinBuildHeight() : minY;
+        int effMaxY = level != null ? Math.min(level.getMaxBuildHeight() - 1, maxY) : maxY;
+        if (this.scanY < effMinY || this.scanY > effMaxY) {
+            this.scanY = effMaxY;
+            this.scanIndex = 0;
+        }
         markForSave();
     }
 
@@ -181,10 +195,14 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
     }
 
     public void reset() {
-        this.scanY = maxY;
+        int effMaxY = level != null ? Math.min(level.getMaxBuildHeight() - 1, maxY) : maxY;
+        this.scanY = effMaxY;
         this.scanIndex = 0;
         this.currentTarget = null;
         this.scanDelay = 0;
+        if (this.status == ExtractorStatus.FINISHED || this.status == ExtractorStatus.NO_OIL) {
+            this.status = ExtractorStatus.IDLE;
+        }
         markForSave();
     }
 
@@ -203,7 +221,7 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
     }
 
     public void setMaxY(int y) {
-        int worldMax = level != null ? level.getMaxBuildHeight() : 320;
+        int worldMax = level != null ? level.getMaxBuildHeight() - 1 : 319;
         this.maxY = Math.min(worldMax, Math.max(minY, y));
         reset();
     }
@@ -219,7 +237,9 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
         // 2. Running state check
         if (!running) {
             setActive(false);
-            status = ExtractorStatus.STOPPED;
+            if (status != ExtractorStatus.FINISHED) {
+                status = ExtractorStatus.STOPPED;
+            }
             return;
         }
 
@@ -258,13 +278,14 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
             if (scanDelay > 0) {
                 scanDelay--;
                 setActive(false);
-                status = ExtractorStatus.NO_OIL;
                 return;
             }
             currentTarget = scanForNextSource();
             if (currentTarget == null) {
                 setActive(false);
-                status = ExtractorStatus.NO_OIL;
+                if (status != ExtractorStatus.FINISHED) {
+                    status = ExtractorStatus.NO_OIL;
+                }
                 return;
             }
         }
@@ -315,7 +336,7 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
         if (pos == null || level == null) return;
         BlockPos center = getBlockPos();
         int effMinY = Math.max(level.getMinBuildHeight(), minY);
-        int effMaxY = Math.min(level.getMaxBuildHeight(), maxY);
+        int effMaxY = Math.min(level.getMaxBuildHeight() - 1, maxY);
         for (Direction dir : EnumUtils.DIRECTIONS) {
             BlockPos neighbor = pos.relative(dir);
             int dx = neighbor.getX() - center.getX();
@@ -334,7 +355,7 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
 
         BlockPos center = getBlockPos();
         int effMinY = Math.max(level.getMinBuildHeight(), minY);
-        int effMaxY = Math.min(level.getMaxBuildHeight(), maxY);
+        int effMaxY = Math.min(level.getMaxBuildHeight() - 1, maxY);
 
         if (scanY < effMinY || scanY > effMaxY) {
             scanY = effMaxY;
@@ -365,9 +386,18 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
                 scanY--;
                 if (scanY < effMinY) {
                     scanY = effMaxY;
-                    scanDelay = 40; // Entire volume scanned without finding any oil; wait 40 ticks before rescanning
-                    status = ExtractorStatus.FINISHED;
-                    return null;
+                    if (extractedCount > 0) {
+                        status = ExtractorStatus.FINISHED;
+                        running = false;
+                        setActive(false);
+                        scanDelay = 0;
+                        markForSave();
+                        return null;
+                    } else {
+                        status = ExtractorStatus.NO_OIL;
+                        scanDelay = 40; // Entire volume scanned without finding any oil; wait 40 ticks before rescanning
+                        return null;
+                    }
                 }
             }
         }
@@ -379,7 +409,7 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
         BlockState state = level.getBlockState(pos);
         FluidState fluid = state.getFluidState();
         return !fluid.isEmpty() && fluid.isSource() &&
-                (fluid.getType() == MCIFluids.CRUDE_OIL_SOURCE.get() || state.getBlock() == MCIBlocks.CRUDE_OIL_BLOCK.get());
+                (fluid.getType() == MCIFluids.CRUDE_OIL_SOURCE.get() || fluid.is(FORGE_CRUDE_OIL) || state.getBlock() == MCIBlocks.CRUDE_OIL_BLOCK.get());
     }
 
     @Override
@@ -445,6 +475,9 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
         if (nbt.contains("scanY")) {
             scanY = nbt.getInt("scanY");
         }
+        if (nbt.contains("status")) {
+            status = ExtractorStatus.byIndexStatic(nbt.getInt("status"));
+        }
     }
 
     @Override
@@ -461,5 +494,6 @@ public class TileEntityCrudeOilExtractor extends TileEntityConfigurableMachine i
         nbt.putInt("maxY", maxY);
         nbt.putInt("extractedCount", extractedCount);
         nbt.putInt("scanY", scanY);
+        nbt.putInt("status", status.ordinal());
     }
 }
