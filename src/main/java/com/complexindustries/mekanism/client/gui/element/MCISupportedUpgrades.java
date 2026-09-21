@@ -32,8 +32,8 @@ public class MCISupportedUpgrades extends GuiElement {
     }
 
     private int getUpgradeStartX() {
-        int labelWidth = getFont().width(MekanismLang.UPGRADES_SUPPORTED.translate());
-        return Math.max(34, labelWidth + 6);
+        int labelWidth = Math.min(54, getFont().width(MekanismLang.UPGRADES_SUPPORTED.translate()));
+        return Math.max(34, labelWidth + 4);
     }
 
     @Override
@@ -42,10 +42,11 @@ public class MCISupportedUpgrades extends GuiElement {
         renderBackgroundTexture(graphics, GuiElementHolder.HOLDER, 32, 32);
 
         int startX = getUpgradeStartX();
-        for (int i = 0; i < SUPPORTED.size(); i++) {
-            Upgrade upgrade = SUPPORTED.get(i);
+        int slotIndex = 0;
+        for (Upgrade upgrade : SUPPORTED) {
             if (supportedUpgrades == null || supportedUpgrades.contains(upgrade)) {
-                gui().renderItem(graphics, UpgradeUtils.getStack(upgrade), relativeX + 1 + startX + i * 14, relativeY + 1, 0.75F);
+                gui().renderItem(graphics, UpgradeUtils.getStack(upgrade), relativeX + 1 + startX + slotIndex * 14, relativeY + 1, 0.75F);
+                slotIndex++;
             }
         }
     }
@@ -60,12 +61,12 @@ public class MCISupportedUpgrades extends GuiElement {
     public void renderToolTip(@NotNull GuiGraphics graphics, int mouseX, int mouseY) {
         super.renderToolTip(graphics, mouseX, mouseY);
         int startX = getUpgradeStartX();
-        for (int i = 0; i < SUPPORTED.size(); i++) {
-            Upgrade upgrade = SUPPORTED.get(i);
+        int slotIndex = 0;
+        for (Upgrade upgrade : SUPPORTED) {
             if (supportedUpgrades != null && !supportedUpgrades.contains(upgrade)) {
                 continue;
             }
-            int itemX = getX() + 1 + startX + i * 14;
+            int itemX = getX() + 1 + startX + slotIndex * 14;
             int itemY = getY() + 1;
             if (mouseX >= itemX && mouseX < itemX + 12 && mouseY >= itemY && mouseY < itemY + 12) {
                 Component title = MekanismLang.UPGRADE_TYPE.translateColored(EnumColor.YELLOW, upgrade);
@@ -74,6 +75,7 @@ public class MCISupportedUpgrades extends GuiElement {
                 displayTooltips(graphics, mouseX, mouseY, title, capacity, desc);
                 return;
             }
+            slotIndex++;
         }
     }
 }

@@ -37,6 +37,9 @@ public class GuiCrudeOilExtractor extends GuiConfigurableTile<TileEntityCrudeOil
         if (tile.supportsRedstone()) {
             addRenderableWidget(new GuiRedstoneControlTab(this, tile));
         }
+        if (tile.hasSecurity()) {
+            addSecurityTab();
+        }
     }
 
     @Override
