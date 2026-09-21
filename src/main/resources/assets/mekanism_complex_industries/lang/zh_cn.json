@@ -1,3 +1,17 @@
 {
-  "itemGroup.mekanism_complex_industries": "通用机械：复合重工"
+  "itemGroup.mekanism_complex_industries": "通用机械：复合工业 (MCI)",
+  "item.mekanism_complex_industries.petroleum_upgrade": "石油采集升级",
+  "item.mekanism_complex_industries.solid_crude_oil": "固体石油",
+  "item.mekanism_complex_industries.crude_oil_bucket": "原油桶",
+  "block.mekanism_complex_industries.solid_crude_oil_ore": "固体石油原矿",
+  "block.mekanism_complex_industries.deepslate_solid_crude_oil_ore": "深层固体石油原矿",
+  "block.mekanism_complex_industries.crude_oil": "原油",
+  "fluid.mekanism_complex_industries.crude_oil": "原油",
+  "fluid_type.mekanism_complex_industries.crude_oil": "原油",
+  "gas.mekanism_complex_industries.dense_crude_oil": "浓稠石油",
+  "tooltip.mekanism_complex_industries.petroleum_upgrade.desc": "当采矿机筛选条件包含【固体石油原矿】时，允许将范围内的原油流体源块采集为固体石油/原矿。",
+  "tooltip.mekanism_complex_industries.petroleum_upgrade.supported": "支持设备: 数字型采矿机",
+  "tooltip.mekanism_complex_industries.petroleum_upgrade.max": "最大安装量: 1",
+  "tooltip.mekanism_complex_industries.solid_crude_oil.desc": "高密度固体碳氢化合物燃料。",
+  "tooltip.mekanism_complex_industries.solid_crude_oil.burntime": "燃烧时间: 3200 ticks (可熔炼16个物品)"
 }

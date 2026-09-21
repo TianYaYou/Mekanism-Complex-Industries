@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "mekanism_complex_industries:solid_crude_oil_ore",
+    "mekanism_complex_industries:deepslate_solid_crude_oil_ore"
+  ]
+}

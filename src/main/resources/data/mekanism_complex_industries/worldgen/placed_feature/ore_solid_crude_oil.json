@@ -1,0 +1,27 @@
+{
+  "feature": "mekanism_complex_industries:ore_solid_crude_oil",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 4
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": {
+          "absolute": -40
+        },
+        "max_inclusive": {
+          "absolute": 48
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

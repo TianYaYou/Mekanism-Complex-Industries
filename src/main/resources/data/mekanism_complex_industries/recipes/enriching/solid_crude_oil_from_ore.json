@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "item": "mekanism_complex_industries:solid_crude_oil_ore"
+    }
+  },
+  "output": {
+    "item": "mekanism_complex_industries:solid_crude_oil",
+    "count": 8
+  }
+}

@@ -44,6 +44,10 @@ legacyForge {
     }
 }
 
+mixin {
+    config 'mekanism_complex_industries.mixins.json'
+}
+
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
@@ -87,6 +91,14 @@ dependencies {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+            'MixinConfigs': 'mekanism_complex_industries.mixins.json'
+        ])
+    }
 }
 
 // Automatically process resources with token replacement

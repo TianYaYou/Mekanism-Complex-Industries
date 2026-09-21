@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "mekanism_complex_industries:deepslate_solid_crude_oil_ore"
+  },
+  "result": "mekanism_complex_industries:solid_crude_oil",
+  "experience": 0.7,
+  "cookingtime": 200
+}

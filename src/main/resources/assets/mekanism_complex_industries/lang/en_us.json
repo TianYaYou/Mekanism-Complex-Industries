@@ -1,3 +1,17 @@
 {
-  "itemGroup.mekanism_complex_industries": "Mekanism Complex Industries"
+  "itemGroup.mekanism_complex_industries": "Mekanism Complex Industries",
+  "item.mekanism_complex_industries.petroleum_upgrade": "Petroleum Harvesting Upgrade",
+  "item.mekanism_complex_industries.solid_crude_oil": "Solid Crude Oil",
+  "item.mekanism_complex_industries.crude_oil_bucket": "Crude Oil Bucket",
+  "block.mekanism_complex_industries.solid_crude_oil_ore": "Solid Crude Oil Ore",
+  "block.mekanism_complex_industries.deepslate_solid_crude_oil_ore": "Deepslate Solid Crude Oil Ore",
+  "block.mekanism_complex_industries.crude_oil": "Crude Oil",
+  "fluid.mekanism_complex_industries.crude_oil": "Crude Oil",
+  "fluid_type.mekanism_complex_industries.crude_oil": "Crude Oil",
+  "gas.mekanism_complex_industries.dense_crude_oil": "Dense Crude Oil",
+  "tooltip.mekanism_complex_industries.petroleum_upgrade.desc": "Allows the Digital Miner to harvest Crude Oil fluid as Solid Crude Oil / Ore when filtered.",
+  "tooltip.mekanism_complex_industries.petroleum_upgrade.supported": "Supported Machines: Digital Miner",
+  "tooltip.mekanism_complex_industries.petroleum_upgrade.max": "Max Stacks: 1",
+  "tooltip.mekanism_complex_industries.solid_crude_oil.desc": "High-density solid hydrocarbon fuel.",
+  "tooltip.mekanism_complex_industries.solid_crude_oil.burntime": "Burn Time: 3200 ticks (16 items)"
 }
