@@ -1,6 +1,7 @@
 package com.complexindustries.mekanism.registration;
 
 import com.complexindustries.mekanism.MCIConstants;
+import com.complexindustries.mekanism.content.block.MCIBlockItem;
 import com.complexindustries.mekanism.content.item.SolidCrudeOilItem;
 import com.complexindustries.mekanism.content.upgrade.ItemPetroleumUpgrade;
 import net.minecraft.world.item.BlockItem;
@@ -30,6 +31,29 @@ public final class MCIItems {
 
     public static final RegistryObject<BlockItem> DEEPSLATE_SOLID_CRUDE_OIL_ORE = ITEMS.register("deepslate_solid_crude_oil_ore",
             () -> new BlockItem(MCIBlocks.DEEPSLATE_SOLID_CRUDE_OIL_ORE.get(), new Item.Properties()));
+
+    public static final RegistryObject<BlockItem> RESISTIVE_COOLER = ITEMS.register("resistive_cooler",
+            () -> new MCIBlockItem(MCIBlocks.RESISTIVE_COOLER.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.resistive_cooler"));
+
+    public static final RegistryObject<BlockItem> FREEZER_CASING = ITEMS.register("freezer_casing",
+            () -> new MCIBlockItem(MCIBlocks.FREEZER_CASING.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.freezer_casing"));
+
+    public static final RegistryObject<BlockItem> FREEZER_VALVE = ITEMS.register("freezer_valve",
+            () -> new MCIBlockItem(MCIBlocks.FREEZER_VALVE.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.freezer_valve"));
+
+    public static final RegistryObject<BlockItem> FREEZER_CONTROLLER = ITEMS.register("freezer_controller",
+            () -> new MCIBlockItem(MCIBlocks.FREEZER_CONTROLLER.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.freezer_controller"));
+
+    public static final RegistryObject<BucketItem> REFRIGERANT_BUCKET = ITEMS.register("refrigerant_bucket",
+            () -> new BucketItem(MCIFluids.SOURCE_CRYOGENIC_REFRIGERANT, new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
+
+    public static final RegistryObject<BlockItem> AIR_COMPRESSOR = ITEMS.register("air_compressor",
+            () -> new MCIBlockItem(MCIBlocks.AIR_COMPRESSOR.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.air_compressor"));
 
     private MCIItems() {}
 }

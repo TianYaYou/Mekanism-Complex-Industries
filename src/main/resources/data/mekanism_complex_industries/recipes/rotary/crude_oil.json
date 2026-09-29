@@ -1,0 +1,19 @@
+{
+  "type": "mekanism:rotary",
+  "fluidInput": {
+    "amount": 1,
+    "tag": "forge:crude_oil"
+  },
+  "fluidOutput": {
+    "amount": 1,
+    "fluid": "mekanism_complex_industries:crude_oil"
+  },
+  "gasInput": {
+    "amount": 1,
+    "gas": "mekanism_complex_industries:dense_crude_oil"
+  },
+  "gasOutput": {
+    "amount": 1,
+    "gas": "mekanism_complex_industries:dense_crude_oil"
+  }
+}

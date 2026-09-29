@@ -96,7 +96,14 @@ tasks.withType(JavaCompile).configureEach {
 tasks.named('jar', Jar).configure {
     manifest {
         attributes([
-            'MixinConfigs': 'mekanism_complex_industries.mixins.json'
+            'Specification-Title'     : 'mekanism_complex_industries',
+            'Specification-Vendor'    : 'MekanismComplexIndustries',
+            'Specification-Version'   : '1',
+            'Implementation-Title'    : project.name,
+            'Implementation-Version'  : project.jar.archiveVersion,
+            'Implementation-Vendor'   : 'MekanismComplexIndustries',
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            'MixinConfigs'            : 'mekanism_complex_industries.mixins.json'
         ])
     }
 }

@@ -1,6 +1,8 @@
 package com.complexindustries.mekanism.util;
 
+import com.complexindustries.mekanism.content.miner.PetroleumMinerFilter;
 import com.complexindustries.mekanism.content.upgrade.ItemPetroleumUpgrade;
+import com.complexindustries.mekanism.content.upgrade.MCIUpgrades;
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import com.complexindustries.mekanism.registration.MCIItems;
 import mekanism.common.content.filter.SortableFilterManager;
@@ -9,10 +11,8 @@ import mekanism.common.content.miner.MinerItemStackFilter;
 import mekanism.common.content.miner.MinerTagFilter;
 import mekanism.common.tile.component.TileComponentUpgrade;
 import mekanism.common.tile.machine.TileEntityDigitalMiner;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -30,7 +30,8 @@ public final class MCIUpgradeHelper {
         }
         TileComponentUpgrade upgradeComponent = miner.getComponent();
         if (upgradeComponent != null) {
-            return isPetroleumUpgrade(upgradeComponent.getUpgradeSlot().getStack());
+            return upgradeComponent.isUpgradeInstalled(MCIUpgrades.PETROLEUM) ||
+                   isPetroleumUpgrade(upgradeComponent.getUpgradeSlot().getStack());
         }
         return false;
     }
@@ -66,12 +67,17 @@ public final class MCIUpgradeHelper {
     }
 
     public static boolean canHarvestOil(TileEntityDigitalMiner miner) {
-        return hasPetroleumUpgrade(miner) && hasOilOreFilter(miner);
+        // Automatic harvesting when Petroleum Upgrade is installed - no filters required!
+        return hasPetroleumUpgrade(miner);
     }
 
     public static boolean isCrudeOilSource(BlockState state) {
         return state.getBlock() == MCIBlocks.CRUDE_OIL_BLOCK.get() &&
                state.hasProperty(LiquidBlock.LEVEL) &&
                state.getValue(LiquidBlock.LEVEL) == 0;
+    }
+
+    public static PetroleumMinerFilter getPetroleumMinerFilter() {
+        return PetroleumMinerFilter.INSTANCE;
     }
 }

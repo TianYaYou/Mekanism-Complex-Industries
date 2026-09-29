@@ -8,7 +8,10 @@
     "MixinUpgradeInventorySlot",
     "MixinThreadMinerSearch",
     "MixinTileEntityDigitalMiner",
-    "MixinMinerItemStackFilter"
+    "MixinMinerItemStackFilter",
+    "MixinUpgrade",
+    "MixinUpgradeUtils",
+    "MixinTileEntityMekanism"
   ],
   "client": [],
   "injectors": {

@@ -22,6 +22,12 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.CRUDE_OIL_BUCKET.get());
                         output.accept(MCIItems.SOLID_CRUDE_OIL_ORE.get());
                         output.accept(MCIItems.DEEPSLATE_SOLID_CRUDE_OIL_ORE.get());
+                        output.accept(MCIItems.RESISTIVE_COOLER.get());
+                        output.accept(MCIItems.FREEZER_CASING.get());
+                        output.accept(MCIItems.FREEZER_VALVE.get());
+                        output.accept(MCIItems.FREEZER_CONTROLLER.get());
+                        output.accept(MCIItems.REFRIGERANT_BUCKET.get());
+                        output.accept(MCIItems.AIR_COMPRESSOR.get());
                     })
                     .build());
 

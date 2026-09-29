@@ -39,7 +39,7 @@ public class CrudeOilFluidType extends FluidType {
 
             @Override
             public int getTintColor() {
-                return 0xFF1C1917; // Dark crude oil brownish-black
+                return 0xFFFFFFFF; // Direct texture rendering without tint darkening
             }
         });
     }

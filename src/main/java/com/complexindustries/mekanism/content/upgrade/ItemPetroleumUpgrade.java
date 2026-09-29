@@ -1,6 +1,8 @@
 package com.complexindustries.mekanism.content.upgrade;
 
 import java.util.List;
+import mekanism.api.Upgrade;
+import mekanism.common.item.interfaces.IUpgradeItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -9,10 +11,15 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemPetroleumUpgrade extends Item {
+public class ItemPetroleumUpgrade extends Item implements IUpgradeItem {
 
     public ItemPetroleumUpgrade(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    public Upgrade getUpgradeType(ItemStack stack) {
+        return MCIUpgrades.PETROLEUM;
     }
 
     @Override

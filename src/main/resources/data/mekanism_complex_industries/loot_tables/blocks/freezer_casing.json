@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "mekanism_complex_industries:freezer_casing"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "mekanism_complex_industries:blocks/freezer_casing"
+}

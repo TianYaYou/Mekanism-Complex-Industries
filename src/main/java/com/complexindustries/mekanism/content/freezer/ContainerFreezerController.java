@@ -1,0 +1,20 @@
+package com.complexindustries.mekanism.content.freezer;
+
+import com.complexindustries.mekanism.registration.MCIContainerTypes;
+import mekanism.common.inventory.container.tile.MekanismTileContainer;
+import mekanism.common.util.WorldUtils;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
+
+public class ContainerFreezerController extends MekanismTileContainer<TileEntityFreezerController> {
+
+    public ContainerFreezerController(int id, Inventory inv, TileEntityFreezerController tile) {
+        super(MCIContainerTypes.FREEZER_CONTROLLER, id, inv, tile);
+    }
+
+    @Override
+    public boolean stillValid(@NotNull Player player) {
+        return !tile.isRemoved() && WorldUtils.isBlockLoaded(tile.getLevel(), tile.getBlockPos());
+    }
+}

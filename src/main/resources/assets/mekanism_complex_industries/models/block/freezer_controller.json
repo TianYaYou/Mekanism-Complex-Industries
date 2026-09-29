@@ -1,0 +1,7 @@
+{
+  "parent": "mekanism_complex_industries:block/machine",
+  "textures": {
+    "sides": "mekanism_complex_industries:block/freezer_casing",
+    "front": "mekanism_complex_industries:block/freezer_controller"
+  }
+}

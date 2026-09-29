@@ -32,3 +32,5 @@ AgentTemp/*
 
 # Archives
 archive/*.zip
+
+tools/*

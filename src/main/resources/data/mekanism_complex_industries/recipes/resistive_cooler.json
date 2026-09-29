@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IDI",
+    "DXD",
+    "IEI"
+  ],
+  "key": {
+    "I": {
+      "tag": "forge:ingots/tin"
+    },
+    "D": {
+      "tag": "forge:gems/diamond"
+    },
+    "X": {
+      "item": "mekanism:steel_casing"
+    },
+    "E": {
+      "item": "mekanism:energy_tablet"
+    }
+  },
+  "result": {
+    "item": "mekanism_complex_industries:resistive_cooler",
+    "count": 1
+  }
+}
