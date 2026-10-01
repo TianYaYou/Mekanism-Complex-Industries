@@ -125,10 +125,13 @@ public class MCIGameTests {
                     valve.setMode(ValveMode.INPUT);
                     cap.onRightClick(fakePlayer);
                     helper.assertTrue(valve.getMode() == ValveMode.OUTPUT, "第1层接口切换后模式应为 OUTPUT");
+                    helper.assertTrue(helper.getBlockState(valvePos).getValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE) == ValveMode.OUTPUT, "接口方块状态 MODE 应同步为 OUTPUT！");
                     cap.onRightClick(fakePlayer);
                     helper.assertTrue(valve.getMode() == ValveMode.HEAT_INPUT, "第1层接口再次切换后模式应为 HEAT_INPUT");
+                    helper.assertTrue(helper.getBlockState(valvePos).getValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE) == ValveMode.HEAT_INPUT, "接口方块状态 MODE 应同步为 HEAT_INPUT！");
                     cap.onRightClick(fakePlayer);
                     helper.assertTrue(valve.getMode() == ValveMode.INPUT, "第1层接口第三次切换后应回到 INPUT");
+                    helper.assertTrue(helper.getBlockState(valvePos).getValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE) == ValveMode.INPUT, "接口方块状态 MODE 应同步为 INPUT！");
                 } else {
                     helper.fail("未能在尖端找到炼化塔接口方块实体！");
                 }
@@ -157,6 +160,58 @@ public class MCIGameTests {
                 controller.getStructure().tick(controller, true);
                 var res = controller.getStructure().runUpdate(controller);
                 helper.assertFalse(controller.getMultiblock().isFormed(), "斜边放置接口时，工业炼化塔绝对不应该成型！");
+                helper.succeed();
+            } else {
+                helper.fail("未能找到控制器方块实体！");
+            }
+        });
+    }
+
+    @GameTest(template = "empty_15x25x15", timeoutTicks = 100)
+    public static void testRefineryMultiblockGlassAtTipFails(GameTestHelper helper) {
+        int x0 = 2;
+        int z0 = 2;
+        int y0 = 1;
+        int height = 16;
+
+        buildRefineryStructure(helper, x0, y0, z0, height, false);
+        // Replace a tip block with structural glass
+        BlockPos tipPos = new BlockPos(x0 + 3, y0 + 2, z0);
+        helper.setBlock(tipPos, MekanismBlocks.STRUCTURAL_GLASS.get());
+
+        BlockPos controllerPos = new BlockPos(x0 + 3, y0 + 1, z0);
+
+        helper.runAfterDelay(10, () -> {
+            if (helper.getBlockEntity(controllerPos) instanceof TileEntityRefineryController controller) {
+                controller.getStructure().tick(controller, true);
+                var res = controller.getStructure().runUpdate(controller);
+                helper.assertFalse(controller.getMultiblock().isFormed(), "尖端放置结构玻璃时，工业炼化塔绝对不应该成型！");
+                helper.succeed();
+            } else {
+                helper.fail("未能找到控制器方块实体！");
+            }
+        });
+    }
+
+    @GameTest(template = "empty_15x25x15", timeoutTicks = 100)
+    public static void testRefineryMultiblockGlassAtPartitionFails(GameTestHelper helper) {
+        int x0 = 2;
+        int z0 = 2;
+        int y0 = 1;
+        int height = 16;
+
+        buildRefineryStructure(helper, x0, y0, z0, height, false);
+        // Replace a partition floor diagonal perimeter block with structural glass (dy = 3, partition floor 1)
+        BlockPos glassPos = new BlockPos(x0 + 2, y0 + 3, z0 + 1);
+        helper.setBlock(glassPos, MekanismBlocks.STRUCTURAL_GLASS.get());
+
+        BlockPos controllerPos = new BlockPos(x0 + 3, y0 + 1, z0);
+
+        helper.runAfterDelay(10, () -> {
+            if (helper.getBlockEntity(controllerPos) instanceof TileEntityRefineryController controller) {
+                controller.getStructure().tick(controller, true);
+                var res = controller.getStructure().runUpdate(controller);
+                helper.assertFalse(controller.getMultiblock().isFormed(), "隔断层外壁放置结构玻璃时，工业炼化塔绝对不应该成型！");
                 helper.succeed();
             } else {
                 helper.fail("未能找到控制器方块实体！");
@@ -258,12 +313,8 @@ public class MCIGameTests {
                     } else if (isPartition) {
                         if (cellType == RefineryValidator.TYPE_CENTER) {
                             helper.setBlock(pos, MCIBlocks.REFINERY_DREDGE_PIPE.get());
-                        } else if (cellType == RefineryValidator.TYPE_INNER) {
+                        } else if (cellType == RefineryValidator.TYPE_INNER || cellType == RefineryValidator.TYPE_TIP || cellType == RefineryValidator.TYPE_DIAGONAL) {
                             helper.setBlock(pos, MCIBlocks.REFINERY_CASING.get());
-                        } else if (cellType == RefineryValidator.TYPE_TIP) {
-                            helper.setBlock(pos, MCIBlocks.REFINERY_CASING.get());
-                        } else if (cellType == RefineryValidator.TYPE_DIAGONAL) {
-                            helper.setBlock(pos, MekanismBlocks.STRUCTURAL_GLASS.get());
                         }
                     } else {
                         // Working cavity layer

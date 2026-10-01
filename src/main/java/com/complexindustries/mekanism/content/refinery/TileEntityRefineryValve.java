@@ -24,11 +24,23 @@ import java.util.Collections;
 
 public class TileEntityRefineryValve extends TileEntityRefineryCasing implements IConfigurable {
 
-    public enum ValveMode {
-        INPUT,
-        OUTPUT,
-        HEAT_INPUT,
-        COOLING_INPUT
+    public enum ValveMode implements net.minecraft.util.StringRepresentable {
+        INPUT("input"),
+        OUTPUT("output"),
+        HEAT_INPUT("heat_input"),
+        COOLING_INPUT("cooling_input");
+
+        private final String name;
+
+        ValveMode(String name) {
+            this.name = name;
+        }
+
+        @NotNull
+        @Override
+        public String getSerializedName() {
+            return name;
+        }
     }
 
     private ValveMode mode = ValveMode.OUTPUT;
@@ -43,8 +55,26 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
 
     public void setMode(ValveMode mode) {
         this.mode = mode;
+        if (level != null && !level.isClientSide) {
+            BlockState state = getBlockState();
+            if (state.hasProperty(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE)
+                    && state.getValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE) != mode) {
+                level.setBlock(worldPosition, state.setValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE, mode), 3);
+            }
+        }
         setChanged();
         sendUpdatePacket();
+    }
+
+    @Override
+    protected boolean onUpdateServer(RefineryMultiblockData multiblock) {
+        boolean needsPacket = super.onUpdateServer(multiblock);
+        BlockState currentState = getBlockState();
+        if (currentState.hasProperty(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE)
+                && currentState.getValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE) != mode) {
+            getLevel().setBlock(getBlockPos(), currentState.setValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE, mode), 3);
+        }
+        return needsPacket;
     }
 
     public int getEffectiveLayer() {
@@ -201,6 +231,13 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
         super.handleUpdateTag(tag, provider);
         if (tag.contains("valveMode")) {
             mode = ValveMode.values()[tag.getInt("valveMode") % ValveMode.values().length];
+            if (level != null && level.isClientSide) {
+                BlockState state = getBlockState();
+                if (state.hasProperty(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE)
+                        && state.getValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE) != mode) {
+                    level.setBlock(worldPosition, state.setValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE, mode), 3);
+                }
+            }
         }
     }
 

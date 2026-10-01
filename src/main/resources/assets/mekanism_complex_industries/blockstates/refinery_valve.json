@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
-      "model": "mekanism_complex_industries:block/refinery_valve"
+    "mode=input": {
+      "model": "mekanism_complex_industries:block/refinery_valve_input"
+    },
+    "mode=output": {
+      "model": "mekanism_complex_industries:block/refinery_valve_output"
+    },
+    "mode=heat_input": {
+      "model": "mekanism_complex_industries:block/refinery_valve_heat"
+    },
+    "mode=cooling_input": {
+      "model": "mekanism_complex_industries:block/refinery_valve_cooling"
     }
   }
 }

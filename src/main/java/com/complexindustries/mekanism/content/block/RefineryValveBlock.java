@@ -23,13 +23,25 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 
 public class RefineryValveBlock extends Block implements IHasTileEntity<TileEntityRefineryValve> {
 
+    public static final EnumProperty<TileEntityRefineryValve.ValveMode> MODE =
+            EnumProperty.create("mode", TileEntityRefineryValve.ValveMode.class);
+
     public RefineryValveBlock(BlockBehaviour.Properties properties) {
         super(properties);
+        registerDefaultState(this.stateDefinition.any().setValue(MODE, TileEntityRefineryValve.ValveMode.OUTPUT));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(MODE);
     }
 
     @Override

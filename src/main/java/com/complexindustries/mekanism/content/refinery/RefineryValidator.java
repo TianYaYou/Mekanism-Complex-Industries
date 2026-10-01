@@ -192,6 +192,15 @@ public class RefineryValidator extends CuboidStructureValidator<RefineryMultiblo
             }
         }
 
+        // Tip positions [W] (TYPE_TIP) can ONLY be refinery casing, valve, or controller (structural glass forbidden)
+        if (gridType == TYPE_TIP) {
+            if (state.getBlock() != MCIBlocks.REFINERY_CASING.get()
+                    && state.getBlock() != MCIBlocks.REFINERY_VALVE.get()
+                    && state.getBlock() != MCIBlocks.REFINERY_CONTROLLER.get()) {
+                return FormationResult.fail(Component.literal("工业炼化塔棱形尖端外壁只能由外壳、接口或控制器构成！(" + pos.toShortString() + ")"), true);
+            }
+        }
+
         // Valves and Controller are ONLY permitted on the 4 Tip positions [W]
         if (state.getBlock() == MCIBlocks.REFINERY_VALVE.get() || state.getBlock() == MCIBlocks.REFINERY_CONTROLLER.get()) {
             if (gridType != TYPE_TIP) {
@@ -292,6 +301,22 @@ public class RefineryValidator extends CuboidStructureValidator<RefineryMultiblo
         for (int i = 0; i < 5; i++) {
             if (heights[i] < 3 || heights[i] > 8) {
                 return FormationResult.fail(Component.literal("工业炼化塔第 " + (i + 1) + " 层高度为 " + heights[i] + "，必须在 3 到 8 格之间！"));
+            }
+        }
+
+        // Validate outer walls on partition floors: all perimeter blocks (tips and diagonals) must be refinery casing
+        for (int p : partitionFloors) {
+            for (int dz = 0; dz < 7; dz++) {
+                for (int dx = 0; dx < 7; dx++) {
+                    int cellType = GRID_TEMPLATE[dz][dx];
+                    if (cellType == TYPE_TIP || cellType == TYPE_DIAGONAL) {
+                        BlockPos wallPos = minPos.offset(dx, p, dz);
+                        Optional<BlockState> wallOpt = WorldUtils.getBlockState(world, chunkMap, wallPos);
+                        if (wallOpt.isEmpty() || wallOpt.get().getBlock() != MCIBlocks.REFINERY_CASING.get()) {
+                            return FormationResult.fail(Component.literal("隔断层所在平面的外壁必须全部为炼化塔外壳！(" + wallPos.toShortString() + ")"));
+                        }
+                    }
+                }
             }
         }
 
