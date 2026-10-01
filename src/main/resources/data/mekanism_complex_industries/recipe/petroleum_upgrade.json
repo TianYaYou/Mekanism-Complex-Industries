@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " G ",
+    "WNL",
+    " G "
+  ],
+  "key": {
+    "G": {
+      "tag": "c:glass_blocks"
+    },
+    "W": {
+      "item": "minecraft:water_bucket"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "L": {
+      "item": "minecraft:lava_bucket"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:petroleum_upgrade"
+  }
+}

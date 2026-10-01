@@ -1,0 +1,19 @@
+{
+  "type": "mekanism:rotary",
+  "chemical_input": {
+    "amount": 1,
+    "chemical": "mekanism_complex_industries:dense_crude_oil"
+  },
+  "chemical_output": {
+    "amount": 1,
+    "id": "mekanism_complex_industries:dense_crude_oil"
+  },
+  "fluid_input": {
+    "amount": 1,
+    "tag": "c:crude_oil"
+  },
+  "fluid_output": {
+    "amount": 1,
+    "id": "mekanism_complex_industries:crude_oil"
+  }
+}

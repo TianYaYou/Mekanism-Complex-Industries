@@ -1,30 +1,27 @@
 package com.complexindustries.mekanism.network;
 
-import com.complexindustries.mekanism.MCIConstants;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import mekanism.common.lib.Version;
+import mekanism.common.network.BasePacketHandler;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.network.PacketDistributor;
 
-public final class MCIPacketHandler {
-    private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(MCIConstants.MODID, "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
-    );
+public class MCIPacketHandler extends BasePacketHandler {
 
-    private static int id = 0;
-
-    public static void init() {
-        INSTANCE.registerMessage(
-                id++,
-                PacketSetCoolerEnergy.class,
-                PacketSetCoolerEnergy::encode,
-                PacketSetCoolerEnergy::decode,
-                PacketSetCoolerEnergy::handle
-        );
+    public MCIPacketHandler(IEventBus modEventBus, Version version) {
+        super(modEventBus, version);
     }
 
-    private MCIPacketHandler() {}
+    @Override
+    protected void registerClientToServer(PacketRegistrar registrar) {
+        registrar.play(PacketSetCoolerEnergy.TYPE, PacketSetCoolerEnergy.STREAM_CODEC);
+    }
+
+    @Override
+    protected void registerServerToClient(PacketRegistrar registrar) {
+    }
+
+    public static void sendToServer(CustomPacketPayload payload) {
+        PacketDistributor.sendToServer(payload);
+    }
 }

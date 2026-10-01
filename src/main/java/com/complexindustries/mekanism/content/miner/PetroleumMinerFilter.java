@@ -4,8 +4,6 @@ import com.complexindustries.mekanism.registration.MCIBlocks;
 import com.complexindustries.mekanism.util.MCIUpgradeHelper;
 import mekanism.common.content.filter.FilterType;
 import mekanism.common.content.miner.MinerFilter;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -42,26 +40,5 @@ public class PetroleumMinerFilter extends MinerFilter<PetroleumMinerFilter> {
     @Override
     public PetroleumMinerFilter clone() {
         return new PetroleumMinerFilter();
-    }
-
-    @Override
-    public CompoundTag write(CompoundTag nbt) {
-        super.write(nbt);
-        return nbt;
-    }
-
-    @Override
-    public void read(CompoundTag nbt) {
-        super.read(nbt);
-    }
-
-    @Override
-    public void write(FriendlyByteBuf buffer) {
-        super.write(buffer);
-    }
-
-    @Override
-    public void read(FriendlyByteBuf buffer) {
-        super.read(buffer);
     }
 }

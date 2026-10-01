@@ -16,6 +16,7 @@ public class ContainerAirCompressor extends MekanismTileContainer<TileEntityAirC
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return !tile.isRemoved() && WorldUtils.isBlockLoaded(tile.getLevel(), tile.getBlockPos());
+        return !tile.isRemoved() && WorldUtils.isBlockLoaded(tile.getLevel(), tile.getBlockPos())
+                && player.distanceToSqr(tile.getBlockPos().getX() + 0.5, tile.getBlockPos().getY() + 0.5, tile.getBlockPos().getZ() + 0.5) <= 64.0;
     }
 }

@@ -1,51 +1,82 @@
 package com.complexindustries.mekanism.registration;
 
 import com.complexindustries.mekanism.MCIConstants;
+import com.complexindustries.mekanism.content.freezer.TileEntityFreezerCasing;
+import com.complexindustries.mekanism.content.freezer.TileEntityFreezerController;
+import com.complexindustries.mekanism.content.freezer.TileEntityFreezerValve;
+import com.complexindustries.mekanism.content.tile.TileEntityAirCompressor;
 import com.complexindustries.mekanism.content.tile.TileEntityResistiveCooler;
+import mekanism.common.capabilities.Capabilities;
+import mekanism.common.registration.impl.TileEntityTypeDeferredRegister;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import mekanism.common.tile.base.TileEntityMekanism;
 
 public final class MCITileEntityTypes {
-    public static final DeferredRegister<BlockEntityType<?>> TILE_ENTITY_TYPES =
-            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MCIConstants.MODID);
-
-    public static final RegistryObject<BlockEntityType<TileEntityResistiveCooler>> RESISTIVE_COOLER_BE =
-            TILE_ENTITY_TYPES.register("resistive_cooler", () ->
-                    BlockEntityType.Builder.of(TileEntityResistiveCooler::new, MCIBlocks.RESISTIVE_COOLER.get()).build(null));
+    public static final TileEntityTypeDeferredRegister TILE_ENTITY_TYPES =
+            new TileEntityTypeDeferredRegister(MCIConstants.MODID);
 
     public static final TileEntityTypeRegistryObject<TileEntityResistiveCooler> RESISTIVE_COOLER =
-            new TileEntityTypeRegistryObject<>(RESISTIVE_COOLER_BE);
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.RESISTIVE_COOLER, TileEntityResistiveCooler::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
 
-    public static final RegistryObject<BlockEntityType<com.complexindustries.mekanism.content.freezer.TileEntityFreezerCasing>> FREEZER_CASING_BE =
-            TILE_ENTITY_TYPES.register("freezer_casing", () ->
-                    BlockEntityType.Builder.of(com.complexindustries.mekanism.content.freezer.TileEntityFreezerCasing::new, MCIBlocks.FREEZER_CASING.get()).build(null));
+    public static final TileEntityTypeRegistryObject<TileEntityFreezerCasing> FREEZER_CASING =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.FREEZER_CASING, TileEntityFreezerCasing::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
 
-    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.freezer.TileEntityFreezerCasing> FREEZER_CASING =
-            new TileEntityTypeRegistryObject<>(FREEZER_CASING_BE);
+    public static final TileEntityTypeRegistryObject<TileEntityFreezerValve> FREEZER_VALVE =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.FREEZER_VALVE, TileEntityFreezerValve::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
 
-    public static final RegistryObject<BlockEntityType<com.complexindustries.mekanism.content.freezer.TileEntityFreezerValve>> FREEZER_VALVE_BE =
-            TILE_ENTITY_TYPES.register("freezer_valve", () ->
-                    BlockEntityType.Builder.of(com.complexindustries.mekanism.content.freezer.TileEntityFreezerValve::new, MCIBlocks.FREEZER_VALVE.get()).build(null));
+    public static final TileEntityTypeRegistryObject<TileEntityFreezerController> FREEZER_CONTROLLER =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.FREEZER_CONTROLLER, TileEntityFreezerController::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
 
-    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.freezer.TileEntityFreezerValve> FREEZER_VALVE =
-            new TileEntityTypeRegistryObject<>(FREEZER_VALVE_BE);
+    public static final TileEntityTypeRegistryObject<TileEntityAirCompressor> AIR_COMPRESSOR =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.AIR_COMPRESSOR, TileEntityAirCompressor::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
 
-    public static final RegistryObject<BlockEntityType<com.complexindustries.mekanism.content.freezer.TileEntityFreezerController>> FREEZER_CONTROLLER_BE =
-            TILE_ENTITY_TYPES.register("freezer_controller", () ->
-                    BlockEntityType.Builder.of(com.complexindustries.mekanism.content.freezer.TileEntityFreezerController::new, MCIBlocks.FREEZER_CONTROLLER.get()).build(null));
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.refinery.TileEntityRefineryCasing> REFINERY_CASING =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.REFINERY_CASING, com.complexindustries.mekanism.content.refinery.TileEntityRefineryCasing::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
 
-    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.freezer.TileEntityFreezerController> FREEZER_CONTROLLER =
-            new TileEntityTypeRegistryObject<>(FREEZER_CONTROLLER_BE);
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.refinery.TileEntityRefineryValve> REFINERY_VALVE =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.REFINERY_VALVE, com.complexindustries.mekanism.content.refinery.TileEntityRefineryValve::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
 
-    public static final RegistryObject<BlockEntityType<com.complexindustries.mekanism.content.tile.TileEntityAirCompressor>> AIR_COMPRESSOR_BE =
-            TILE_ENTITY_TYPES.register("air_compressor", () ->
-                    BlockEntityType.Builder.of(com.complexindustries.mekanism.content.tile.TileEntityAirCompressor::new, MCIBlocks.AIR_COMPRESSOR.get()).build(null));
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.refinery.TileEntityRefineryController> REFINERY_CONTROLLER =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.REFINERY_CONTROLLER, com.complexindustries.mekanism.content.refinery.TileEntityRefineryController::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
 
-    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.tile.TileEntityAirCompressor> AIR_COMPRESSOR =
-            new TileEntityTypeRegistryObject<>(AIR_COMPRESSOR_BE);
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.refinery.TileEntityRefineryDredgePipe> REFINERY_DREDGE_PIPE =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.REFINERY_DREDGE_PIPE, com.complexindustries.mekanism.content.refinery.TileEntityRefineryDredgePipe::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
 
     private MCITileEntityTypes() {}
 }

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PSP",
+    "SIS",
+    "PSP"
+  ],
+  "key": {
+    "P": {
+      "item": "mekanism:hdpe_pellet"
+    },
+    "S": {
+      "tag": "c:ingots/steel"
+    },
+    "I": {
+      "tag": "c:ingots/tin"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:refinery_casing"
+  }
+}

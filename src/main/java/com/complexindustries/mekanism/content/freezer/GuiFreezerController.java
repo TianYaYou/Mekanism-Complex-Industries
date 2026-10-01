@@ -6,7 +6,7 @@ import mekanism.client.gui.element.bar.GuiBar.IBarInfoHandler;
 import mekanism.client.gui.element.bar.GuiHorizontalRateBar;
 import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiFluidGauge;
-import mekanism.client.gui.element.gauge.GuiGasGauge;
+import mekanism.client.gui.element.gauge.GuiChemicalGauge;
 import mekanism.client.gui.element.tab.GuiHeatTab;
 import mekanism.common.MekanismLang;
 import mekanism.common.util.MekanismUtils;
@@ -70,17 +70,17 @@ public class GuiFreezerController extends GuiMekanismTile<TileEntityFreezerContr
             }
         }, 48, 64));
 
-        // 3. Left Gauges: Input Gas Tank (6, 13) & Input Fluid Tank (24, 13)
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().inputGasTank,
-                () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 6, 13));
+        // 3. Left Gauges: Input Chemical Tank (6, 13) & Input Fluid Tank (24, 13)
+        addRenderableWidget(new GuiChemicalGauge(() -> tile.getMultiblock().inputChemicalTank,
+                () -> tile.getMultiblock().getChemicalTanks(null), GaugeType.STANDARD, this, 6, 13));
         addRenderableWidget(new GuiFluidGauge(() -> tile.getMultiblock().inputFluidTank,
                 () -> tile.getMultiblock().getFluidTanks(null), GaugeType.STANDARD, this, 24, 13));
 
-        // 4. Right Gauges: Output Fluid Tank (136, 13) & Output Gas Tank (154, 13)
+        // 4. Right Gauges: Output Fluid Tank (136, 13) & Output Chemical Tank (154, 13)
         addRenderableWidget(new GuiFluidGauge(() -> tile.getMultiblock().outputFluidTank,
                 () -> tile.getMultiblock().getFluidTanks(null), GaugeType.STANDARD, this, 136, 13));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().outputGasTank,
-                () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 154, 13));
+        addRenderableWidget(new GuiChemicalGauge(() -> tile.getMultiblock().outputChemicalTank,
+                () -> tile.getMultiblock().getChemicalTanks(null), GaugeType.STANDARD, this, 154, 13));
 
         // 5. Heat Tab on Right
         addRenderableWidget(new GuiHeatTab(this, () -> {
@@ -92,7 +92,7 @@ public class GuiFreezerController extends GuiMekanismTile<TileEntityFreezerContr
     @Override
     protected void drawForegroundText(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY) {
         renderTitleText(guiGraphics);
-        drawString(guiGraphics, playerInventoryTitle, inventoryLabelX, inventoryLabelY, titleTextColor());
+        renderInventoryText(guiGraphics);
         super.drawForegroundText(guiGraphics, mouseX, mouseY);
     }
 }

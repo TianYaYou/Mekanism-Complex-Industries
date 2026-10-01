@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class TileEntityFreezerController extends TileEntityFreezerCasing {
 
     public TileEntityFreezerController(BlockPos pos, BlockState state) {
-        super(MCIBlocks.FREEZER_CONTROLLER_PROVIDER, pos, state);
+        super(MCIBlocks.FREEZER_CONTROLLER, pos, state);
         delaySupplier = NO_DELAY;
     }
 

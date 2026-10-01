@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class GuiCryoRateBar extends GuiBar<IBarInfoHandler> {
 
-    private static final ResourceLocation CRYO_BAR = new ResourceLocation(MCIConstants.MODID, "textures/gui/bar/horizontal_rate_cryo.png");
+    private static final ResourceLocation CRYO_BAR = ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "textures/gui/bar/horizontal_rate_cryo.png");
     private static final int texWidth = 78;
     private static final int texHeight = 8;
 

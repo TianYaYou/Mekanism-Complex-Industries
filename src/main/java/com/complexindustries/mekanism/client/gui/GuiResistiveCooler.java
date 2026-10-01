@@ -2,9 +2,7 @@ package com.complexindustries.mekanism.client.gui;
 
 import com.complexindustries.mekanism.content.tile.TileEntityResistiveCooler;
 import com.complexindustries.mekanism.inventory.container.ContainerResistiveCooler;
-import com.complexindustries.mekanism.network.MCIPacketHandler;
 import com.complexindustries.mekanism.network.PacketSetCoolerEnergy;
-import mekanism.api.math.FloatingLong;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.bar.GuiVerticalPowerBar;
@@ -12,6 +10,7 @@ import mekanism.client.gui.element.tab.GuiEnergyTab;
 import mekanism.client.gui.element.tab.GuiHeatTab;
 import mekanism.client.gui.element.text.GuiTextField;
 import mekanism.common.MekanismLang;
+import mekanism.common.network.PacketUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import mekanism.common.util.text.EnergyDisplay;
@@ -19,6 +18,7 @@ import mekanism.common.util.text.InputValidator;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -80,18 +80,18 @@ public class GuiResistiveCooler extends GuiMekanismTile<TileEntityResistiveCoole
     }
 
     @Override
-    protected void drawForegroundText(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected void drawForegroundText(@NotNull GuiGraphics graphics, int mouseX, int mouseY) {
         renderTitleText(graphics);
-        drawString(graphics, playerInventoryTitle, inventoryLabelX, inventoryLabelY, titleTextColor());
+        renderInventoryText(graphics);
         super.drawForegroundText(graphics, mouseX, mouseY);
     }
 
     private void setEnergyUsage() {
         if (!energyUsageField.getText().isEmpty()) {
             try {
-                FloatingLong enteredEnergy = FloatingLong.parseFloatingLong(energyUsageField.getText());
-                FloatingLong inJoules = MekanismUtils.convertToJoules(enteredEnergy);
-                MCIPacketHandler.INSTANCE.sendToServer(new PacketSetCoolerEnergy(tile.getBlockPos(), inJoules));
+                long enteredEnergy = Math.max(0, Long.parseLong(energyUsageField.getText()));
+                long inJoules = MekanismUtils.convertToJoules(enteredEnergy);
+                PacketUtils.sendToServer(new PacketSetCoolerEnergy(tile.getBlockPos(), inJoules));
             } catch (NumberFormatException ignored) {}
             energyUsageField.setText("");
         }

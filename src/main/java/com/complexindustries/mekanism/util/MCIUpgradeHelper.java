@@ -57,6 +57,8 @@ public final class MCIUpgradeHelper {
                 if (tag != null) {
                     if (tag.equals("forge:ores/crude_oil") || tag.equals("forge:ores/oil") ||
                         tag.equals("forge:crude_oil") || tag.equals("forge:oil") ||
+                        tag.equals("c:ores/crude_oil") || tag.equals("c:ores/oil") ||
+                        tag.equals("c:crude_oil") || tag.equals("c:oil") ||
                         tag.contains("crude_oil") || tag.contains("ores/oil")) {
                         return true;
                     }

@@ -1,13 +1,22 @@
 package com.complexindustries.mekanism.content.upgrade;
 
 import com.complexindustries.mekanism.MCIConstants;
+import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import mekanism.api.Upgrade;
 import mekanism.api.text.EnumColor;
+import mekanism.api.text.ILangEntry;
 import mekanism.common.util.EnumUtils;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ByIdMap;
+import net.minecraft.util.StringRepresentable;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public final class MCIUpgrades {
 
@@ -39,12 +48,19 @@ public final class MCIUpgrades {
             int ordinal = currentValues.length;
             unsafe.putInt(instance, unsafe.objectFieldOffset(ordinalField), ordinal);
 
-            // 3. Set Upgrade class specific fields: name, maxStack, color
+            // 3. Set Upgrade class specific fields: name, langKey, descLangKey, maxStack, color
             Field rawNameField = Upgrade.class.getDeclaredField("name");
+            Field langKeyField = Upgrade.class.getDeclaredField("langKey");
+            Field descLangKeyField = Upgrade.class.getDeclaredField("descLangKey");
             Field maxStackField = Upgrade.class.getDeclaredField("maxStack");
             Field colorField = Upgrade.class.getDeclaredField("color");
 
+            ILangEntry langKey = () -> "upgrade.mekanism_complex_industries.petroleum";
+            ILangEntry descLangKey = () -> "description.mekanism_complex_industries.petroleum";
+
             unsafe.putObject(instance, unsafe.objectFieldOffset(rawNameField), "petroleum");
+            unsafe.putObject(instance, unsafe.objectFieldOffset(langKeyField), langKey);
+            unsafe.putObject(instance, unsafe.objectFieldOffset(descLangKeyField), descLangKey);
             unsafe.putInt(instance, unsafe.objectFieldOffset(maxStackField), 1);
             unsafe.putObject(instance, unsafe.objectFieldOffset(colorField), EnumColor.DARK_AQUA);
 
@@ -57,19 +73,35 @@ public final class MCIUpgrades {
             newValues[newValues.length - 1] = instance;
             unsafe.putObject(valuesBase, valuesOffset, newValues);
 
-            // 5. Update Upgrade.UPGRADES
-            Field upgradesField = Upgrade.class.getDeclaredField("UPGRADES");
-            Object upgradesBase = unsafe.staticFieldBase(upgradesField);
-            long upgradesOffset = unsafe.staticFieldOffset(upgradesField);
-            Upgrade[] oldUpgrades = (Upgrade[]) unsafe.getObject(upgradesBase, upgradesOffset);
-            Upgrade[] newUpgrades = Arrays.copyOf(oldUpgrades, oldUpgrades.length + 1);
-            newUpgrades[newUpgrades.length - 1] = instance;
-            unsafe.putObject(upgradesBase, upgradesOffset, newUpgrades);
+            // 5. Update Upgrade.BY_ID, STREAM_CODEC, and CODEC for 1.21.1
+            try {
+                IntFunction<Upgrade> newById = ByIdMap.continuous(Upgrade::ordinal, newValues, ByIdMap.OutOfBoundsStrategy.WRAP);
+                Field byIdField = Upgrade.class.getDeclaredField("BY_ID");
+                Object byIdBase = unsafe.staticFieldBase(byIdField);
+                long byIdOffset = unsafe.staticFieldOffset(byIdField);
+                unsafe.putObject(byIdBase, byIdOffset, newById);
+
+                Field streamCodecField = Upgrade.class.getDeclaredField("STREAM_CODEC");
+                Object scBase = unsafe.staticFieldBase(streamCodecField);
+                long scOffset = unsafe.staticFieldOffset(streamCodecField);
+                StreamCodec<ByteBuf, Upgrade> newStreamCodec = ByteBufCodecs.idMapper(newById, Upgrade::ordinal);
+                unsafe.putObject(scBase, scOffset, newStreamCodec);
+
+                Field codecField = Upgrade.class.getDeclaredField("CODEC");
+                Object codecBase = unsafe.staticFieldBase(codecField);
+                long codecOffset = unsafe.staticFieldOffset(codecField);
+                Function<String, Upgrade> nameLookup = StringRepresentable.createNameLookup(newValues, Function.identity());
+                Function<String, Upgrade> remapper = it -> "gas".equals(it) ? Upgrade.CHEMICAL : nameLookup.apply(it);
+                Codec<Upgrade> newCodec = new StringRepresentable.EnumCodec<>(newValues, remapper);
+                unsafe.putObject(codecBase, codecOffset, newCodec);
+            } catch (Throwable t) {
+                MCIConstants.LOGGER.warn("Could not update Upgrade codecs: {}", t.getMessage());
+            }
 
             // 6. Clear Class.enumConstants and Class.enumConstantDirectory on Upgrade.class
             clearEnumCache(Upgrade.class, unsafe);
 
-            // 7. Ensure EnumUtils class is loaded and initialized (its <clinit> runs UPGRADES = Upgrade.values())
+            // 7. Ensure EnumUtils class is loaded and initialized
             try {
                 Class.forName("mekanism.common.util.EnumUtils", true, EnumUtils.class.getClassLoader());
             } catch (Throwable t) {

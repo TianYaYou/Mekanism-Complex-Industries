@@ -6,6 +6,6 @@ import net.minecraft.world.level.block.DropExperienceBlock;
 public class SolidCrudeOilOreBlock extends DropExperienceBlock {
 
     public SolidCrudeOilOreBlock(Properties properties, IntProvider xpRange) {
-        super(properties, xpRange);
+        super(xpRange, properties);
     }
 }

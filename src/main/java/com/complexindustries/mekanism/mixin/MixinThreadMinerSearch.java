@@ -2,18 +2,18 @@ package com.complexindustries.mekanism.mixin;
 
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import com.complexindustries.mekanism.util.MCIUpgradeHelper;
-import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import mekanism.common.content.filter.SortableFilterManager;
 import mekanism.common.content.miner.ThreadMinerSearch;
 import mekanism.common.tile.machine.TileEntityDigitalMiner;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 @Mixin(value = ThreadMinerSearch.class, remap = false)
 public abstract class MixinThreadMinerSearch {
@@ -53,18 +53,21 @@ public abstract class MixinThreadMinerSearch {
         return MekanismUtils.isLiquidBlock(block);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(
         method = "run",
         at = @At(
             value = "INVOKE",
-            target = "Lit/unimi/dsi/fastutil/objects/Reference2BooleanMap;computeIfAbsent(Ljava/lang/Object;Ljava/util/function/Predicate;)Z"
+            target = "Lmekanism/common/content/filter/SortableFilterManager;anyEnabledMatch(Ljava/lang/Object;Ljava/util/function/BiPredicate;)Z"
         ),
         remap = false
     )
-    private boolean mci$redirectComputeIfAbsent(Reference2BooleanMap<Block> map, Object key, Predicate<Block> predicate) {
-        if (key == MCIBlocks.CRUDE_OIL_BLOCK.get() && MCIUpgradeHelper.canHarvestOil(this.tile)) {
-            return true;
+    private boolean mci$redirectAnyEnabledMatch(SortableFilterManager<?> manager, Object state, BiPredicate<?, ?> predicate) {
+        if (state instanceof BlockState blockState && blockState.getBlock() == MCIBlocks.CRUDE_OIL_BLOCK.get()) {
+            if (MCIUpgradeHelper.canHarvestOil(this.tile)) {
+                return true;
+            }
         }
-        return map.computeIfAbsent((Block) key, predicate);
+        return ((SortableFilterManager) manager).anyEnabledMatch(state, (BiPredicate) predicate);
     }
 }

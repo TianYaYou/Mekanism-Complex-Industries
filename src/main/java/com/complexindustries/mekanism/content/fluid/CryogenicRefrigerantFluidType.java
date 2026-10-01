@@ -3,14 +3,14 @@ package com.complexindustries.mekanism.content.fluid;
 import java.util.function.Consumer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.common.SoundActions;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.common.SoundActions;
+import net.neoforged.neoforge.fluids.FluidType;
 
 public class CryogenicRefrigerantFluidType extends FluidType {
 
-    public static final ResourceLocation STILL_TEXTURE = new ResourceLocation("mekanism_complex_industries", "block/cryogenic_refrigerant_still");
-    public static final ResourceLocation FLOWING_TEXTURE = new ResourceLocation("mekanism_complex_industries", "block/cryogenic_refrigerant_flow");
+    public static final ResourceLocation STILL_TEXTURE = ResourceLocation.fromNamespaceAndPath("mekanism_complex_industries", "block/cryogenic_refrigerant_still");
+    public static final ResourceLocation FLOWING_TEXTURE = ResourceLocation.fromNamespaceAndPath("mekanism_complex_industries", "block/cryogenic_refrigerant_flow");
 
     public CryogenicRefrigerantFluidType() {
         super(Properties.create()

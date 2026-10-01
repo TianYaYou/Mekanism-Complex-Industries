@@ -1,46 +1,51 @@
 package com.complexindustries.mekanism.network;
 
+import com.complexindustries.mekanism.MCIConstants;
 import com.complexindustries.mekanism.content.tile.TileEntityResistiveCooler;
-import mekanism.api.math.FloatingLong;
+import mekanism.common.network.IMekanismPacket;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+public record PacketSetCoolerEnergy(BlockPos pos, long energyUsage) implements IMekanismPacket {
 
-public class PacketSetCoolerEnergy {
-    private final BlockPos pos;
-    private final FloatingLong energyUsage;
+    public static final CustomPacketPayload.Type<PacketSetCoolerEnergy> TYPE =
+            new CustomPacketPayload.Type<>(MCIConstants.rl("set_cooler_energy"));
 
-    public PacketSetCoolerEnergy(BlockPos pos, FloatingLong energyUsage) {
-        this.pos = pos;
-        this.energyUsage = energyUsage;
-    }
+    public static final StreamCodec<FriendlyByteBuf, PacketSetCoolerEnergy> STREAM_CODEC = StreamCodec.ofMember(
+            PacketSetCoolerEnergy::write,
+            PacketSetCoolerEnergy::decode
+    );
 
-    public static void encode(PacketSetCoolerEnergy msg, FriendlyByteBuf buf) {
-        buf.writeBlockPos(msg.pos);
-        msg.energyUsage.writeToBuffer(buf);
+    public void write(FriendlyByteBuf buf) {
+        buf.writeBlockPos(pos);
+        buf.writeVarLong(energyUsage);
     }
 
     public static PacketSetCoolerEnergy decode(FriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
-        FloatingLong energyUsage = FloatingLong.readFromBuffer(buf);
+        long energyUsage = buf.readVarLong();
         return new PacketSetCoolerEnergy(pos, energyUsage);
     }
 
-    public static void handle(PacketSetCoolerEnergy msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer sender = ctx.get().getSender();
-            if (sender != null) {
-                TileEntityResistiveCooler cooler = WorldUtils.getTileEntity(
-                        TileEntityResistiveCooler.class, sender.level(), msg.pos);
-                if (cooler != null) {
-                    cooler.setEnergyUsage(msg.energyUsage);
-                }
-            }
-        });
-        ctx.get().setPacketHandled(true);
+    @NotNull
+    @Override
+    public CustomPacketPayload.Type<PacketSetCoolerEnergy> type() {
+        return TYPE;
+    }
+
+    @Override
+    public void handle(IPayloadContext context) {
+        Player player = context.player();
+        TileEntityResistiveCooler cooler = WorldUtils.getTileEntity(
+                TileEntityResistiveCooler.class, player.level(), pos);
+        if (cooler != null) {
+            cooler.setEnergyUsage(energyUsage);
+        }
     }
 }

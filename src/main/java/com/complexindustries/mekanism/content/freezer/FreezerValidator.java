@@ -44,7 +44,7 @@ public class FreezerValidator extends CuboidStructureValidator<FreezerMultiblock
             return CasingType.VALVE;
         } else if (block == MCIBlocks.FREEZER_CONTROLLER.get()) {
             return CasingType.OTHER;
-        } else if (block == MekanismBlocks.STRUCTURAL_GLASS.getBlock()) {
+        } else if (block == MekanismBlocks.STRUCTURAL_GLASS.get()) {
             return CasingType.OTHER;
         }
         return CasingType.INVALID;

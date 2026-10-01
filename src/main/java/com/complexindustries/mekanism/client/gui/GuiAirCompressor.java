@@ -8,7 +8,7 @@ import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.bar.GuiVerticalPowerBar;
 import mekanism.client.gui.element.gauge.GaugeType;
-import mekanism.client.gui.element.gauge.GuiGasGauge;
+import mekanism.client.gui.element.gauge.GuiChemicalGauge;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
 import mekanism.common.util.text.EnergyDisplay;
 import net.minecraft.client.gui.GuiGraphics;
@@ -34,8 +34,8 @@ public class GuiAirCompressor extends GuiMekanismTile<TileEntityAirCompressor, C
                 Component.translatable("gui.mekanism_complex_industries.air_compressor.usage", EnergyDisplay.of(tile.getEnergyUsed()).getTextComponent())
         )).spacing(2));
 
-        // 2. Left Gas Gauge (Output Compressed Air)
-        addRenderableWidget(new GuiGasGauge(() -> tile.outputTank, () -> Collections.singletonList(tile.outputTank), GaugeType.STANDARD, this, 24, 13));
+        // 2. Left Chemical Gauge (Output Compressed Air)
+        addRenderableWidget(new GuiChemicalGauge(() -> tile.outputTank, () -> Collections.singletonList(tile.outputTank), GaugeType.STANDARD, this, 24, 13));
 
         // 3. Right Vertical Power Bar
         addRenderableWidget(new GuiVerticalPowerBar(this, tile.getEnergyContainer(), 164, 15));
@@ -47,7 +47,7 @@ public class GuiAirCompressor extends GuiMekanismTile<TileEntityAirCompressor, C
     @Override
     protected void drawForegroundText(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY) {
         renderTitleText(guiGraphics);
-        drawString(guiGraphics, playerInventoryTitle, inventoryLabelX, inventoryLabelY, titleTextColor());
+        renderInventoryText(guiGraphics);
         super.drawForegroundText(guiGraphics, mouseX, mouseY);
     }
 }

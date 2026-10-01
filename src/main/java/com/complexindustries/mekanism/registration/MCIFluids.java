@@ -2,30 +2,32 @@ package com.complexindustries.mekanism.registration;
 
 import com.complexindustries.mekanism.MCIConstants;
 import com.complexindustries.mekanism.content.fluid.CrudeOilFluidType;
+import com.complexindustries.mekanism.content.fluid.CryogenicRefrigerantFluidType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public final class MCIFluids {
     public static final DeferredRegister<FluidType> FLUID_TYPES =
-            DeferredRegister.create(ForgeRegistries.Keys.FLUID_TYPES, MCIConstants.MODID);
+            DeferredRegister.create(NeoForgeRegistries.Keys.FLUID_TYPES, MCIConstants.MODID);
 
     public static final DeferredRegister<Fluid> FLUIDS =
-            DeferredRegister.create(ForgeRegistries.FLUIDS, MCIConstants.MODID);
+            DeferredRegister.create(BuiltInRegistries.FLUID, MCIConstants.MODID);
 
-    public static final RegistryObject<FluidType> CRUDE_OIL_TYPE = FLUID_TYPES.register("crude_oil", CrudeOilFluidType::new);
+    public static final DeferredHolder<FluidType, FluidType> CRUDE_OIL_TYPE = FLUID_TYPES.register("crude_oil", CrudeOilFluidType::new);
 
-    public static final RegistryObject<FlowingFluid> SOURCE_CRUDE_OIL = FLUIDS.register("crude_oil",
-            () -> new ForgeFlowingFluid.Source(MCIFluids.CRUDE_OIL_PROPERTIES));
+    public static final DeferredHolder<Fluid, FlowingFluid> SOURCE_CRUDE_OIL = FLUIDS.register("crude_oil",
+            () -> new BaseFlowingFluid.Source(MCIFluids.CRUDE_OIL_PROPERTIES));
 
-    public static final RegistryObject<FlowingFluid> FLOWING_CRUDE_OIL = FLUIDS.register("flowing_crude_oil",
-            () -> new ForgeFlowingFluid.Flowing(MCIFluids.CRUDE_OIL_PROPERTIES));
+    public static final DeferredHolder<Fluid, FlowingFluid> FLOWING_CRUDE_OIL = FLUIDS.register("flowing_crude_oil",
+            () -> new BaseFlowingFluid.Flowing(MCIFluids.CRUDE_OIL_PROPERTIES));
 
-    public static final ForgeFlowingFluid.Properties CRUDE_OIL_PROPERTIES = new ForgeFlowingFluid.Properties(
+    public static final BaseFlowingFluid.Properties CRUDE_OIL_PROPERTIES = new BaseFlowingFluid.Properties(
             CRUDE_OIL_TYPE,
             SOURCE_CRUDE_OIL,
             FLOWING_CRUDE_OIL)
@@ -35,16 +37,16 @@ public final class MCIFluids {
             .levelDecreasePerBlock(2)
             .tickRate(20);
 
-    public static final RegistryObject<FluidType> CRYOGENIC_REFRIGERANT_TYPE =
-            FLUID_TYPES.register("cryogenic_refrigerant", com.complexindustries.mekanism.content.fluid.CryogenicRefrigerantFluidType::new);
+    public static final DeferredHolder<FluidType, FluidType> CRYOGENIC_REFRIGERANT_TYPE =
+            FLUID_TYPES.register("cryogenic_refrigerant", CryogenicRefrigerantFluidType::new);
 
-    public static final RegistryObject<FlowingFluid> SOURCE_CRYOGENIC_REFRIGERANT = FLUIDS.register("cryogenic_refrigerant",
-            () -> new ForgeFlowingFluid.Source(MCIFluids.CRYOGENIC_REFRIGERANT_PROPERTIES));
+    public static final DeferredHolder<Fluid, FlowingFluid> SOURCE_CRYOGENIC_REFRIGERANT = FLUIDS.register("cryogenic_refrigerant",
+            () -> new BaseFlowingFluid.Source(MCIFluids.CRYOGENIC_REFRIGERANT_PROPERTIES));
 
-    public static final RegistryObject<FlowingFluid> FLOWING_CRYOGENIC_REFRIGERANT = FLUIDS.register("flowing_cryogenic_refrigerant",
-            () -> new ForgeFlowingFluid.Flowing(MCIFluids.CRYOGENIC_REFRIGERANT_PROPERTIES));
+    public static final DeferredHolder<Fluid, FlowingFluid> FLOWING_CRYOGENIC_REFRIGERANT = FLUIDS.register("flowing_cryogenic_refrigerant",
+            () -> new BaseFlowingFluid.Flowing(MCIFluids.CRYOGENIC_REFRIGERANT_PROPERTIES));
 
-    public static final ForgeFlowingFluid.Properties CRYOGENIC_REFRIGERANT_PROPERTIES = new ForgeFlowingFluid.Properties(
+    public static final BaseFlowingFluid.Properties CRYOGENIC_REFRIGERANT_PROPERTIES = new BaseFlowingFluid.Properties(
             CRYOGENIC_REFRIGERANT_TYPE,
             SOURCE_CRYOGENIC_REFRIGERANT,
             FLOWING_CRYOGENIC_REFRIGERANT)

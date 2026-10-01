@@ -6,40 +6,45 @@ import java.util.List;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.bar.GuiVerticalPowerBar;
 import mekanism.client.gui.element.gauge.GaugeType;
-import mekanism.client.gui.element.gauge.GuiGasGauge;
+import mekanism.client.gui.element.gauge.GuiChemicalGauge;
 import mekanism.client.gui.element.gauge.GuiGauge;
 import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.gui.element.slot.SlotType;
-import mekanism.client.jei.BaseRecipeCategory;
-import mekanism.client.jei.MekanismJEI;
-import mekanism.client.jei.MekanismJEIRecipeType;
+import mekanism.client.recipe_viewer.RecipeViewerUtils;
+import mekanism.client.recipe_viewer.jei.BaseRecipeCategory;
 import mekanism.common.inventory.container.slot.SlotOverlay;
 import mekanism.common.tile.component.config.DataType;
+import com.mojang.serialization.Codec;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.helpers.ICodecHelper;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class AirCompressorRecipeCategory extends BaseRecipeCategory<AirCompressorJEIRecipe> {
 
-    private final GuiGauge<?> outputGas;
+    private final GuiGauge<?> outputChemical;
 
-    public AirCompressorRecipeCategory(IGuiHelper helper, MekanismJEIRecipeType<AirCompressorJEIRecipe> recipeType) {
+    public AirCompressorRecipeCategory(IGuiHelper helper, RecipeType<AirCompressorJEIRecipe> recipeType) {
         super(helper, recipeType, Component.translatable("gui.mekanism_complex_industries.air_compressor.category"),
                 helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(MCIBlocks.AIR_COMPRESSOR.get())),
-                3, 12, 170, 64);
+                0, 0, 170, 70);
 
         // Power vertical bar on left
-        addElement(new GuiVerticalPowerBar(this, FULL_BAR, 8, 13));
+        addElement(new GuiVerticalPowerBar(this, RecipeViewerUtils.FULL_BAR, 6, 5));
         // Power slot
-        addSlot(SlotType.POWER, 18, 24).with(SlotOverlay.POWER);
+        addSlot(SlotType.POWER, 18, 26).with(SlotOverlay.POWER);
 
         // Center monitor screen with 4 crisp, non-squished lines
-        addElement(new GuiInnerScreen(this, 40, 14, 74, 46, () -> List.of(
+        addElement(new GuiInnerScreen(this, 42, 6, 74, 56, () -> List.of(
                 Component.translatable("gui.mekanism_complex_industries.jei.air_compressor.title"),
                 Component.translatable("gui.mekanism_complex_industries.jei.air_compressor.short_usage"),
                 Component.translatable("gui.mekanism_complex_industries.jei.air_compressor.short_rate"),
@@ -51,14 +56,26 @@ public class AirCompressorRecipeCategory extends BaseRecipeCategory<AirCompresso
         )));
 
         // Animated progress arrow (28px wide) cleanly pointing between screen and gauge
-        addSimpleProgress(ProgressType.SMALL_RIGHT, 118, 33);
+        addSimpleProgress(ProgressType.SMALL_RIGHT, 118, 25);
 
-        // Output gas gauge on right
-        outputGas = addElement(GuiGasGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 148, 13));
+        // Output chemical gauge on right
+        outputChemical = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 146, 5));
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation getRegistryName(AirCompressorJEIRecipe recipe) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Codec<AirCompressorJEIRecipe> getCodec(ICodecHelper codecHelper, IRecipeManager recipeManager) {
+        return null;
     }
 
     @Override
     public void setRecipe(@NotNull IRecipeLayoutBuilder builder, AirCompressorJEIRecipe recipe, @NotNull IFocusGroup focusGroup) {
-        initChemical(builder, MekanismJEI.TYPE_GAS, RecipeIngredientRole.OUTPUT, outputGas, Collections.singletonList(recipe.outputGas()));
+        initChemical(builder, RecipeIngredientRole.OUTPUT, outputChemical, Collections.singletonList(recipe.outputChemical()));
     }
 }

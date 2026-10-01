@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CGC",
+    "#T#",
+    "###"
+  ],
+  "key": {
+    "C": {
+      "tag": "c:circuits/advanced"
+    },
+    "G": {
+      "tag": "c:glass_panes"
+    },
+    "#": {
+      "item": "mekanism_complex_industries:refinery_casing"
+    },
+    "T": {
+      "item": "mekanism:elite_chemical_tank"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:refinery_controller"
+  }
+}

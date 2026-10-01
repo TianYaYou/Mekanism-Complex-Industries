@@ -1,6 +1,5 @@
 package com.complexindustries.mekanism.content.block;
 
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -21,7 +20,7 @@ public class CryogenicRefrigerantBlock extends LiquidBlock {
 
     public static final int MELT_TICKS = 140;
 
-    public CryogenicRefrigerantBlock(Supplier<? extends FlowingFluid> fluid, BlockBehaviour.Properties properties) {
+    public CryogenicRefrigerantBlock(FlowingFluid fluid, BlockBehaviour.Properties properties) {
         super(fluid, properties);
     }
 

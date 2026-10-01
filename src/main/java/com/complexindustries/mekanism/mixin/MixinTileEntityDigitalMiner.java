@@ -81,15 +81,13 @@ public abstract class MixinTileEntityDigitalMiner {
     }
 
     @Inject(method = "getDrops", at = @At("HEAD"), cancellable = true, remap = false)
-    private void mci$getDropsForCrudeOil(BlockState state, BlockPos pos, CallbackInfoReturnable<List<ItemStack>> cir) {
+    private void mci$getDropsForCrudeOil(net.minecraft.server.level.ServerLevel level, BlockState state, BlockPos pos, CallbackInfoReturnable<List<ItemStack>> cir) {
         if (state.getBlock() == MCIBlocks.CRUDE_OIL_BLOCK.get()) {
             if (MCIUpgradeHelper.isCrudeOilSource(state)) {
                 if (this.getSilkTouch()) {
                     cir.setReturnValue(List.of(new ItemStack(MCIBlocks.SOLID_CRUDE_OIL_ORE.get())));
                 } else {
                     int count = 1;
-                    TileEntityDigitalMiner miner = (TileEntityDigitalMiner) (Object) this;
-                    Level level = miner.getLevel();
                     if (level != null && level.random.nextFloat() < 0.25f) {
                         count += 1;
                     }

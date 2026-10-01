@@ -10,9 +10,9 @@ import mekanism.common.tile.base.WrenchResult;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -21,8 +21,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -30,7 +28,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class AirCompressorBlock extends Block implements IHasTileEntity<TileEntityAirCompressor> {
@@ -49,49 +47,38 @@ public class AirCompressorBlock extends Block implements IHasTileEntity<TileEnti
         return MCITileEntityTypes.AIR_COMPRESSOR;
     }
 
-    @Nullable
+    @NotNull
     @Override
-    public TileEntityAirCompressor newBlockEntity(BlockPos pos, BlockState state) {
-        return new TileEntityAirCompressor(pos, state);
-    }
-
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        if (level.isClientSide) {
-            return createTickerHelper(type, MCITileEntityTypes.AIR_COMPRESSOR_BE.get(), TileEntityMekanism::tickClient);
+    protected ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player,
+            @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
+        if (stack.isEmpty()) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        return createTickerHelper(type, MCITileEntityTypes.AIR_COMPRESSOR_BE.get(), TileEntityMekanism::tickServer);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(
-            BlockEntityType<A> givenType, BlockEntityType<E> expectedType, BlockEntityTicker<? super E> ticker) {
-        return expectedType == givenType ? (BlockEntityTicker<A>) ticker : null;
-    }
-
-    @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.getBlockEntity(pos) instanceof TileEntityAirCompressor tile) {
-            ItemStack stack = player.getItemInHand(hand);
-            if (!stack.isEmpty() && MekanismUtils.canUseAsWrench(stack)) {
+            if (MekanismUtils.canUseAsWrench(stack)) {
                 if (!level.isClientSide) {
-                    WrenchResult result = tile.tryWrench(state, player, hand, hit);
+                    WrenchResult result = tile.tryWrench(state, player, stack);
                     if (result != WrenchResult.PASS) {
-                        return InteractionResult.SUCCESS;
+                        return ItemInteractionResult.SUCCESS;
                     }
                 }
-                return InteractionResult.sidedSuccess(level.isClientSide);
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @NotNull
+    @Override
+    protected InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hit) {
+        if (level.getBlockEntity(pos) instanceof TileEntityAirCompressor tile) {
             if (player.isShiftKeyDown()) {
                 return InteractionResult.PASS;
             }
             if (!level.isClientSide) {
-                NetworkHooks.openScreen(
-                        (ServerPlayer) player,
-                        MCIContainerTypes.AIR_COMPRESSOR.getProvider(tile.getDisplayName(), tile),
-                        pos
+                player.openMenu(
+                        MCIContainerTypes.AIR_COMPRESSOR.getProvider(tile.getDisplayName(), tile, false),
+                        buf -> buf.writeBlockPos(pos)
                 );
             }
             return InteractionResult.sidedSuccess(level.isClientSide);

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "SIS",
+    " S "
+  ],
+  "key": {
+    "S": {
+      "tag": "c:ingots/steel"
+    },
+    "I": {
+      "tag": "c:ingots/tin"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:freezer_casing"
+  }
+}

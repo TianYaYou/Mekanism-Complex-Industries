@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "mekanism_complex_industries:solid_crude_oil_ore",
+    "mekanism_complex_industries:deepslate_solid_crude_oil_ore",
+    "mekanism_complex_industries:resistive_cooler",
+    "mekanism_complex_industries:freezer_casing",
+    "mekanism_complex_industries:freezer_valve",
+    "mekanism_complex_industries:freezer_controller",
+    "mekanism_complex_industries:air_compressor",
+    "mekanism_complex_industries:refinery_casing",
+    "mekanism_complex_industries:refinery_valve",
+    "mekanism_complex_industries:refinery_controller",
+    "mekanism_complex_industries:refinery_dredge_pipe"
+  ]
+}

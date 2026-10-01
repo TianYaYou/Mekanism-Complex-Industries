@@ -1,18 +1,15 @@
 package com.complexindustries.mekanism.content.freezer;
 
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import com.complexindustries.mekanism.registration.MCIChemicals;
+import com.complexindustries.mekanism.registration.MCIFluids;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
-import mekanism.api.NBTConstants;
-import mekanism.api.chemical.attribute.ChemicalAttributeValidator;
-import mekanism.api.chemical.gas.Gas;
-import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasTank;
+import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.heat.HeatAPI;
 import mekanism.api.recipes.RotaryRecipe;
-import mekanism.common.capabilities.chemical.multiblock.MultiblockChemicalTankBuilder;
-import mekanism.common.capabilities.fluid.BasicFluidTank;
+import mekanism.common.capabilities.chemical.VariableCapacityChemicalTank;
 import mekanism.common.capabilities.fluid.VariableCapacityFluidTank;
 import mekanism.common.capabilities.heat.VariableHeatCapacitor;
 import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
@@ -20,14 +17,11 @@ import mekanism.common.lib.multiblock.IValveHandler;
 import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
-import mekanism.common.util.NBTUtils;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import com.complexindustries.mekanism.registration.MCIFluids;
-import com.complexindustries.mekanism.registration.MCIGases;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 public class FreezerMultiblockData extends MultiblockData implements IValveHandler {
@@ -39,9 +33,9 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
     @ContainerSync
     public VariableCapacityFluidTank outputFluidTank;
     @ContainerSync
-    public IGasTank inputGasTank;
+    public IChemicalTank inputChemicalTank;
     @ContainerSync
-    public IGasTank outputGasTank;
+    public IChemicalTank outputChemicalTank;
     @ContainerSync
     public VariableHeatCapacitor heatCapacitor;
 
@@ -59,24 +53,24 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
         super(tile);
         fluidTanks.add(inputFluidTank = VariableCapacityFluidTank.input(this, this::getTankCapacity, this::isValidInputFluid, this));
         fluidTanks.add(outputFluidTank = VariableCapacityFluidTank.output(this, this::getTankCapacity, ConstantPredicates.alwaysTrue(), this));
-        gasTanks.add(inputGasTank = MultiblockChemicalTankBuilder.GAS.input(this, this::getTankCapacity, this::isValidInputGas, this));
-        gasTanks.add(outputGasTank = MultiblockChemicalTankBuilder.GAS.output(this, this::getTankCapacity, ConstantPredicates.alwaysTrue(), this));
+        chemicalTanks.add(inputChemicalTank = VariableCapacityChemicalTank.input(this, this::getTankCapacityLong, this::isValidInputChemical, this));
+        chemicalTanks.add(outputChemicalTank = VariableCapacityChemicalTank.output(this, this::getTankCapacityLong, ConstantPredicates.alwaysTrue(), this));
         heatCapacitors.add(heatCapacitor = VariableHeatCapacitor.create(Math.max(64, getVolume()) * 50.0, () -> biomeAmbientTemp, this));
     }
 
-    public boolean isValidInputGas(@NotNull Gas gas) {
-        if (gas.isEmptyType()) {
+    public boolean isValidInputChemical(@NotNull ChemicalStack chemicalStack) {
+        if (chemicalStack.isEmpty()) {
             return false;
         }
-        if (gas == MCIGases.COMPRESSED_AIR.get()) {
+        if (chemicalStack.is(MCIChemicals.COMPRESSED_AIR.get())) {
             return true;
         }
-        Level world = getWorld();
+        Level world = getLevel();
         if (world == null) {
             return true;
         }
-        RotaryRecipe recipe = MekanismRecipeType.ROTARY.getInputCache().findFirstRecipe(world, gas.getStack(1));
-        return recipe != null && recipe.hasGasToFluid();
+        RotaryRecipe recipe = MekanismRecipeType.ROTARY.getInputCache().findFirstRecipe(world, chemicalStack);
+        return recipe != null && recipe.hasChemicalToFluid();
     }
 
     public boolean isValidInputFluid(@NotNull FluidStack stack) {
@@ -89,7 +83,7 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
         if (stack.getFluid() == MCIFluids.SOURCE_CRYOGENIC_REFRIGERANT.get() || stack.getFluid() == MCIFluids.FLOWING_CRYOGENIC_REFRIGERANT.get()) {
             return true;
         }
-        Level world = getWorld();
+        Level world = getLevel();
         if (world == null) {
             return true;
         }
@@ -99,6 +93,10 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
 
     public int getTankCapacity() {
         return Math.max(64_000, getVolume() * 16_000);
+    }
+
+    public long getTankCapacityLong() {
+        return getTankCapacity();
     }
 
     @Override
@@ -136,10 +134,10 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
             int maxProcessRate = (int) Math.round(50 * lastEfficiency);
 
             FluidStack inFluid = inputFluidTank.getFluid();
-            GasStack inGas = inputGasTank.getStack();
+            ChemicalStack inGas = inputChemicalTank.getStack();
             boolean isRefrigerant = !inFluid.isEmpty() && (inFluid.getFluid() == MCIFluids.SOURCE_CRYOGENIC_REFRIGERANT.get() || inFluid.getFluid() == MCIFluids.FLOWING_CRYOGENIC_REFRIGERANT.get());
             boolean isWater = !inFluid.isEmpty() && inFluid.getFluid() == Fluids.WATER;
-            boolean isCompressedAir = !inGas.isEmpty() && inGas.getType() == MCIGases.COMPRESSED_AIR.get();
+            boolean isCompressedAir = !inGas.isEmpty() && inGas.is(MCIChemicals.COMPRESSED_AIR.get());
 
             // 1. Process: 低温冷煤 + 压缩空气 -> 稀有气体(1/100 产出) + 水(1:1 融化回收)
             if (isRefrigerant && isCompressedAir) {
@@ -149,18 +147,18 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
 
                 if (toProcess > 0) {
                     int potentialGas = (nobleGasAccumulator + toProcess) / 100;
-                    if (potentialGas == 0 || outputGasTank.getNeeded() >= potentialGas) {
+                    if (potentialGas == 0 || outputChemicalTank.getNeeded() >= potentialGas) {
                         FluidStack outFluid = new FluidStack(Fluids.WATER, toProcess);
                         if (outputFluidTank.insert(outFluid, Action.SIMULATE, AutomationType.INTERNAL).isEmpty()) {
                             inputFluidTank.shrinkStack(toProcess, Action.EXECUTE);
-                            inputGasTank.shrinkStack(toProcess, Action.EXECUTE);
+                            inputChemicalTank.shrinkStack(toProcess, Action.EXECUTE);
                             outputFluidTank.insert(outFluid, Action.EXECUTE, AutomationType.INTERNAL);
 
                             nobleGasAccumulator += toProcess;
                             int outGasAmount = nobleGasAccumulator / 100;
                             nobleGasAccumulator %= 100;
                             if (outGasAmount > 0) {
-                                outputGasTank.insert(MCIGases.NOBLE_GAS.getStack(outGasAmount), Action.EXECUTE, AutomationType.INTERNAL);
+                                outputChemicalTank.insert(MCIChemicals.NOBLE_GAS.asStack(outGasAmount), Action.EXECUTE, AutomationType.INTERNAL);
                             }
 
                             heatCapacitor.handleHeat(toProcess * 3.0);
@@ -175,14 +173,14 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
                     int toProcess = (int) Math.min(inGas.getAmount(), (long) maxProcessRate);
                     if (toProcess > 0) {
                         int potentialGas = (nitrogenAccumulator + toProcess) / 2;
-                        if (potentialGas == 0 || outputGasTank.getNeeded() >= potentialGas) {
-                            inputGasTank.shrinkStack(toProcess, Action.EXECUTE);
+                        if (potentialGas == 0 || outputChemicalTank.getNeeded() >= potentialGas) {
+                            inputChemicalTank.shrinkStack(toProcess, Action.EXECUTE);
 
                             nitrogenAccumulator += toProcess;
                             int outGasAmount = nitrogenAccumulator / 2;
                             nitrogenAccumulator %= 2;
                             if (outGasAmount > 0) {
-                                outputGasTank.insert(MCIGases.NITROGEN.getStack(outGasAmount), Action.EXECUTE, AutomationType.INTERNAL);
+                                outputChemicalTank.insert(MCIChemicals.NITROGEN.asStack(outGasAmount), Action.EXECUTE, AutomationType.INTERNAL);
                             }
 
                             heatCapacitor.handleHeat(toProcess * 1.5);
@@ -209,18 +207,18 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
                 }
             }
 
-            // 4. Generic Rotary Condensation (Gas -> Fluid)
-            if (!inGas.isEmpty() && inGas.getType() != MCIGases.COMPRESSED_AIR.get()) {
+            // 4. Generic Rotary Condensation (Chemical -> Fluid)
+            if (!inGas.isEmpty() && !inGas.is(MCIChemicals.COMPRESSED_AIR.get())) {
                 RotaryRecipe recipe = MekanismRecipeType.ROTARY.getInputCache().findFirstRecipe(world, inGas);
-                if (recipe != null && recipe.hasGasToFluid()) {
+                if (recipe != null && recipe.hasChemicalToFluid()) {
                     FluidStack outputFluid = recipe.getFluidOutput(inGas);
                     int toConvert = (int) Math.min(inGas.getAmount(), (long) maxProcessRate);
                     int needed = outputFluidTank.getNeeded();
                     toConvert = Math.min(toConvert, needed);
                     if (toConvert > 0) {
-                        FluidStack toInsert = new FluidStack(outputFluid, toConvert);
+                        FluidStack toInsert = outputFluid.copyWithAmount(toConvert);
                         if (outputFluidTank.insert(toInsert, Action.SIMULATE, AutomationType.INTERNAL).isEmpty()) {
-                            inputGasTank.shrinkStack(toConvert, Action.EXECUTE);
+                            inputChemicalTank.shrinkStack(toConvert, Action.EXECUTE);
                             outputFluidTank.insert(toInsert, Action.EXECUTE, AutomationType.INTERNAL);
                             heatCapacitor.handleHeat(toConvert * 2.0);
                             needsPacket = true;
@@ -275,16 +273,16 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
     }
 
     @Override
-    public void readUpdateTag(CompoundTag tag) {
-        super.readUpdateTag(tag);
+    public void readUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
+        super.readUpdateTag(tag, provider);
         readValves(tag);
         nobleGasAccumulator = tag.getInt("nobleGasAcc");
         nitrogenAccumulator = tag.getInt("nitrogenAcc");
     }
 
     @Override
-    public void writeUpdateTag(CompoundTag tag) {
-        super.writeUpdateTag(tag);
+    public void writeUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
+        super.writeUpdateTag(tag, provider);
         writeValves(tag);
         tag.putInt("nobleGasAcc", nobleGasAccumulator);
         tag.putInt("nitrogenAcc", nitrogenAccumulator);

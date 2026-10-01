@@ -111,7 +111,7 @@
           "texture": "#north_led"
         }
       },
-      "forge_data": {
+      "neoforge_data": {
         "block_light": 15,
         "sky_light": 15
       }

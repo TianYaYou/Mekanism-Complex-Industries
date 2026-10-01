@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id 'net.neoforged.moddev.legacyforge' version '2.0.146'
+    id 'net.neoforged.moddev' version '2.0.147'
 }
 
 group = property('mod_group_id')
@@ -12,28 +12,31 @@ base {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
-legacyForge {
-    version = "${property('minecraft_version')}-${property('forge_version')}"
+neoForge {
+    version = property('neoforge_version')
     validateAccessTransformers = true
 
     runs {
         client {
             client()
             systemProperty 'neoforge.logging.console.level', 'debug'
-            systemProperty 'forge.logging.console.level', 'debug'
         }
         server {
             server()
             systemProperty 'neoforge.logging.console.level', 'debug'
-            systemProperty 'forge.logging.console.level', 'debug'
         }
         data {
             data()
             programArguments.addAll '--mod', property('mod_id'), '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.logging.console.level', 'debug'
+            systemProperty 'neoforge.enabledGameTestNamespaces', property('mod_id')
         }
     }
 
@@ -42,10 +45,6 @@ legacyForge {
             sourceSet sourceSets.main
         }
     }
-}
-
-mixin {
-    config 'mekanism_complex_industries.mixins.json'
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -80,13 +79,13 @@ repositories {
 
 dependencies {
     // Mekanism API & Mod
-    modImplementation "mekanism:Mekanism:${property('mekanism_version')}"
-    modRuntimeOnly "mekanism:Mekanism:${property('mekanism_version')}:generators"
-    modRuntimeOnly "mekanism:Mekanism:${property('mekanism_version')}:additions"
-    modRuntimeOnly "mekanism:Mekanism:${property('mekanism_version')}:tools"
+    implementation "mekanism:Mekanism:${property('mekanism_version')}"
+    runtimeOnly "mekanism:Mekanism:${property('mekanism_version')}:generators"
+    runtimeOnly "mekanism:Mekanism:${property('mekanism_version')}:additions"
+    runtimeOnly "mekanism:Mekanism:${property('mekanism_version')}:tools"
 
     // JEI for recipe viewer integration (compileOnly)
-    compileOnly "mezz.jei:jei-${property('minecraft_version')}-forge-api:${property('jei_version')}"
+    compileOnly "mezz.jei:jei-${property('minecraft_version')}-neoforge-api:${property('jei_version')}"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -112,7 +111,7 @@ tasks.named('jar', Jar).configure {
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
         minecraft_version   : project.property('minecraft_version'),
-        forge_version       : project.property('forge_version'),
+        neoforge_version    : project.property('neoforge_version'),
         mod_id              : project.property('mod_id'),
         mod_name            : project.property('mod_name'),
         mod_version         : project.property('mod_version'),
@@ -123,15 +122,15 @@ tasks.named('processResources', ProcessResources).configure {
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
         expand replaceProperties
     }
 }
 
 // Custom task to deploy the built jar directly to the test modpack
 tasks.register('deployToModpack', Copy) {
-    dependsOn tasks.named('reobfJar')
-    from tasks.named('reobfJar')
+    dependsOn tasks.named('jar')
+    from tasks.named('jar')
     into file(project.property('modpack_mods_dir'))
 
     outputs.upToDateWhen { false }
@@ -149,6 +148,6 @@ tasks.register('deployToModpack', Copy) {
     }
 
     doLast {
-        println "Successfully deployed reobfuscated jar to ${project.property('modpack_mods_dir')}"
+        println "Successfully deployed jar to ${project.property('modpack_mods_dir')}"
     }
 }

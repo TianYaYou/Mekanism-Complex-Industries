@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " # ",
+    "#P#",
+    " # "
+  ],
+  "key": {
+    "#": {
+      "item": "mekanism_complex_industries:refinery_casing"
+    },
+    "P": {
+      "item": "mekanism:basic_mechanical_pipe"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:refinery_valve"
+  }
+}

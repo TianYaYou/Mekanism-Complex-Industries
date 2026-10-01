@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CGC",
+    "#B#",
+    "###"
+  ],
+  "key": {
+    "C": {
+      "tag": "c:circuits/advanced"
+    },
+    "G": {
+      "tag": "c:glass_panes"
+    },
+    "#": {
+      "item": "mekanism_complex_industries:freezer_casing"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:freezer_controller"
+  }
+}

@@ -1,10 +1,10 @@
 package com.complexindustries.mekanism.client.jei;
 
-import mekanism.api.chemical.gas.GasStack;
+import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.network.chat.Component;
 
 public record AirCompressorJEIRecipe(
-        GasStack outputGas,
+        ChemicalStack outputChemical,
         Component energyUsage,
         Component productionRate,
         Component sourceDesc

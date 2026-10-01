@@ -1,0 +1,24 @@
+{
+  "type": "mekanism:reaction",
+  "chemical_input": {
+    "amount": 100,
+    "chemical": "mekanism:steam"
+  },
+  "chemical_output": {
+    "amount": 200,
+    "id": "mekanism_complex_industries:dense_crude_oil"
+  },
+  "duration": 100,
+  "fluid_input": {
+    "amount": 100,
+    "tag": "minecraft:lava"
+  },
+  "item_input": {
+    "count": 1,
+    "item": "mekanism_complex_industries:solid_crude_oil"
+  },
+  "item_output": {
+    "count": 1,
+    "id": "minecraft:mud"
+  }
+}

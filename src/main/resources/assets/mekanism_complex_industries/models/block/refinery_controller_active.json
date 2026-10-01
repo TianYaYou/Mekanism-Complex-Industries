@@ -1,0 +1,8 @@
+{
+  "parent": "mekanism_complex_industries:block/machine_front_led",
+  "textures": {
+    "sides": "mekanism_complex_industries:block/refinery_casing",
+    "front": "mekanism_complex_industries:block/refinery_controller",
+    "front_led": "mekanism_complex_industries:block/refinery_controller_on_led"
+  }
+}

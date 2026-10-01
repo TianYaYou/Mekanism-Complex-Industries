@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ABA",
+    "CDC",
+    "ABA"
+  ],
+  "key": {
+    "A": {
+      "tag": "c:ingots/osmium"
+    },
+    "B": {
+      "item": "mekanism:elite_pressurized_tube"
+    },
+    "C": {
+      "item": "mekanism:elite_chemical_tank"
+    },
+    "D": {
+      "tag": "c:circuits/elite"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:air_compressor"
+  }
+}

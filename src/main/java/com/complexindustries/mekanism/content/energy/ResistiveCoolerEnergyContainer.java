@@ -1,30 +1,36 @@
 package com.complexindustries.mekanism.content.energy;
 
 import com.complexindustries.mekanism.content.tile.TileEntityResistiveCooler;
+import java.util.function.Predicate;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
-import mekanism.api.math.FloatingLong;
+import mekanism.api.functions.ConstantPredicates;
+import mekanism.api.math.MathUtils;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.util.NBTUtils;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-
-import java.util.function.Predicate;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ResistiveCoolerEnergyContainer extends MachineEnergyContainer<TileEntityResistiveCooler> {
-    public static ResistiveCoolerEnergyContainer input(TileEntityResistiveCooler tile, IContentsListener listener) {
+    public static final long USAGE_MULTIPLIER = 400L;
+    public static final long MIN_STORAGE = 100_000L;
+
+    public static ResistiveCoolerEnergyContainer input(TileEntityResistiveCooler tile, @Nullable IContentsListener listener) {
         return new ResistiveCoolerEnergyContainer(
-                FloatingLong.createConst(100_000_000),
-                FloatingLong.createConst(250),
+                100_000_000L,
+                250L,
                 notExternal,
-                alwaysTrue,
+                ConstantPredicates.alwaysTrue(),
                 tile,
                 listener
         );
     }
 
-    public ResistiveCoolerEnergyContainer(FloatingLong maxEnergy, FloatingLong energyPerTick,
-                                          Predicate<AutomationType> canExtract, Predicate<AutomationType> canInsert,
-                                          TileEntityResistiveCooler tile, IContentsListener listener) {
+    public ResistiveCoolerEnergyContainer(long maxEnergy, long energyPerTick,
+                                          Predicate<@NotNull AutomationType> canExtract, Predicate<@NotNull AutomationType> canInsert,
+                                          TileEntityResistiveCooler tile, @Nullable IContentsListener listener) {
         super(maxEnergy, energyPerTick, canExtract, canInsert, tile, listener);
     }
 
@@ -33,26 +39,21 @@ public class ResistiveCoolerEnergyContainer extends MachineEnergyContainer<TileE
         return true;
     }
 
-    @Override
-    public void setEnergyPerTick(FloatingLong energyPerTick) {
-        super.setEnergyPerTick(energyPerTick);
-        setMaxEnergy(energyPerTick.multiply(400L).max(FloatingLong.createConst(100_000)));
-    }
-
-    public void updateEnergyUsage(FloatingLong newUsage) {
-        setEnergyPerTick(newUsage);
+    public void updateEnergyUsage(long newUsage) {
+        currentEnergyPerTick = newUsage;
+        setMaxEnergy(Math.max(MIN_STORAGE, MathUtils.multiplyClamped(newUsage, USAGE_MULTIPLIER)));
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = super.serializeNBT();
-        tag.putString("energyUsage", getEnergyPerTick().toString());
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag tag = super.serializeNBT(provider);
+        tag.putLong("energyUsage", getEnergyPerTick());
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        NBTUtils.setFloatingLongIfPresent(nbt, "energyUsage", this::updateEnergyUsage);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        NBTUtils.setLegacyEnergyIfPresent(nbt, "energyUsage", this::updateEnergyUsage);
+        super.deserializeNBT(provider, nbt);
     }
 }
