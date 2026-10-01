@@ -17,9 +17,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
+import mekanism.api.IConfigurable;
+import net.minecraft.world.InteractionResult;
+
 import java.util.Collections;
 
-public class TileEntityRefineryValve extends TileEntityRefineryCasing {
+public class TileEntityRefineryValve extends TileEntityRefineryCasing implements IConfigurable {
 
     public enum ValveMode {
         INPUT,
@@ -52,6 +55,14 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing {
     }
 
     public void cycleMode(Player player) {
+        if (!getMultiblock().isFormed()) {
+            player.displayClientMessage(
+                    Component.translatable("message.mekanism_complex_industries.refinery_valve.unformed"),
+                    true
+            );
+            return;
+        }
+
         int layer = getEffectiveLayer();
         ValveMode nextMode;
 
@@ -79,14 +90,22 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing {
         setMode(nextMode);
 
         Component modeDesc;
-        if (nextMode == ValveMode.INPUT) {
-            modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_input");
-        } else if (nextMode == ValveMode.HEAT_INPUT) {
-            modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_heat_input");
-        } else if (nextMode == ValveMode.COOLING_INPUT) {
-            modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_cooling_input");
+        if (layer == 1) {
+            if (nextMode == ValveMode.INPUT) {
+                modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_input");
+            } else if (nextMode == ValveMode.HEAT_INPUT) {
+                modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_heat_input");
+            } else {
+                modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_output_1");
+            }
+        } else if (layer == 5) {
+            if (nextMode == ValveMode.COOLING_INPUT) {
+                modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_cooling_input");
+            } else {
+                modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_output_5");
+            }
         } else {
-            modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_output", layer);
+            modeDesc = Component.translatable("message.mekanism_complex_industries.refinery_valve.mode_output_" + layer);
         }
 
         player.displayClientMessage(
@@ -95,15 +114,39 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing {
         );
     }
 
+    @Override
+    public InteractionResult onRightClick(Player player) {
+        if (getLevel() != null && !getLevel().isClientSide) {
+            cycleMode(player);
+        }
+        return InteractionResult.sidedSuccess(getLevel() != null && getLevel().isClientSide);
+    }
+
+    @Override
+    public InteractionResult onSneakRightClick(Player player) {
+        if (getLevel() != null && !getLevel().isClientSide) {
+            cycleMode(player);
+        }
+        return InteractionResult.sidedSuccess(getLevel() != null && getLevel().isClientSide);
+    }
+
     @NotNull
     public IChemicalTank getActiveChemicalTank() {
         if (!getMultiblock().isFormed()) {
             return null;
         }
-        if (mode == ValveMode.INPUT) {
-            return getMultiblock().getInputChemicalTank();
-        } else if (mode == ValveMode.OUTPUT) {
-            int layer = getEffectiveLayer();
+        int layer = getEffectiveLayer();
+        if (layer == 1) {
+            if (mode == ValveMode.INPUT) {
+                return getMultiblock().getInputChemicalTank();
+            } else if (mode == ValveMode.OUTPUT) {
+                return getMultiblock().getOutputChemicalTank(0);
+            }
+        } else if (layer == 5) {
+            if (mode == ValveMode.OUTPUT) {
+                return getMultiblock().getOutputChemicalTank(4);
+            }
+        } else {
             return getMultiblock().getOutputChemicalTank(layer - 1);
         }
         return null;

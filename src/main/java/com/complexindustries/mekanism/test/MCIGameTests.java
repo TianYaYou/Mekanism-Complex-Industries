@@ -117,12 +117,17 @@ public class MCIGameTests {
                 // Test valve mode switching on Layer 1
                 if (helper.getBlockEntity(valvePos) instanceof TileEntityRefineryValve valve) {
                     Player fakePlayer = FakePlayerFactory.getMinecraft(helper.getLevel());
+
+                    // Verify Configurable capability
+                    var cap = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.CONFIGURABLE, valvePos, null, valve, null);
+                    helper.assertTrue(cap != null, "炼化塔接口必须能够通过 BlockCapability 暴露 Capabilities.CONFIGURABLE！");
+
                     valve.setMode(ValveMode.INPUT);
-                    valve.cycleMode(fakePlayer);
+                    cap.onRightClick(fakePlayer);
                     helper.assertTrue(valve.getMode() == ValveMode.OUTPUT, "第1层接口切换后模式应为 OUTPUT");
-                    valve.cycleMode(fakePlayer);
+                    cap.onRightClick(fakePlayer);
                     helper.assertTrue(valve.getMode() == ValveMode.HEAT_INPUT, "第1层接口再次切换后模式应为 HEAT_INPUT");
-                    valve.cycleMode(fakePlayer);
+                    cap.onRightClick(fakePlayer);
                     helper.assertTrue(valve.getMode() == ValveMode.INPUT, "第1层接口第三次切换后应回到 INPUT");
                 } else {
                     helper.fail("未能在尖端找到炼化塔接口方块实体！");
