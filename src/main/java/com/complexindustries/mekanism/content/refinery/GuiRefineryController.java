@@ -33,8 +33,8 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
     protected void addGuiElements() {
         super.addGuiElements();
 
-        // 1. Center Terminal Screen (31, 13, 92, 44)
-        addRenderableWidget(new GuiInnerScreen(this, 31, 13, 92, 44, () -> {
+        // 1. Center Terminal Screen (31, 13, 96, 44)
+        addRenderableWidget(new GuiInnerScreen(this, 31, 13, 96, 44, () -> {
             RefineryMultiblockData multiblock = tile.getMultiblock();
             if (!multiblock.isFormed()) {
                 return List.of(Component.translatable("gui.mekanism_complex_industries.refinery.unformed"));

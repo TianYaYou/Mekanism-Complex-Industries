@@ -13,6 +13,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+
 public class TileEntityRefineryCasing extends TileEntityMultiblock<RefineryMultiblockData> {
 
     public TileEntityRefineryCasing(BlockPos pos, BlockState state) {
@@ -26,7 +28,7 @@ public class TileEntityRefineryCasing extends TileEntityMultiblock<RefineryMulti
     @NotNull
     @Override
     protected IHeatCapacitorHolder getInitialHeatCapacitors(IContentsListener listener, CachedAmbientTemperature ambientTemperature) {
-        return side -> getMultiblock().getHeatCapacitors(side);
+        return side -> Collections.emptyList();
     }
 
     @Override

@@ -148,6 +148,27 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
     }
 
     @Override
+    public void onCreated(Level world) {
+        super.onCreated(world);
+        biomeAmbientTemp = calculateAverageAmbientTemperature(world);
+        double cap = Math.max(10_000.0, Math.max(64, getVolume()) * 40.0);
+        bottomHeatCapacitor.setHeatCapacity(cap, true);
+        topHeatCapacitor.setHeatCapacity(cap, true);
+    }
+
+    @Override
+    public void setVolume(int volume) {
+        super.setVolume(volume);
+        double cap = Math.max(10_000.0, Math.max(64, volume) * 40.0);
+        if (bottomHeatCapacitor != null) {
+            bottomHeatCapacitor.setHeatCapacity(cap, false);
+        }
+        if (topHeatCapacitor != null) {
+            topHeatCapacitor.setHeatCapacity(cap, false);
+        }
+    }
+
+    @Override
     public boolean tick(Level world) {
         boolean needsPacket = super.tick(world);
 
@@ -155,25 +176,43 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
         if (isFormed()) {
             double bottomTemp = bottomHeatCapacitor.getTemperature();
             double topTemp = topHeatCapacitor.getTemperature();
+
+            // Sanity clamp for legacy saves where temperature ran away up to tens of thousands of degrees
+            if (bottomTemp > 2500.0) {
+                bottomHeatCapacitor.setHeat(1200.0 * bottomHeatCapacitor.getHeatCapacity());
+                bottomTemp = 1200.0;
+                needsPacket = true;
+            }
+            if (topTemp > 2000.0) {
+                topHeatCapacitor.setHeat(350.0 * topHeatCapacitor.getHeatCapacity());
+                topTemp = 350.0;
+                needsPacket = true;
+            }
+
             double diff = bottomTemp - topTemp;
 
-            // Internal thermal conduction between bottom and top (heating bottom heats top)
-            if (Math.abs(diff) > 0.01) {
-                double transfer = diff * 0.02;
+            // Internal thermal conduction between bottom and top (upward heat rise)
+            if (Math.abs(diff) > 0.05) {
+                double transfer = diff * 0.005 * Math.min(bottomHeatCapacitor.getHeatCapacity(), topHeatCapacitor.getHeatCapacity());
                 bottomHeatCapacitor.handleHeat(-transfer);
                 topHeatCapacitor.handleHeat(transfer);
                 needsPacket = true;
             }
 
-            // Environmental dissipation towards ambient
+            // Environmental dissipation towards ambient (proportional to heat capacity using Mekanism sqrt formula)
             double bEnvDiff = bottomTemp - biomeAmbientTemp;
             if (Math.abs(bEnvDiff) > 0.05) {
-                bottomHeatCapacitor.handleHeat(-bEnvDiff * 0.005);
+                double dissipation = 0.005 * Math.sqrt(Math.abs(bEnvDiff)) * bottomHeatCapacitor.getHeatCapacity();
+                bottomHeatCapacitor.handleHeat(bEnvDiff > 0 ? -dissipation : dissipation);
             }
             double tEnvDiff = topTemp - biomeAmbientTemp;
             if (Math.abs(tEnvDiff) > 0.05) {
-                topHeatCapacitor.handleHeat(-tEnvDiff * 0.005);
+                double dissipation = 0.005 * Math.sqrt(Math.abs(tEnvDiff)) * topHeatCapacitor.getHeatCapacity();
+                topHeatCapacitor.handleHeat(tEnvDiff > 0 ? -dissipation : dissipation);
             }
+
+            // Flush heat buffer updates
+            updateHeatCapacitors(null);
 
             // Cracking process
             needsPacket |= updateCrackingProcess(bottomTemp, topTemp, diff);

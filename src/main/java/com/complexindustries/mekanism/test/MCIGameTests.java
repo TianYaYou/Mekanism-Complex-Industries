@@ -278,6 +278,45 @@ public class MCIGameTests {
         });
     }
 
+    @GameTest(template = "empty_15x25x15", timeoutTicks = 120)
+    public static void testRefineryHeatInputClampedToSourceTemp(GameTestHelper helper) {
+        int x0 = 2;
+        int z0 = 2;
+        int y0 = 1;
+        int height = 16;
+
+        buildRefineryStructure(helper, x0, y0, z0, height, false);
+
+        BlockPos controllerPos = new BlockPos(x0 + 3, y0 + 1, z0);
+        BlockPos valvePos = new BlockPos(x0 + 3, y0 + 1, z0 + 6);
+
+        helper.runAfterDelay(10, () -> {
+            if (helper.getBlockEntity(controllerPos) instanceof TileEntityRefineryController controller) {
+                controller.getStructure().tick(controller, true);
+                controller.getStructure().runUpdate(controller);
+                helper.assertTrue(controller.getMultiblock().isFormed(), "工业炼化塔应该成型！");
+
+                if (helper.getBlockEntity(valvePos) instanceof TileEntityRefineryValve valve) {
+                    valve.setMode(ValveMode.HEAT_INPUT);
+                    var heatHandler = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.HEAT, valvePos, null, valve, null);
+                    helper.assertTrue(heatHandler != null, "接口在热量输入模式下应该暴露热量能力！");
+
+                    var mb = controller.getMultiblock();
+                    // Verify heat capacity was scaled onCreated
+                    helper.assertTrue(mb.getBottomHeatCapacitor().getHeatCapacity() >= 10_000.0, "炼化塔底部热容应该正确成型初始化！");
+
+                    // Test legacy recovery clamp
+                    mb.getBottomHeatCapacitor().setHeat(50_000.0 * mb.getBottomHeatCapacitor().getHeatCapacity());
+                    mb.tick(helper.getLevel());
+                    helper.assertTrue(mb.getBottomHeatCapacitor().getTemperature() <= 2500.0, "异常高热应该被自动限制到合理区间！");
+                }
+                helper.succeed();
+            } else {
+                helper.fail("未能找到控制器方块实体！");
+            }
+        });
+    }
+
     private static void buildRefineryStructure(GameTestHelper helper, int x0, int y0, int z0, int height, boolean placeIllegalDiagonalValve) {
         int[] partitions = {3, 6, 9, 12};
 

@@ -18,6 +18,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 import mekanism.api.IConfigurable;
+import mekanism.api.heat.HeatAPI;
+import mekanism.api.heat.IHeatCapacitor;
+import mekanism.api.heat.IHeatHandler;
+import mekanism.common.capabilities.heat.VariableHeatCapacitor;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 
 import java.util.Collections;
@@ -194,6 +199,135 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
         };
     }
 
+    private final IHeatCapacitor heatingValveCapacitor = new ClampedHeatCapacitor(true);
+    private final IHeatCapacitor coolingValveCapacitor = new ClampedHeatCapacitor(false);
+
+    public double getMaxAdjacentTemperature() {
+        if (getLevel() == null) return 0.0;
+        double maxTemp = 0.0;
+        for (Direction dir : Direction.values()) {
+            IHeatHandler adjacent = getAdjacent(dir);
+            if (adjacent != null) {
+                maxTemp = Math.max(maxTemp, adjacent.getTotalTemperature());
+            }
+        }
+        return maxTemp;
+    }
+
+    public double getMinAdjacentTemperature() {
+        if (getLevel() == null) return Double.MAX_VALUE;
+        double minTemp = Double.MAX_VALUE;
+        for (Direction dir : Direction.values()) {
+            IHeatHandler adjacent = getAdjacent(dir);
+            if (adjacent != null) {
+                minTemp = Math.min(minTemp, adjacent.getTotalTemperature());
+            }
+        }
+        return minTemp;
+    }
+
+    private class ClampedHeatCapacitor implements IHeatCapacitor {
+        private final boolean isHeating;
+
+        public ClampedHeatCapacitor(boolean isHeating) {
+            this.isHeating = isHeating;
+        }
+
+        private VariableHeatCapacitor getTarget() {
+            if (!getMultiblock().isFormed()) return null;
+            return isHeating ? getMultiblock().getBottomHeatCapacitor() : getMultiblock().getTopHeatCapacitor();
+        }
+
+        @Override
+        public double getTemperature() {
+            VariableHeatCapacitor target = getTarget();
+            return target != null ? target.getTemperature() : HeatAPI.AMBIENT_TEMP;
+        }
+
+        @Override
+        public double getInverseConduction() {
+            VariableHeatCapacitor target = getTarget();
+            return target != null ? target.getInverseConduction() : HeatAPI.DEFAULT_INVERSE_CONDUCTION;
+        }
+
+        @Override
+        public double getInverseInsulation() {
+            VariableHeatCapacitor target = getTarget();
+            return target != null ? target.getInverseInsulation() : HeatAPI.DEFAULT_INVERSE_INSULATION;
+        }
+
+        @Override
+        public double getHeatCapacity() {
+            VariableHeatCapacitor target = getTarget();
+            return target != null ? target.getHeatCapacity() : HeatAPI.DEFAULT_HEAT_CAPACITY;
+        }
+
+        @Override
+        public double getHeat() {
+            VariableHeatCapacitor target = getTarget();
+            return target != null ? target.getHeat() : 0.0;
+        }
+
+        @Override
+        public void setHeat(double heat) {
+            VariableHeatCapacitor target = getTarget();
+            if (target != null) target.setHeat(heat);
+        }
+
+        @Override
+        public void handleHeat(double heat) {
+            VariableHeatCapacitor target = getTarget();
+            if (target == null) return;
+
+            if (isHeating) {
+                // Bottom heating valve: can only be heated up to the maximum temperature of adjacent heat source
+                if (heat > 0) {
+                    double maxSourceTemp = getMaxAdjacentTemperature();
+                    if (maxSourceTemp > 0) {
+                        double currentTemp = target.getTemperature();
+                        if (currentTemp >= maxSourceTemp) {
+                            return; // Cannot heat beyond source temperature!
+                        }
+                        double maxHeat = (maxSourceTemp - currentTemp) * target.getHeatCapacity();
+                        heat = Math.min(heat, maxHeat);
+                    }
+                }
+            } else {
+                // Top cooling valve: can only be cooled down to the minimum temperature of adjacent cooling source
+                if (heat < 0) {
+                    double minSourceTemp = getMinAdjacentTemperature();
+                    if (minSourceTemp > 0 && minSourceTemp < Double.MAX_VALUE) {
+                        double currentTemp = target.getTemperature();
+                        if (currentTemp <= minSourceTemp) {
+                            return; // Cannot cool below source temperature!
+                        }
+                        double maxExtract = (currentTemp - minSourceTemp) * target.getHeatCapacity();
+                        heat = -Math.min(Math.abs(heat), maxExtract);
+                    }
+                }
+            }
+            target.handleHeat(heat);
+        }
+
+        @Override
+        public void onContentsChanged() {
+            VariableHeatCapacitor target = getTarget();
+            if (target != null) target.onContentsChanged();
+        }
+
+        @Override
+        public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+            VariableHeatCapacitor target = getTarget();
+            return target != null ? target.serializeNBT(provider) : new CompoundTag();
+        }
+
+        @Override
+        public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+            VariableHeatCapacitor target = getTarget();
+            if (target != null) target.deserializeNBT(provider, nbt);
+        }
+    }
+
     @NotNull
     @Override
     protected IHeatCapacitorHolder getInitialHeatCapacitors(IContentsListener listener, CachedAmbientTemperature ambientTemperature) {
@@ -202,9 +336,9 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
                 return Collections.emptyList();
             }
             if (mode == ValveMode.HEAT_INPUT) {
-                return Collections.singletonList(getMultiblock().getBottomHeatCapacitor());
+                return Collections.singletonList(heatingValveCapacitor);
             } else if (mode == ValveMode.COOLING_INPUT) {
-                return Collections.singletonList(getMultiblock().getTopHeatCapacitor());
+                return Collections.singletonList(coolingValveCapacitor);
             }
             return Collections.emptyList();
         };
