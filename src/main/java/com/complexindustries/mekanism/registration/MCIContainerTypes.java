@@ -23,5 +23,8 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<ContainerAirCompressor> AIR_COMPRESSOR =
             CONTAINER_TYPES.register("air_compressor", TileEntityAirCompressor.class, ContainerAirCompressor::new);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.refinery.ContainerRefineryController> REFINERY_CONTROLLER =
+            CONTAINER_TYPES.register("refinery_controller", com.complexindustries.mekanism.content.refinery.TileEntityRefineryController.class, com.complexindustries.mekanism.content.refinery.ContainerRefineryController::new);
+
     private MCIContainerTypes() {}
 }

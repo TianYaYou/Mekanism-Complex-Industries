@@ -159,6 +159,65 @@ public class MCIGameTests {
         });
     }
 
+    @GameTest(template = "empty_15x25x15", timeoutTicks = 120)
+    public static void testRefineryCrackingReaction(GameTestHelper helper) {
+        int x0 = 2;
+        int z0 = 2;
+        int y0 = 1;
+        int height = 16;
+
+        buildRefineryStructure(helper, x0, y0, z0, height, false);
+
+        BlockPos controllerPos = new BlockPos(x0 + 3, y0 + 1, z0);
+
+        helper.runAfterDelay(10, () -> {
+            if (helper.getBlockEntity(controllerPos) instanceof TileEntityRefineryController controller) {
+                controller.getStructure().tick(controller, true);
+                controller.getStructure().runUpdate(controller);
+                helper.assertTrue(controller.getMultiblock().isFormed(), "工业炼化塔多方块结构应该成型！");
+
+                var mb = controller.getMultiblock();
+                // 1. Supply Dense Crude Oil
+                mb.getInputChemicalTank().setStack(com.complexindustries.mekanism.registration.MCIChemicals.DENSE_CRUDE_OIL.asStack(10_000));
+
+                // 2. Set Bottom Temp to 700 K, Top Temp to 300 K (deltaT = 400 K >= 100 K)
+                mb.getBottomHeatCapacitor().setHeat(700.0 * mb.getBottomHeatCapacitor().getHeatCapacity());
+                mb.getTopHeatCapacitor().setHeat(300.0 * mb.getTopHeatCapacitor().getHeatCapacity());
+
+                // 3. Tick multiblock for 20 ticks (1 second of cracking)
+                for (int i = 0; i < 20; i++) {
+                    mb.tick(helper.getLevel());
+                }
+
+                // 4. Verify cracking occurred
+                helper.assertTrue(mb.lastCrackingRate > 0.0, "裂解速率应该大于0！当前: " + mb.lastCrackingRate);
+                helper.assertTrue(mb.operatingStatus == 3, "运行状态应该为活跃裂解 (3)！当前: " + mb.operatingStatus);
+
+                long bitumen = mb.outputTank1.getStored();
+                long heavyOil = mb.outputTank2.getStored();
+                long refinedFuel = mb.outputTank3.getStored();
+                long naphtha = mb.outputTank4.getStored();
+                long gas = mb.outputTank5.getStored();
+
+                helper.assertTrue(gas > 0, "石油气产出应该大于0！当前: " + gas);
+                helper.assertTrue(naphtha > 0, "石脑油产出应该大于0！当前: " + naphtha);
+                helper.assertTrue(refinedFuel > 0, "精炼燃油产出应该大于0！当前: " + refinedFuel);
+                helper.assertTrue(heavyOil > 0, "重油产出应该大于0！当前: " + heavyOil);
+                helper.assertTrue(bitumen > 0, "沥青产出应该大于0！当前: " + bitumen);
+
+                // Verify relative ratios: gas (2.0) > naphtha (0.2) > bitumen (0.15) > refinedFuel (0.1) == heavyOil (0.1)
+                helper.assertTrue(gas > naphtha, "石油气产出应显著高于石脑油！");
+                helper.assertTrue(naphtha > bitumen, "石脑油产出应高于沥青！");
+                helper.assertTrue(bitumen > refinedFuel, "沥青产出应高于精炼燃油！");
+                helper.assertTrue(refinedFuel == heavyOil, "精炼燃油产出与重油产出比例应一致！");
+
+                helper.succeed();
+            } else {
+                helper.fail("未能找到控制器方块实体！");
+            }
+        });
+    }
+
     private static void buildRefineryStructure(GameTestHelper helper, int x0, int y0, int z0, int height, boolean placeIllegalDiagonalValve) {
         int[] partitions = {3, 6, 9, 12};
 

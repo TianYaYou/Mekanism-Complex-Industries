@@ -24,6 +24,12 @@ public class TileEntityRefineryController extends TileEntityRefineryCasing {
     }
 
     @Override
+    public void addContainerTrackers(mekanism.common.inventory.container.MekanismContainer container) {
+        super.addContainerTrackers(container);
+        mekanism.common.inventory.container.sync.dynamic.SyncMapper.INSTANCE.setup(container, RefineryMultiblockData.class, this::getMultiblock);
+    }
+
+    @Override
     public boolean canBeMaster() {
         return true;
     }

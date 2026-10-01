@@ -16,6 +16,17 @@ public final class MCIChemicals {
     public static final DeferredChemical<Chemical> NITROGEN = CHEMICALS.register("nitrogen", 0x7FB5FF);
     // Noble Gas: 0xC084FC
     public static final DeferredChemical<Chemical> NOBLE_GAS = CHEMICALS.register("noble_gas", 0xC084FC);
+    // Cracking Products:
+    // Layer 5 (Top): Petroleum Gas: 0xF5C542
+    public static final DeferredChemical<Chemical> PETROLEUM_GAS = CHEMICALS.register("petroleum_gas", 0xF5C542);
+    // Layer 4: Naphtha: 0xE0C870
+    public static final DeferredChemical<Chemical> NAPHTHA = CHEMICALS.register("naphtha", 0xE0C870);
+    // Layer 3: Refined Fuel: 0xFFA000
+    public static final DeferredChemical<Chemical> REFINED_FUEL = CHEMICALS.register("refined_fuel", 0xFFA000);
+    // Layer 2: Heavy Oil: 0x3D2E24
+    public static final DeferredChemical<Chemical> HEAVY_OIL = CHEMICALS.register("heavy_oil", 0x3D2E24);
+    // Layer 1 (Bottom): Bitumen: 0x1A1A1A
+    public static final DeferredChemical<Chemical> BITUMEN = CHEMICALS.register("bitumen", 0x1A1A1A);
 
     private MCIChemicals() {}
 }
