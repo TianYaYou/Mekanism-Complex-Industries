@@ -12,17 +12,28 @@ import mekanism.common.capabilities.heat.VariableHeatCapacitor;
 import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
 import mekanism.common.lib.multiblock.IValveHandler;
 import mekanism.common.lib.multiblock.MultiblockData;
+import mekanism.common.lib.multiblock.Structure;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RefineryMultiblockData extends MultiblockData implements IValveHandler {
+
+    public static final Set<RefineryMultiblockData> FORMED_REFINERIES = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     @ContainerSync
     public IChemicalTank inputChemicalTank;
@@ -65,15 +76,15 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
 
     public RefineryMultiblockData(TileEntityMultiblock<?> tile) {
         super(tile);
-        // 1 Chemical Input Tank (Layer 1)
-        chemicalTanks.add(inputChemicalTank = VariableCapacityChemicalTank.input(this, this::getTankCapacityLong, ConstantPredicates.alwaysTrue(), this));
+        // 1 Chemical Input Tank (Layer 1) - Capacity scaled to 1/100 of original
+        chemicalTanks.add(inputChemicalTank = VariableCapacityChemicalTank.input(this, this::getInputTankCapacityLong, ConstantPredicates.alwaysTrue(), this));
 
-        // 5 Chemical Output Tanks (Layers 1..5)
-        outputTank1 = VariableCapacityChemicalTank.output(this, this::getTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
-        outputTank2 = VariableCapacityChemicalTank.output(this, this::getTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
-        outputTank3 = VariableCapacityChemicalTank.output(this, this::getTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
-        outputTank4 = VariableCapacityChemicalTank.output(this, this::getTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
-        outputTank5 = VariableCapacityChemicalTank.output(this, this::getTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
+        // 5 Chemical Output Tanks (Layers 1..5) - Capacity scaled to 1/1000 of original (1/10 of input capacity)
+        outputTank1 = VariableCapacityChemicalTank.output(this, this::getOutputTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
+        outputTank2 = VariableCapacityChemicalTank.output(this, this::getOutputTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
+        outputTank3 = VariableCapacityChemicalTank.output(this, this::getOutputTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
+        outputTank4 = VariableCapacityChemicalTank.output(this, this::getOutputTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
+        outputTank5 = VariableCapacityChemicalTank.output(this, this::getOutputTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
 
         outputChemicalTanks.add(outputTank1);
         outputChemicalTanks.add(outputTank2);
@@ -91,12 +102,28 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
         heatCapacitors.add(topHeatCapacitor = VariableHeatCapacitor.create(Math.max(64, getVolume()) * 40.0, () -> biomeAmbientTemp, this));
     }
 
+    public int getInputTankCapacity() {
+        return Math.max(640, getVolume() * 160);
+    }
+
+    public long getInputTankCapacityLong() {
+        return getInputTankCapacity();
+    }
+
+    public int getOutputTankCapacity() {
+        return Math.max(64, getVolume() * 16);
+    }
+
+    public long getOutputTankCapacityLong() {
+        return getOutputTankCapacity();
+    }
+
     public int getTankCapacity() {
-        return Math.max(64_000, getVolume() * 16_000);
+        return getInputTankCapacity();
     }
 
     public long getTankCapacityLong() {
-        return getTankCapacity();
+        return getInputTankCapacityLong();
     }
 
     public IChemicalTank getInputChemicalTank() {
@@ -150,10 +177,17 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
     @Override
     public void onCreated(Level world) {
         super.onCreated(world);
+        FORMED_REFINERIES.add(this);
         biomeAmbientTemp = calculateAverageAmbientTemperature(world);
         double cap = Math.max(10_000.0, Math.max(64, getVolume()) * 40.0);
         bottomHeatCapacitor.setHeatCapacity(cap, true);
         topHeatCapacitor.setHeatCapacity(cap, true);
+    }
+
+    @Override
+    public void remove(Level world, Structure structure) {
+        FORMED_REFINERIES.remove(this);
+        super.remove(world, structure);
     }
 
     @Override
@@ -174,6 +208,9 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
 
         // Heat exchange and vertical gradient between bottom and top
         if (isFormed()) {
+            if (!FORMED_REFINERIES.contains(this)) {
+                FORMED_REFINERIES.add(this);
+            }
             double bottomTemp = bottomHeatCapacitor.getTemperature();
             double topTemp = topHeatCapacitor.getTemperature();
 
@@ -217,6 +254,7 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
             // Cracking process
             needsPacket |= updateCrackingProcess(bottomTemp, topTemp, diff);
         } else {
+            FORMED_REFINERIES.remove(this);
             if (lastCrackingRate != 0.0 || operatingStatus != 0) {
                 lastCrackingRate = 0.0;
                 operatingStatus = 0;
@@ -402,5 +440,97 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
         tag.putIntArray("partitionFloors", partitionFloors);
         tag.putDouble("lastCrackingRate", lastCrackingRate);
         tag.putInt("operatingStatus", operatingStatus);
+    }
+
+    /**
+     * Checks if a block position is physically inside the tower multiblock bounds (any interior or casing cell).
+     */
+    public boolean isInsideTower(BlockPos pos) {
+        if (!isFormed() || getBounds() == null) {
+            return false;
+        }
+        BlockPos min = getBounds().getMinPos();
+        BlockPos max = getBounds().getMaxPos();
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+
+        if (y < min.getY() || y > max.getY()) {
+            return false;
+        }
+        int dx = x - min.getX();
+        int dz = z - min.getZ();
+        if (dx >= 0 && dx < 7 && dz >= 0 && dz < 7) {
+            return RefineryValidator.GRID_TEMPLATE[dz][dx] != RefineryValidator.TYPE_IGNORED;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a block position is near the tower multiblock within specified horizontal and vertical distances.
+     */
+    public boolean isNearTower(BlockPos pos, int horizontalRadius, int verticalRadius) {
+        if (!isFormed() || getBounds() == null) {
+            return false;
+        }
+        BlockPos min = getBounds().getMinPos();
+        BlockPos max = getBounds().getMaxPos();
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+
+        if (y < min.getY() - verticalRadius || y > max.getY() + verticalRadius) {
+            return false;
+        }
+        if (x < min.getX() - horizontalRadius || x > max.getX() + horizontalRadius) {
+            return false;
+        }
+        if (z < min.getZ() - horizontalRadius || z > max.getZ() + horizontalRadius) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Determine whether mob spawning should be suppressed around or inside any active refinery multiblock.
+     * - Inside tower: suppress ALL mob spawns.
+     * - Around tower (16 blocks horizontal, 8 blocks vertical): suppress hostile / monster spawns.
+     */
+    public static boolean shouldSuppressSpawn(Level level, BlockPos pos, MobCategory category, Class<?> entityClass, MobSpawnType spawnType) {
+        if (spawnType == MobSpawnType.SPAWN_EGG || spawnType == MobSpawnType.COMMAND) {
+            return false;
+        }
+        boolean isHostile = (category == MobCategory.MONSTER) || (entityClass != null && Enemy.class.isAssignableFrom(entityClass));
+
+        Iterator<RefineryMultiblockData> iterator = FORMED_REFINERIES.iterator();
+        while (iterator.hasNext()) {
+            RefineryMultiblockData refinery = iterator.next();
+            if (!refinery.isFormed() || refinery.getBounds() == null) {
+                iterator.remove();
+                continue;
+            }
+            Level refineryLevel = refinery.getLevel();
+            if (refineryLevel != null && level != null && !refineryLevel.dimension().equals(level.dimension())) {
+                continue;
+            }
+
+            // 1. Inside tower: suppress all mob spawns
+            if (refinery.isInsideTower(pos)) {
+                return true;
+            }
+
+            // 2. Around tower: suppress hostile mobs within 16 blocks horizontal, 8 blocks vertical
+            if (isHostile && refinery.isNearTower(pos, 16, 8)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean shouldSuppressSpawn(Level level, BlockPos pos, Mob mob, MobSpawnType spawnType) {
+        if (mob == null) {
+            return false;
+        }
+        return shouldSuppressSpawn(level, pos, mob.getType().getCategory(), mob.getClass(), spawnType);
     }
 }

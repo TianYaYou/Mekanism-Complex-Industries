@@ -2,6 +2,7 @@ package com.complexindustries.mekanism.test;
 
 import com.complexindustries.mekanism.MCIConstants;
 import com.complexindustries.mekanism.content.freezer.TileEntityFreezerController;
+import com.complexindustries.mekanism.content.refinery.RefineryMultiblockData;
 import com.complexindustries.mekanism.content.refinery.RefineryValidator;
 import com.complexindustries.mekanism.content.refinery.TileEntityRefineryCasing;
 import com.complexindustries.mekanism.content.refinery.TileEntityRefineryController;
@@ -14,6 +15,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -271,6 +276,12 @@ public class MCIGameTests {
                 helper.assertTrue(bitumen > refinedFuel, "沥青产出应高于精炼燃油！");
                 helper.assertTrue(refinedFuel == heavyOil, "精炼燃油产出与重油产出比例应一致！");
 
+                // Verify scaled tank capacities (Input = 1/100 of old, Output = 1/10 of input / 1/1000 of old)
+                helper.assertTrue(mb.getInputTankCapacity() == Math.max(640, mb.getVolume() * 160), "炼化塔输入容积应为原先的1/100！");
+                helper.assertTrue(mb.getOutputTankCapacity() == Math.max(64, mb.getVolume() * 16), "炼化塔产物容积应额外再缩小1/10！");
+                helper.assertTrue(mb.inputChemicalTank.getCapacity() == mb.getInputTankCapacity(), "输入槽容量应与 getInputTankCapacity 一致！");
+                helper.assertTrue(mb.outputTank1.getCapacity() == mb.getOutputTankCapacity(), "产物槽容量应与 getOutputTankCapacity 一致！");
+
                 helper.succeed();
             } else {
                 helper.fail("未能找到控制器方块实体！");
@@ -310,6 +321,54 @@ public class MCIGameTests {
                     mb.tick(helper.getLevel());
                     helper.assertTrue(mb.getBottomHeatCapacitor().getTemperature() <= 2500.0, "异常高热应该被自动限制到合理区间！");
                 }
+                helper.succeed();
+            } else {
+                helper.fail("未能找到控制器方块实体！");
+            }
+        });
+    }
+
+    @GameTest(template = "empty_15x25x15", timeoutTicks = 100)
+    public static void testRefineryMobSpawnSuppression(GameTestHelper helper) {
+        int x0 = 2;
+        int z0 = 2;
+        int y0 = 1;
+        int height = 16;
+
+        buildRefineryStructure(helper, x0, y0, z0, height, false);
+
+        BlockPos controllerPos = new BlockPos(x0 + 3, y0 + 1, z0);
+
+        helper.runAfterDelay(10, () -> {
+            if (helper.getBlockEntity(controllerPos) instanceof TileEntityRefineryController controller) {
+                controller.getStructure().tick(controller, true);
+                controller.getStructure().runUpdate(controller);
+                helper.assertTrue(controller.getMultiblock().isFormed(), "工业炼化塔应该成型！");
+
+                var mb = controller.getMultiblock();
+                BlockPos absoluteInsidePos = helper.absolutePos(new BlockPos(x0 + 3, y0 + 2, z0 + 3)); // hollow interior
+                BlockPos absoluteNearPos = helper.absolutePos(new BlockPos(x0 - 2, y0 + 1, z0 + 3));   // 2 blocks outside tower
+                BlockPos absoluteFarPos = helper.absolutePos(new BlockPos(x0 + 3, y0 + 40, z0 + 3));  // 40 blocks up, far outside any vertical/horizontal radius
+
+                // 1. Inside check: ALL mobs suppressed
+                helper.assertTrue(mb.isInsideTower(absoluteInsidePos), "内部腔体坐标应被判定为在塔内！");
+                helper.assertTrue(RefineryMultiblockData.shouldSuppressSpawn(helper.getLevel(), absoluteInsidePos, MobCategory.MONSTER, Zombie.class, MobSpawnType.NATURAL), "塔内应阻止怪物自然生成！");
+                helper.assertTrue(RefineryMultiblockData.shouldSuppressSpawn(helper.getLevel(), absoluteInsidePos, MobCategory.CREATURE, Cow.class, MobSpawnType.NATURAL), "塔内应阻止生物自然生成！");
+
+                // 2. Near check: Hostile suppressed, Passive allowed
+                helper.assertTrue(!mb.isInsideTower(absoluteNearPos), "外部坐标不应被判定为在塔内！");
+                helper.assertTrue(mb.isNearTower(absoluteNearPos, 16, 8), "近距离外部坐标应在16格保护半径内！");
+                helper.assertTrue(RefineryMultiblockData.shouldSuppressSpawn(helper.getLevel(), absoluteNearPos, MobCategory.MONSTER, Zombie.class, MobSpawnType.NATURAL), "塔周围应阻止怪物生成！");
+                helper.assertTrue(!RefineryMultiblockData.shouldSuppressSpawn(helper.getLevel(), absoluteNearPos, MobCategory.CREATURE, Cow.class, MobSpawnType.NATURAL), "塔周围应允许和平动物生成！");
+
+                // 3. Spawn egg / Command bypass check
+                helper.assertTrue(!RefineryMultiblockData.shouldSuppressSpawn(helper.getLevel(), absoluteInsidePos, MobCategory.MONSTER, Zombie.class, MobSpawnType.SPAWN_EGG), "刷怪蛋不应被阻止！");
+                helper.assertTrue(!RefineryMultiblockData.shouldSuppressSpawn(helper.getLevel(), absoluteInsidePos, MobCategory.MONSTER, Zombie.class, MobSpawnType.COMMAND), "指令生成不应被阻止！");
+
+                // 4. Far check: Hostile allowed
+                helper.assertTrue(!mb.isNearTower(absoluteFarPos, 16, 8), "远距离坐标不应在保护半径内！");
+                helper.assertTrue(!RefineryMultiblockData.shouldSuppressSpawn(helper.getLevel(), absoluteFarPos, MobCategory.MONSTER, Zombie.class, MobSpawnType.NATURAL), "远距离应允许怪物生成！");
+
                 helper.succeed();
             } else {
                 helper.fail("未能找到控制器方块实体！");
