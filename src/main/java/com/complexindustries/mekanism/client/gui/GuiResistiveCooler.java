@@ -40,8 +40,7 @@ public class GuiResistiveCooler extends GuiMekanismTile<TileEntityResistiveCoole
             double temp = tile.getTotalTemperature();
             double belowAmbient = Math.max(0.0, ambient - temp);
             return List.of(
-                    Component.translatable("gui.mekanism_complex_industries.resistive_cooler.below_ambient",
-                            MekanismUtils.getTemperatureDisplay(belowAmbient, TemperatureUnit.KELVIN, false)),
+                    MekanismLang.TEMPERATURE.translate(MekanismUtils.getTemperatureDisplay(temp, TemperatureUnit.KELVIN, true)),
                     MekanismLang.RESISTIVE_HEATER_USAGE.translate(EnergyDisplay.of(tile.getEnergyContainer().getEnergyPerTick()))
             );
         }).clearFormat().tooltip(() -> {

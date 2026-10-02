@@ -21,6 +21,7 @@ import mekanism.api.IConfigurable;
 import mekanism.api.heat.HeatAPI;
 import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.heat.IHeatHandler;
+import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.heat.VariableHeatCapacitor;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
@@ -207,6 +208,9 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
         double maxTemp = 0.0;
         for (Direction dir : Direction.values()) {
             IHeatHandler adjacent = getAdjacent(dir);
+            if (adjacent == null && getLevel() != null) {
+                adjacent = getLevel().getCapability(Capabilities.HEAT, getBlockPos().relative(dir), dir.getOpposite());
+            }
             if (adjacent != null) {
                 maxTemp = Math.max(maxTemp, adjacent.getTotalTemperature());
             }
@@ -219,6 +223,9 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
         double minTemp = Double.MAX_VALUE;
         for (Direction dir : Direction.values()) {
             IHeatHandler adjacent = getAdjacent(dir);
+            if (adjacent == null && getLevel() != null) {
+                adjacent = getLevel().getCapability(Capabilities.HEAT, getBlockPos().relative(dir), dir.getOpposite());
+            }
             if (adjacent != null) {
                 minTemp = Math.min(minTemp, adjacent.getTotalTemperature());
             }
@@ -280,30 +287,28 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
             if (target == null) return;
 
             if (isHeating) {
-                // Bottom heating valve: can only be heated up to the maximum temperature of adjacent heat source
-                if (heat > 0) {
-                    double maxSourceTemp = getMaxAdjacentTemperature();
-                    if (maxSourceTemp > 0) {
-                        double currentTemp = target.getTemperature();
-                        if (currentTemp >= maxSourceTemp) {
-                            return; // Cannot heat beyond source temperature!
-                        }
-                        double maxHeat = (maxSourceTemp - currentTemp) * target.getHeatCapacity();
-                        heat = Math.min(heat, maxHeat);
+                // Bottom heating valve: only accepts heating (heat > 0)
+                if (heat <= 0) return;
+                double maxSourceTemp = getMaxAdjacentTemperature();
+                if (maxSourceTemp > 0) {
+                    double currentTemp = target.getTemperature();
+                    if (currentTemp >= maxSourceTemp) {
+                        return; // Cannot heat beyond source temperature!
                     }
+                    double maxHeat = (maxSourceTemp - currentTemp) * target.getHeatCapacity();
+                    heat = Math.min(heat, maxHeat);
                 }
             } else {
-                // Top cooling valve: can only be cooled down to the minimum temperature of adjacent cooling source
-                if (heat < 0) {
-                    double minSourceTemp = getMinAdjacentTemperature();
-                    if (minSourceTemp > 0 && minSourceTemp < Double.MAX_VALUE) {
-                        double currentTemp = target.getTemperature();
-                        if (currentTemp <= minSourceTemp) {
-                            return; // Cannot cool below source temperature!
-                        }
-                        double maxExtract = (currentTemp - minSourceTemp) * target.getHeatCapacity();
-                        heat = -Math.min(Math.abs(heat), maxExtract);
+                // Top cooling valve: only accepts cooling (heat < 0)
+                if (heat >= 0) return;
+                double minSourceTemp = getMinAdjacentTemperature();
+                if (minSourceTemp > 0 && minSourceTemp < Double.MAX_VALUE) {
+                    double currentTemp = target.getTemperature();
+                    if (currentTemp <= minSourceTemp) {
+                        return; // Cannot cool below source temperature!
                     }
+                    double maxExtract = (currentTemp - minSourceTemp) * target.getHeatCapacity();
+                    heat = -Math.min(Math.abs(heat), maxExtract);
                 }
             }
             target.handleHeat(heat);

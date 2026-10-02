@@ -20,7 +20,7 @@ public class ResistiveCoolerEnergyContainer extends MachineEnergyContainer<TileE
     public static ResistiveCoolerEnergyContainer input(TileEntityResistiveCooler tile, @Nullable IContentsListener listener) {
         return new ResistiveCoolerEnergyContainer(
                 100_000_000L,
-                250L,
+                2_500L,
                 notExternal,
                 ConstantPredicates.alwaysTrue(),
                 tile,

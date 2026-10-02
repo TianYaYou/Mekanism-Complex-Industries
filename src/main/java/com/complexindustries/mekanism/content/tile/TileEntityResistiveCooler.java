@@ -38,15 +38,14 @@ import org.jetbrains.annotations.NotNull;
 public class TileEntityResistiveCooler extends TileEntityMekanism {
     // -200°C in Kelvin is 73.15 K
     public static final double MIN_TEMPERATURE = 73.15D;
-    // Maximum cooling energy rate: 25,000 J/t (10,000 FE/t)
-    public static final long MAX_ENERGY_USAGE = 25_000L;
-    // Baseline power for full cryogenic cooling (-200°C): 12,500 J/t (5,000 FE/t)
-    public static final double FULL_COOLING_ENERGY = 12_500.0D;
+    // Maximum cooling energy rate: allow high power like Resistive Heater
+    public static final long MAX_ENERGY_USAGE = 100_000_000L;
 
     private float soundScale = 1.0F;
     private double lastEnvironmentLoss;
     private double lastTransferLoss;
     private long clientEnergyUsed = 0L;
+    private double currentTickCoolingPower = 0.0;
 
     private ResistiveCoolerEnergyContainer energyContainer;
     private BasicHeatCapacitor heatCapacitor;
@@ -68,7 +67,8 @@ public class TileEntityResistiveCooler extends TileEntityMekanism {
     @Override
     protected IHeatCapacitorHolder getInitialHeatCapacitors(IContentsListener listener, CachedAmbientTemperature ambientTemperature) {
         HeatCapacitorHelper helper = HeatCapacitorHelper.forSide(this::getDirection);
-        helper.addCapacitor(heatCapacitor = BasicHeatCapacitor.create(100.0D, 50.0D, 10.0D, ambientTemperature, listener));
+        // Inverse conduction 5.0 matching Resistive Heater
+        helper.addCapacitor(heatCapacitor = BasicHeatCapacitor.create(100.0D, 5.0D, 10.0D, ambientTemperature, listener));
         return helper.build();
     }
 
@@ -85,22 +85,20 @@ public class TileEntityResistiveCooler extends TileEntityMekanism {
         boolean sendUpdatePacket = super.onUpdateServer();
         energySlot.fillContainerOrConvert();
         long toUse = 0L;
+        double coolingPower = 0.0;
 
         if (this.canFunction()) {
             long requestedUsage = energyContainer.getEnergyPerTick();
             toUse = energyContainer.extract(requestedUsage, Action.SIMULATE, AutomationType.INTERNAL);
 
             if (toUse > 0L) {
-                double ambient = getAmbientTemperature(null);
-                double powerRatio = Math.min(1.0, (double) toUse / FULL_COOLING_ENERGY);
-                // Target temperature: scales from ambient down to -200°C (73.15 K) at 5,000 FE/t (12,500 J/t)
-                double targetTemp = Math.max(MIN_TEMPERATURE, ambient - powerRatio * (ambient - MIN_TEMPERATURE));
+                coolingPower = (double) toUse * MekanismConfig.general.resistiveHeaterEfficiency.get();
+                // Active refrigeration: cool the cold plate down towards MIN_TEMPERATURE (73.15 K)
                 double currentHeat = heatCapacitor.getHeat();
-                double targetHeat = targetTemp * heatCapacitor.getHeatCapacity();
+                double minHeat = MIN_TEMPERATURE * heatCapacitor.getHeatCapacity();
 
-                if (currentHeat > targetHeat) {
-                    double coolingRate = (double) toUse * MekanismConfig.general.resistiveHeaterEfficiency.get() * 50.0;
-                    double toRemove = Math.min(coolingRate, currentHeat - targetHeat);
+                if (currentHeat > minHeat) {
+                    double toRemove = Math.min(coolingPower, currentHeat - minHeat);
                     heatCapacitor.handleHeat(-toRemove);
                 }
 
@@ -110,13 +108,14 @@ public class TileEntityResistiveCooler extends TileEntityMekanism {
 
         setActive(toUse > 0L);
         clientEnergyUsed = toUse;
+        this.currentTickCoolingPower = coolingPower;
 
         // Mekanism heat transfer simulation (transfers cold / absorbs ambient heat)
         HeatAPI.HeatTransfer transfer = simulate();
         lastEnvironmentLoss = transfer.environmentTransfer();
         lastTransferLoss = transfer.adjacentTransfer();
 
-        float newSoundScale = (float) toUse / 12_500.0F;
+        float newSoundScale = (float) Math.min(1.0, (double) toUse / 12_500.0);
         if (Math.abs(newSoundScale - soundScale) > 0.01F) {
             soundScale = newSoundScale;
             sendUpdatePacket = true;
@@ -175,32 +174,35 @@ public class TileEntityResistiveCooler extends TileEntityMekanism {
                     // Heat flows from the hotter sink into the cooler
                     double tempDiff = sinkTemp - myTemp;
                     double sinkCapacity = sink.getTotalHeatCapacity();
-                    double effectiveCapacity = Math.max(getTotalHeatCapacity(side), Math.min(sinkCapacity, 10_000.0));
-                    double heatToExtract = (tempDiff / invConduction) * effectiveCapacity;
 
-                    // Ensure we don't extract more than would balance temperatures
-                    double maxHeatBeforeEqualizing = tempDiff * sinkCapacity * 0.5;
+                    // Max heat before equalizing temperatures with cold plate
+                    double maxHeatBeforeEqualizing = (sinkTemp - myTemp) * sinkCapacity * 0.5;
+
+                    // Active electrical refrigeration pumps heat away
+                    double heatToExtract = (tempDiff / invConduction) * Math.min(sinkCapacity, getTotalHeatCapacity(side) * 20.0);
                     heatToExtract = Math.min(heatToExtract, maxHeatBeforeEqualizing);
 
-                    // Clamp to maximum extraction rate per tick per face
-                    heatToExtract = Math.min(heatToExtract, 50_000.0);
+                    // When powered, refrigeration extracts up to coolingPower without overheating the cold plate
+                    if (currentTickCoolingPower > 0) {
+                        heatToExtract = Math.min(heatToExtract, currentTickCoolingPower);
+                    } else {
+                        // Passive: limited by small heat capacity of cold plate
+                        heatToExtract = Math.min(heatToExtract, getTotalHeatCapacity(side) * 2.0);
+                    }
 
                     if (heatToExtract > 0) {
                         sink.handleHeat(-heatToExtract);
-                        handleHeat(heatToExtract, side);
+                        // Active refrigeration pumps extracted heat to ambient.
+                        // Only excess heat exceeding active cooling power warms the cold plate:
+                        double unhandledHeat = Math.max(0.0, heatToExtract - currentTickCoolingPower);
+                        if (unhandledHeat > 0) {
+                            handleHeat(unhandledHeat, side);
+                        }
                         adjacentTransfer += (heatToExtract / Math.max(1.0, getTotalHeatCapacity(side)));
                     }
-                } else if (myTemp > sinkTemp) {
-                    // Normal heat transfer to colder sink
-                    double tempDiff = myTemp - sinkTemp;
-                    double heatToTransfer = (tempDiff / invConduction) * getTotalHeatCapacity(side);
-                    heatToTransfer = Math.min(heatToTransfer, tempDiff * getTotalHeatCapacity(side) * 0.5);
-                    if (heatToTransfer > 0) {
-                        handleHeat(-heatToTransfer, side);
-                        sink.handleHeat(heatToTransfer);
-                        adjacentTransfer += (heatToTransfer / Math.max(1.0, getTotalHeatCapacity(side)));
-                    }
                 }
+                // NOTE: If myTemp >= sinkTemp, DO NOT TRANSFER HEAT INTO SINK!
+                // A Resistive Cooler is a one-way cryogenic heat extractor and must NEVER heat adjacent blocks.
             }
         }
         return adjacentTransfer;

@@ -9,8 +9,12 @@ import com.complexindustries.mekanism.content.refinery.TileEntityRefineryControl
 import com.complexindustries.mekanism.content.refinery.TileEntityRefineryDredgePipe;
 import com.complexindustries.mekanism.content.refinery.TileEntityRefineryValve;
 import com.complexindustries.mekanism.content.refinery.TileEntityRefineryValve.ValveMode;
+import com.complexindustries.mekanism.content.tile.TileEntityResistiveCooler;
 import com.complexindustries.mekanism.registration.MCIBlocks;
+import mekanism.api.Action;
+import mekanism.api.AutomationType;
 import mekanism.common.registries.MekanismBlocks;
+import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -368,6 +372,69 @@ public class MCIGameTests {
                 // 4. Far check: Hostile allowed
                 helper.assertTrue(!mb.isNearTower(absoluteFarPos, 16, 8), "远距离坐标不应在保护半径内！");
                 helper.assertTrue(!RefineryMultiblockData.shouldSuppressSpawn(helper.getLevel(), absoluteFarPos, MobCategory.MONSTER, Zombie.class, MobSpawnType.NATURAL), "远距离应允许怪物生成！");
+
+                helper.succeed();
+            } else {
+                helper.fail("未能找到控制器方块实体！");
+            }
+        });
+    }
+
+    @GameTest(template = "empty_15x25x15", timeoutTicks = 100)
+    public static void testCoolerCoolsRefineryTopValve(GameTestHelper helper) {
+        int x0 = 2;
+        int z0 = 2;
+        int y0 = 1;
+        int height = 16;
+
+        buildRefineryStructure(helper, x0, y0, z0, height, false);
+
+        BlockPos controllerPos = new BlockPos(x0 + 3, y0 + 1, z0);
+        // Tip at layer 5 (dy = 13, dx = 3, dz = 6): replace casing with valve
+        BlockPos topValvePos = new BlockPos(x0 + 3, y0 + 13, z0 + 6);
+        helper.setBlock(topValvePos, MCIBlocks.REFINERY_VALVE.get());
+
+        // Adjacent cooler pos (South of the valve): dx = 3, dz = 7, dy = 13
+        BlockPos coolerPos = new BlockPos(x0 + 3, y0 + 13, z0 + 7);
+        helper.setBlock(coolerPos, MCIBlocks.RESISTIVE_COOLER.get());
+
+        helper.runAfterDelay(10, () -> {
+            if (helper.getBlockEntity(controllerPos) instanceof TileEntityRefineryController controller) {
+                controller.getStructure().tick(controller, true);
+                controller.getStructure().runUpdate(controller);
+                helper.assertTrue(controller.getMultiblock().isFormed(), "工业炼化塔应该成型！");
+
+                TileEntityRefineryValve valve = (TileEntityRefineryValve) helper.getBlockEntity(topValvePos);
+                helper.assertTrue(valve != null, "未能找到顶层接口！");
+                helper.assertTrue(valve.getEffectiveLayer() == 5, "顶层接口层数应为 5！实际: " + valve.getEffectiveLayer());
+
+                // Set valve mode to COOLING_INPUT
+                valve.setMode(TileEntityRefineryValve.ValveMode.COOLING_INPUT);
+                helper.assertTrue(valve.getMode() == TileEntityRefineryValve.ValveMode.COOLING_INPUT, "接口模式应为 COOLING_INPUT！");
+
+                TileEntityResistiveCooler cooler = (TileEntityResistiveCooler) helper.getBlockEntity(coolerPos);
+                helper.assertTrue(cooler != null, "未能找到制冷器！");
+
+                // Inject energy into cooler
+                cooler.getEnergyContainer().insert(500_000L, Action.EXECUTE, AutomationType.INTERNAL);
+                cooler.setEnergyUsage(5_000L); // 2,000 FE/t
+
+                var mb = controller.getMultiblock();
+                // Bottom is heated to 900 K (cracking operational temperature)
+                mb.getBottomHeatCapacitor().setHeat(900.0 * mb.getBottomHeatCapacitor().getHeatCapacity());
+                // Top capacitor starts at 400 K
+                mb.getTopHeatCapacitor().setHeat(400.0 * mb.getTopHeatCapacitor().getHeatCapacity());
+                double initialTopTemp = mb.getTopHeatCapacitor().getTemperature();
+
+                // Tick cooler and multiblock for 30 ticks
+                for (int i = 0; i < 30; i++) {
+                    TileEntityMekanism.tickServer(helper.getLevel(), coolerPos, helper.getBlockState(coolerPos), cooler);
+                    mb.tick(helper.getLevel());
+                }
+
+                double finalTopTemp = mb.getTopHeatCapacitor().getTemperature();
+                helper.assertTrue(finalTopTemp < initialTopTemp, "顶层温度应该在制冷器作用下降温（即使底层为900K加热态）！初始: " + initialTopTemp + ", 结束: " + finalTopTemp + ", 制冷器温度: " + cooler.getTotalTemperature());
+                helper.assertTrue(cooler.getTotalTemperature() < 200.0, "制冷器冷端应达到超低温！实际: " + cooler.getTotalTemperature());
 
                 helper.succeed();
             } else {

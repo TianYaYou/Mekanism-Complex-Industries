@@ -230,7 +230,7 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
 
             // Internal thermal conduction between bottom and top (upward heat rise)
             if (Math.abs(diff) > 0.05) {
-                double transfer = diff * 0.005 * Math.min(bottomHeatCapacitor.getHeatCapacity(), topHeatCapacitor.getHeatCapacity());
+                double transfer = diff * 0.0001 * Math.min(bottomHeatCapacitor.getHeatCapacity(), topHeatCapacitor.getHeatCapacity());
                 bottomHeatCapacitor.handleHeat(-transfer);
                 topHeatCapacitor.handleHeat(transfer);
                 needsPacket = true;

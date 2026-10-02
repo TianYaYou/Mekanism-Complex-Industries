@@ -98,6 +98,12 @@ public class RefineryValveBlock extends Block implements IHasTileEntity<TileEnti
     protected InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hit) {
         if (level.getBlockEntity(pos) instanceof TileEntityRefineryValve tile) {
             if (player.isShiftKeyDown()) {
+                if (tile.getMultiblock().isFormed()) {
+                    if (!level.isClientSide) {
+                        tile.cycleMode(player);
+                    }
+                    return InteractionResult.sidedSuccess(level.isClientSide);
+                }
                 return InteractionResult.PASS;
             }
             if (!tile.getMultiblock().isFormed()) {
