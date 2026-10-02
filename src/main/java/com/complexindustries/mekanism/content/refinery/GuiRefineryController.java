@@ -9,6 +9,9 @@ import mekanism.client.gui.element.bar.GuiHorizontalRateBar;
 import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiChemicalGauge;
 import mekanism.client.gui.element.tab.GuiHeatTab;
+import mekanism.client.gui.element.tab.GuiWarningTab;
+import mekanism.common.inventory.warning.IWarningTracker;
+import mekanism.common.inventory.warning.WarningTracker;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import net.minecraft.client.gui.GuiGraphics;
@@ -46,16 +49,7 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
             double topTemp = multiblock.getTopHeatCapacitor() != null
                     ? multiblock.getTopHeatCapacitor().getTemperature()
                     : HeatAPI.AMBIENT_TEMP;
-
-            Component statusComp;
-            switch (multiblock.operatingStatus) {
-                case 1 -> statusComp = Component.translatable("gui.mekanism_complex_industries.refinery.status_low_temp");
-                case 2 -> statusComp = Component.translatable("gui.mekanism_complex_industries.refinery.status_low_delta_t");
-                case 3 -> statusComp = Component.translatable("gui.mekanism_complex_industries.refinery.status_active",
-                        String.format("%.1f", multiblock.lastCrackingRate));
-                case 4 -> statusComp = Component.translatable("gui.mekanism_complex_industries.refinery.status_outputs_full");
-                default -> statusComp = Component.translatable("gui.mekanism_complex_industries.refinery.status_idle");
-            }
+            double deltaT = bottomTemp - topTemp;
 
             return List.of(
                     Component.translatable("gui.mekanism_complex_industries.refinery.dimensions",
@@ -64,7 +58,8 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                             MekanismUtils.getTemperatureDisplay(bottomTemp, TemperatureUnit.KELVIN, true)),
                     Component.translatable("gui.mekanism_complex_industries.refinery.top_temp",
                             MekanismUtils.getTemperatureDisplay(topTemp, TemperatureUnit.KELVIN, true)),
-                    statusComp
+                    Component.translatable("gui.mekanism_complex_industries.refinery.delta_temp",
+                            MekanismUtils.getTemperatureDisplay(deltaT, TemperatureUnit.KELVIN, false))
             );
         }).spacing(1));
 
@@ -98,6 +93,10 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                 GaugeType.STANDARD, this, 129, 13
         ));
         out1.setDummyType(MCIChemicals.BITUMEN.asStack(1));
+        out1.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {
+            RefineryMultiblockData multiblock = tile.getMultiblock();
+            return multiblock.isFormed() && multiblock.outputTank1 != null && multiblock.outputTank1.getNeeded() <= 0;
+        });
 
         // Layer 2: Heavy Oil
         GuiChemicalGauge out2 = addRenderableWidget(new GuiChemicalGauge(
@@ -106,6 +105,10 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                 GaugeType.STANDARD, this, 147, 13
         ));
         out2.setDummyType(MCIChemicals.HEAVY_OIL.asStack(1));
+        out2.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {
+            RefineryMultiblockData multiblock = tile.getMultiblock();
+            return multiblock.isFormed() && multiblock.outputTank2 != null && multiblock.outputTank2.getNeeded() <= 0;
+        });
 
         // Layer 3: Refined Fuel
         GuiChemicalGauge out3 = addRenderableWidget(new GuiChemicalGauge(
@@ -114,6 +117,10 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                 GaugeType.STANDARD, this, 165, 13
         ));
         out3.setDummyType(MCIChemicals.REFINED_FUEL.asStack(1));
+        out3.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {
+            RefineryMultiblockData multiblock = tile.getMultiblock();
+            return multiblock.isFormed() && multiblock.outputTank3 != null && multiblock.outputTank3.getNeeded() <= 0;
+        });
 
         // Layer 4: Naphtha
         GuiChemicalGauge out4 = addRenderableWidget(new GuiChemicalGauge(
@@ -122,6 +129,10 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                 GaugeType.STANDARD, this, 183, 13
         ));
         out4.setDummyType(MCIChemicals.NAPHTHA.asStack(1));
+        out4.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {
+            RefineryMultiblockData multiblock = tile.getMultiblock();
+            return multiblock.isFormed() && multiblock.outputTank4 != null && multiblock.outputTank4.getNeeded() <= 0;
+        });
 
         // Layer 5: Petroleum Gas
         GuiChemicalGauge out5 = addRenderableWidget(new GuiChemicalGauge(
@@ -130,8 +141,12 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                 GaugeType.STANDARD, this, 201, 13
         ));
         out5.setDummyType(MCIChemicals.PETROLEUM_GAS.asStack(1));
+        out5.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {
+            RefineryMultiblockData multiblock = tile.getMultiblock();
+            return multiblock.isFormed() && multiblock.outputTank5 != null && multiblock.outputTank5.getNeeded() < 2;
+        });
 
-        // 5. Heat Tab on Right Side
+        // 5. Heat Tab on Left Side
         addRenderableWidget(new GuiHeatTab(this, () -> {
             RefineryMultiblockData multiblock = tile.getMultiblock();
             double bottomTemp = multiblock.getBottomHeatCapacitor() != null
@@ -150,6 +165,11 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                             MekanismUtils.getTemperatureDisplay(deltaT, TemperatureUnit.KELVIN, false))
             );
         }));
+    }
+
+    @Override
+    protected void addWarningTab(IWarningTracker tracker) {
+        addRenderableWidget(new GuiWarningTab(this, tracker, false));
     }
 
     @Override

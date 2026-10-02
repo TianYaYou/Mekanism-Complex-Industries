@@ -3,6 +3,7 @@ package com.complexindustries.mekanism.client.jei;
 import com.complexindustries.mekanism.MCIConstants;
 import com.complexindustries.mekanism.client.gui.GuiAirCompressor;
 import com.complexindustries.mekanism.content.freezer.GuiFreezerController;
+import com.complexindustries.mekanism.content.refinery.GuiRefineryController;
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import com.complexindustries.mekanism.registration.MCIChemicals;
 import com.complexindustries.mekanism.registration.MCIFluids;
@@ -36,6 +37,9 @@ public class MCIJEIPlugin implements IModPlugin {
     public static final RecipeType<AirCompressorJEIRecipe> AIR_COMPRESSOR_JEI_TYPE =
             new RecipeType<>(ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "air_compressor"), AirCompressorJEIRecipe.class);
 
+    public static final RecipeType<RefineryJEIRecipe> REFINERY_JEI_TYPE =
+            new RecipeType<>(ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "refinery"), RefineryJEIRecipe.class);
+
     @NotNull
     @Override
     public ResourceLocation getPluginUid() {
@@ -55,6 +59,7 @@ public class MCIJEIPlugin implements IModPlugin {
         IGuiHelper guiHelper = registry.getJeiHelpers().getGuiHelper();
         registry.addRecipeCategories(new FreezerRecipeCategory(guiHelper, FREEZER_JEI_TYPE));
         registry.addRecipeCategories(new AirCompressorRecipeCategory(guiHelper, AIR_COMPRESSOR_JEI_TYPE));
+        registry.addRecipeCategories(new RefineryRecipeCategory(guiHelper, REFINERY_JEI_TYPE));
     }
 
     @Override
@@ -103,6 +108,22 @@ public class MCIJEIPlugin implements IModPlugin {
                 Component.translatable("gui.mekanism_complex_industries.jei.air_compressor.source")
         ));
         registry.addRecipes(AIR_COMPRESSOR_JEI_TYPE, airCompressorRecipes);
+
+        // 3. Refinery Cracking Recipes
+        List<RefineryJEIRecipe> refineryRecipes = new ArrayList<>();
+        refineryRecipes.add(new RefineryJEIRecipe(
+                MCIChemicals.DENSE_CRUDE_OIL.asStack(1000),
+                MCIChemicals.BITUMEN.asStack(150),
+                MCIChemicals.HEAVY_OIL.asStack(100),
+                MCIChemicals.REFINED_FUEL.asStack(100),
+                MCIChemicals.NAPHTHA.asStack(200),
+                MCIChemicals.PETROLEUM_GAS.asStack(2000),
+                Component.translatable("gui.mekanism_complex_industries.jei.refinery.title"),
+                Component.translatable("gui.mekanism_complex_industries.jei.refinery.short_heat"),
+                Component.translatable("gui.mekanism_complex_industries.jei.refinery.short_delta"),
+                Component.translatable("gui.mekanism_complex_industries.jei.refinery.short_rate")
+        ));
+        registry.addRecipes(REFINERY_JEI_TYPE, refineryRecipes);
     }
 
     @Override
@@ -112,11 +133,16 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.FREEZER_VALVE.get()), FREEZER_JEI_TYPE);
 
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.AIR_COMPRESSOR.get()), AIR_COMPRESSOR_JEI_TYPE);
+
+        registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_CONTROLLER.get()), REFINERY_JEI_TYPE);
+        registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_CASING.get()), REFINERY_JEI_TYPE);
+        registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_VALVE.get()), REFINERY_JEI_TYPE);
     }
 
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registry) {
         registry.addRecipeClickArea(GuiFreezerController.class, 42, 18, 92, 44, FREEZER_JEI_TYPE);
         registry.addRecipeClickArea(GuiAirCompressor.class, 48, 23, 80, 42, AIR_COMPRESSOR_JEI_TYPE);
+        registry.addRecipeClickArea(GuiRefineryController.class, 31, 13, 96, 56, REFINERY_JEI_TYPE);
     }
 }

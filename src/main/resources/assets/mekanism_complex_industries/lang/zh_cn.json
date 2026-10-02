@@ -111,5 +111,16 @@
   "gui.mekanism_complex_industries.refinery.rate_tooltip": "裂解负载：%s / 160.0 mB/s",
   "gui.mekanism_complex_industries.refinery.heat_tab.bottom": "底部温度：%s",
   "gui.mekanism_complex_industries.refinery.heat_tab.top": "顶部温度：%s",
-  "gui.mekanism_complex_industries.refinery.heat_tab.delta": "塔柱温差：%s"
+  "gui.mekanism_complex_industries.refinery.heat_tab.delta": "塔柱温差：%s",
+  "gui.mekanism_complex_industries.refinery.delta_temp": "塔柱温差: %s",
+  "gui.mekanism_complex_industries.refinery.category": "工业炼化塔",
+  "gui.mekanism_complex_industries.jei.refinery.title": "催化裂解",
+  "gui.mekanism_complex_industries.jei.refinery.short_heat": "底部: ≥500K",
+  "gui.mekanism_complex_industries.jei.refinery.short_delta": "温差: ≥100K",
+  "gui.mekanism_complex_industries.jei.refinery.short_rate": "速率: 10~160",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.title": "工业催化裂解工艺",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.dimensions": "结构尺寸: 7x7x21 (5个分隔层)",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.heat": "底部加热: 500K~1200K (10~80 mB/s)",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.delta": "塔柱温差: 100K~600K (-10~+80 mB/s)",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.warning": "任意产物槽满载时暂停运行"
 }

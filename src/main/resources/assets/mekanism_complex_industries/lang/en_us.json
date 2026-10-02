@@ -111,5 +111,16 @@
   "gui.mekanism_complex_industries.refinery.rate_tooltip": "Cracking Rate: %s / 160.0 mB/s",
   "gui.mekanism_complex_industries.refinery.heat_tab.bottom": "Bottom Temp: %s",
   "gui.mekanism_complex_industries.refinery.heat_tab.top": "Top Temp: %s",
-  "gui.mekanism_complex_industries.refinery.heat_tab.delta": "Temp Diff: %s"
+  "gui.mekanism_complex_industries.refinery.heat_tab.delta": "Temp Diff: %s",
+  "gui.mekanism_complex_industries.refinery.delta_temp": "Temp Diff: %s",
+  "gui.mekanism_complex_industries.refinery.category": "Industrial Refinery",
+  "gui.mekanism_complex_industries.jei.refinery.title": "Catalytic Cracking",
+  "gui.mekanism_complex_industries.jei.refinery.short_heat": "Bottom: ≥500K",
+  "gui.mekanism_complex_industries.jei.refinery.short_delta": "ΔT: ≥100K",
+  "gui.mekanism_complex_industries.jei.refinery.short_rate": "Rate: 10~160",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.title": "Industrial Catalytic Cracking Process",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.dimensions": "Structure: 7x7x21 (5 partition layers)",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.heat": "Bottom Heat: 500K~1200K (10~80 mB/s)",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.delta": "Temp Diff: 100K~600K (-10~+80 mB/s)",
+  "gui.mekanism_complex_industries.jei.refinery.tooltip.warning": "Cracking halts when any product tank is full"
 }
