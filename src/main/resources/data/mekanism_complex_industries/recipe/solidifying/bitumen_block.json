@@ -1,0 +1,11 @@
+{
+  "type": "mekanism_complex_industries:chemical_solidifying",
+  "input": {
+    "chemical": "mekanism_complex_industries:bitumen",
+    "amount": 200
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:bitumen_block"
+  }
+}

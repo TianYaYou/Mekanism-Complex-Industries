@@ -78,5 +78,49 @@ public final class MCITileEntityTypes {
                     .withSimple(Capabilities.CONFIGURABLE)
                     .build();
 
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier> CHEMICAL_SOLIDIFIER =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.CHEMICAL_SOLIDIFIER, com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory> BASIC_CHEMICAL_SOLIDIFIER_FACTORY =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.BASIC_CHEMICAL_SOLIDIFIER_FACTORY, com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory> ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY, com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory> ELITE_CHEMICAL_SOLIDIFIER_FACTORY =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.ELITE_CHEMICAL_SOLIDIFIER_FACTORY, com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory> ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY, com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory> getFactoryTile(mekanism.common.tier.FactoryTier tier) {
+        return switch (tier) {
+            case BASIC -> BASIC_CHEMICAL_SOLIDIFIER_FACTORY;
+            case ADVANCED -> ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY;
+            case ELITE -> ELITE_CHEMICAL_SOLIDIFIER_FACTORY;
+            case ULTIMATE -> ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY;
+        };
+    }
+
     private MCITileEntityTypes() {}
 }

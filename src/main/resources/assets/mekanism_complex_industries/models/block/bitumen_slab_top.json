@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "mekanism_complex_industries:block/bitumen_block",
+    "side": "mekanism_complex_industries:block/bitumen_block",
+    "top": "mekanism_complex_industries:block/bitumen_block"
+  }
+}

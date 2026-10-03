@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
@@ -65,7 +66,7 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
             BlockState state = getBlockState();
             if (state.hasProperty(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE)
                     && state.getValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE) != mode) {
-                level.setBlock(worldPosition, state.setValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE, mode), 3);
+                level.setBlock(worldPosition, state.setValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE, mode), Block.UPDATE_CLIENTS);
             }
         }
         setChanged();
@@ -78,7 +79,7 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
         BlockState currentState = getBlockState();
         if (currentState.hasProperty(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE)
                 && currentState.getValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE) != mode) {
-            getLevel().setBlock(getBlockPos(), currentState.setValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE, mode), 3);
+            getLevel().setBlock(getBlockPos(), currentState.setValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE, mode), Block.UPDATE_CLIENTS);
         }
         return needsPacket;
     }
@@ -374,7 +375,7 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
                 BlockState state = getBlockState();
                 if (state.hasProperty(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE)
                         && state.getValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE) != mode) {
-                    level.setBlock(worldPosition, state.setValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE, mode), 3);
+                    level.setBlock(worldPosition, state.setValue(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE, mode), Block.UPDATE_CLIENTS);
                 }
             }
         }

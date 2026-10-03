@@ -28,10 +28,31 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.FREEZER_CONTROLLER.get());
                         output.accept(MCIItems.REFRIGERANT_BUCKET.get());
                         output.accept(MCIItems.AIR_COMPRESSOR.get());
+                        output.accept(MCIItems.CHEMICAL_SOLIDIFIER.get());
+                        output.accept(MCIItems.BASIC_CHEMICAL_SOLIDIFIER_FACTORY.get());
+                        output.accept(MCIItems.ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY.get());
+                        output.accept(MCIItems.ELITE_CHEMICAL_SOLIDIFIER_FACTORY.get());
+                        output.accept(MCIItems.ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY.get());
                         output.accept(MCIItems.REFINERY_CASING.get());
                         output.accept(MCIItems.REFINERY_VALVE.get());
                         output.accept(MCIItems.REFINERY_CONTROLLER.get());
                         output.accept(MCIItems.REFINERY_DREDGE_PIPE.get());
+                    })
+                    .build());
+
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> DECORATIVE_TAB = CREATIVE_TABS.register("decorative",
+            () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup." + MCIConstants.MODID + ".decorative"))
+                    .icon(() -> new ItemStack(MCIItems.BITUMEN_BLOCK.get()))
+                    .displayItems((parameters, output) -> {
+                        output.accept(MCIItems.BITUMEN_BLOCK.get());
+                        output.accept(MCIItems.BITUMEN_STAIRS.get());
+                        output.accept(MCIItems.BITUMEN_SLAB.get());
+                        for (net.minecraft.world.item.DyeColor color : net.minecraft.world.item.DyeColor.values()) {
+                            output.accept(MCIItems.DYED_BITUMEN_BLOCKS.get(color).get());
+                            output.accept(MCIItems.DYED_BITUMEN_STAIRS.get(color).get());
+                            output.accept(MCIItems.DYED_BITUMEN_SLABS.get(color).get());
+                        }
                     })
                     .build());
 

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "mekanism_complex_industries:magenta_bitumen_block"
+  },
+  "result": {
+    "count": 2,
+    "id": "mekanism_complex_industries:magenta_bitumen_slab"
+  }
+}

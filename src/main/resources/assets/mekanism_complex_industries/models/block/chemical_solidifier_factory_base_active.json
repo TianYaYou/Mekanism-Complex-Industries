@@ -1,0 +1,27 @@
+{
+  "parent": "block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "mekanism_complex_industries:block/chemical_solidifier_factory_front_active",
+    "front": "mekanism_complex_industries:block/chemical_solidifier_factory_front_active",
+    "side": "mekanism_complex_industries:block/chemical_solidifier_side",
+    "top": "mekanism_complex_industries:block/chemical_solidifier_factory_top",
+    "bottom": "mekanism:block/steel_casing",
+    "back": "mekanism:block/factory/factory_front_back"
+  },
+  "elements": [
+    {
+      "name": "full_cube",
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "#front", "cullface": "north"},
+        "south": {"uv": [0, 0, 16, 16], "texture": "#back", "cullface": "south"},
+        "west": {"uv": [0, 0, 16, 16], "texture": "#side", "cullface": "west"},
+        "east": {"uv": [0, 0, 16, 16], "texture": "#side", "cullface": "east"},
+        "up": {"uv": [0, 0, 16, 16], "texture": "#top", "cullface": "up"},
+        "down": {"uv": [0, 0, 16, 16], "texture": "#bottom", "cullface": "down"}
+      }
+    }
+  ]
+}

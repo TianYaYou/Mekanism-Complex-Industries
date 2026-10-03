@@ -5,6 +5,7 @@ import com.complexindustries.mekanism.registration.MCIBlocks;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.dynamic.SyncMapper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TileEntityFreezerController extends TileEntityFreezerCasing {
@@ -20,7 +21,7 @@ public class TileEntityFreezerController extends TileEntityFreezerCasing {
         boolean formed = multiblock.isFormed();
         BlockState currentState = getBlockState();
         if (currentState.hasProperty(FreezerControllerBlock.ACTIVE) && currentState.getValue(FreezerControllerBlock.ACTIVE) != formed) {
-            getLevel().setBlock(getBlockPos(), currentState.setValue(FreezerControllerBlock.ACTIVE, formed), 3);
+            getLevel().setBlock(getBlockPos(), currentState.setValue(FreezerControllerBlock.ACTIVE, formed), Block.UPDATE_CLIENTS);
         }
         return needsPacket;
     }

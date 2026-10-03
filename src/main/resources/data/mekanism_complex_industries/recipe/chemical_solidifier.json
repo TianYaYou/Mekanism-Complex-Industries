@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ABA",
+    "CDC",
+    "AEA"
+  ],
+  "key": {
+    "A": {
+      "tag": "c:ingots/steel"
+    },
+    "B": {
+      "item": "mekanism:basic_chemical_tank"
+    },
+    "C": {
+      "tag": "c:circuits/advanced"
+    },
+    "D": {
+      "item": "mekanism:steel_casing"
+    },
+    "E": {
+      "item": "minecraft:piston"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:chemical_solidifier"
+  }
+}

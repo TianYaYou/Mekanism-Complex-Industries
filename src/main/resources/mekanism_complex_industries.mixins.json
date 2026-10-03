@@ -11,9 +11,12 @@
     "MixinMinerItemStackFilter",
     "MixinUpgrade",
     "MixinUpgradeUtils",
-    "MixinTileEntityMekanism"
+    "MixinTileEntityMekanism",
+    "MixinTileComponentUpgrade"
   ],
-  "client": [],
+  "client": [
+    "MixinGuiUpgradeWindow"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

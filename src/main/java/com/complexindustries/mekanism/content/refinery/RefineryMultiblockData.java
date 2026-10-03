@@ -187,6 +187,10 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
     @Override
     public void remove(Level world, Structure structure) {
         FORMED_REFINERIES.remove(this);
+        if (inventoryID != null) {
+            markDirty();
+            MCIRefineryMultiblock.REFINERY_MANAGER.handleDirtyMultiblock(this);
+        }
         super.remove(world, structure);
     }
 

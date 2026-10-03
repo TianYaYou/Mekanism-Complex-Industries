@@ -36,14 +36,29 @@ public class MekanismComplexIndustries {
         MCIChemicals.CHEMICALS.register(modEventBus);
         MCIItems.ITEMS.register(modEventBus);
         MCICreativeTabs.CREATIVE_TABS.register(modEventBus);
+        com.complexindustries.mekanism.registration.MCIRecipeTypes.RECIPE_TYPES.register(modEventBus);
+        com.complexindustries.mekanism.registration.MCIRecipeSerializers.RECIPE_SERIALIZERS.register(modEventBus);
 
         // Network Handler
         packetHandler = new MCIPacketHandler(modEventBus, versionNumber);
 
         // Lifecycle Events
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::registerCapabilities);
+
+        // Ensure multiblock managers are classloaded and registered with Mekanism before world load
+        com.complexindustries.mekanism.content.freezer.MCIFreezerMultiblock.FREEZER_MANAGER.getName();
+        com.complexindustries.mekanism.content.refinery.MCIRefineryMultiblock.REFINERY_MANAGER.getName();
 
         MCIConstants.LOGGER.info("Initializing {} [Petroleum Harvesting & Chemical Ecology]...", MCIConstants.MOD_NAME);
+    }
+
+    private void registerCapabilities(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent event) {
+        for (var itemHolder : MCIItems.ITEMS.getEntries()) {
+            if (itemHolder.get() instanceof mekanism.common.capabilities.ICapabilityAware capabilityAware) {
+                capabilityAware.attachCapabilities(event);
+            }
+        }
     }
 
     public static MekanismComplexIndustries instance() {
@@ -56,8 +71,9 @@ public class MekanismComplexIndustries {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            String multiblockName = com.complexindustries.mekanism.content.freezer.MCIFreezerMultiblock.FREEZER_MANAGER.getName();
-            MCIConstants.LOGGER.info("{} common setup completed (registered multiblock: {}).", MCIConstants.MOD_NAME, multiblockName);
+            String freezer = com.complexindustries.mekanism.content.freezer.MCIFreezerMultiblock.FREEZER_MANAGER.getName();
+            String refinery = com.complexindustries.mekanism.content.refinery.MCIRefineryMultiblock.REFINERY_MANAGER.getName();
+            MCIConstants.LOGGER.info("{} common setup completed (registered multiblocks: {}, {}).", MCIConstants.MOD_NAME, freezer, refinery);
         });
     }
 }

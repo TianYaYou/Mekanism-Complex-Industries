@@ -26,5 +26,11 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.refinery.ContainerRefineryController> REFINERY_CONTROLLER =
             CONTAINER_TYPES.register("refinery_controller", com.complexindustries.mekanism.content.refinery.TileEntityRefineryController.class, com.complexindustries.mekanism.content.refinery.ContainerRefineryController::new);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.ContainerChemicalSolidifier> CHEMICAL_SOLIDIFIER =
+            CONTAINER_TYPES.register("chemical_solidifier", com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier.class, com.complexindustries.mekanism.content.solidifier.ContainerChemicalSolidifier::new);
+
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.ContainerChemicalSolidifierFactory> CHEMICAL_SOLIDIFIER_FACTORY =
+            CONTAINER_TYPES.register("chemical_solidifier_factory", com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory.class, com.complexindustries.mekanism.content.solidifier.ContainerChemicalSolidifierFactory::new);
+
     private MCIContainerTypes() {}
 }

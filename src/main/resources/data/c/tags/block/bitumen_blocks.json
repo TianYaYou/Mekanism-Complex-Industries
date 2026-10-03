@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "mekanism_complex_industries:bitumen_block",
+    "mekanism_complex_industries:white_bitumen_block",
+    "mekanism_complex_industries:orange_bitumen_block",
+    "mekanism_complex_industries:magenta_bitumen_block",
+    "mekanism_complex_industries:light_blue_bitumen_block",
+    "mekanism_complex_industries:yellow_bitumen_block",
+    "mekanism_complex_industries:lime_bitumen_block",
+    "mekanism_complex_industries:pink_bitumen_block",
+    "mekanism_complex_industries:gray_bitumen_block",
+    "mekanism_complex_industries:light_gray_bitumen_block",
+    "mekanism_complex_industries:cyan_bitumen_block",
+    "mekanism_complex_industries:purple_bitumen_block",
+    "mekanism_complex_industries:blue_bitumen_block",
+    "mekanism_complex_industries:brown_bitumen_block",
+    "mekanism_complex_industries:green_bitumen_block",
+    "mekanism_complex_industries:red_bitumen_block",
+    "mekanism_complex_industries:black_bitumen_block"
+  ]
+}

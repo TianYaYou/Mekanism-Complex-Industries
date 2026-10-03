@@ -1,0 +1,22 @@
+{
+  "type": "mekanism:painting",
+  "chemical_input": {
+    "amount": 32,
+    "chemical": "mekanism:orange"
+  },
+  "item_input": {
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "c:bitumen_slabs"
+    },
+    "count": 1,
+    "subtracted": {
+      "item": "mekanism_complex_industries:orange_bitumen_slab"
+    }
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:orange_bitumen_slab"
+  },
+  "per_tick_usage": false
+}

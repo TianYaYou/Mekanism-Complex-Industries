@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": {
+      "tag": "c:bitumen_slabs"
+    },
+    "D": {
+      "item": "minecraft:green_dye"
+    }
+  },
+  "pattern": [
+    "###",
+    "#D#",
+    "###"
+  ],
+  "result": {
+    "count": 8,
+    "id": "mekanism_complex_industries:green_bitumen_slab"
+  }
+}

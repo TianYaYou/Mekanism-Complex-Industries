@@ -107,6 +107,15 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
     }
 
     @Override
+    public void remove(Level world, mekanism.common.lib.multiblock.Structure structure) {
+        if (inventoryID != null) {
+            markDirty();
+            MCIFreezerMultiblock.FREEZER_MANAGER.handleDirtyMultiblock(this);
+        }
+        super.remove(world, structure);
+    }
+
+    @Override
     public void setVolume(int volume) {
         super.setVolume(volume);
         if (heatCapacitor != null) {

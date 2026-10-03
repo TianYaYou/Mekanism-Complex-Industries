@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "mekanism_complex_industries:block/magenta_bitumen_block"
+  }
+}

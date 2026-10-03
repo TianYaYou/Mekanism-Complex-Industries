@@ -1,0 +1,22 @@
+{
+  "type": "mekanism:painting",
+  "chemical_input": {
+    "amount": 32,
+    "chemical": "mekanism:light_gray"
+  },
+  "item_input": {
+    "type": "neoforge:difference",
+    "base": {
+      "tag": "c:bitumen_blocks"
+    },
+    "count": 1,
+    "subtracted": {
+      "item": "mekanism_complex_industries:light_gray_bitumen_block"
+    }
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:light_gray_bitumen_block"
+  },
+  "per_tick_usage": false
+}

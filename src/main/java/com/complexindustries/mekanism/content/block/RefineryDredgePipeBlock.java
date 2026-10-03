@@ -53,4 +53,24 @@ public class RefineryDredgePipeBlock extends Block implements IHasTileEntity<Til
     protected InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hit) {
         return super.useWithoutItem(state, level, pos, player, hit);
     }
+
+    @Override
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+        super.neighborChanged(state, level, pos, block, fromPos, isMoving);
+        net.minecraft.world.level.block.entity.BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof TileEntityRefineryDredgePipe tile) {
+            tile.onNeighborChange(block, fromPos);
+        }
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            net.minecraft.world.level.block.entity.BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof mekanism.common.tile.base.TileEntityMekanism tile) {
+                tile.blockRemoved();
+            }
+            super.onRemove(state, level, pos, newState, isMoving);
+        }
+    }
 }

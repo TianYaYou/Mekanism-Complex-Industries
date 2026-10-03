@@ -3,6 +3,7 @@ package com.complexindustries.mekanism.content.refinery;
 import com.complexindustries.mekanism.content.block.RefineryControllerBlock;
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TileEntityRefineryController extends TileEntityRefineryCasing {
@@ -18,7 +19,7 @@ public class TileEntityRefineryController extends TileEntityRefineryCasing {
         boolean formed = multiblock.isFormed();
         BlockState currentState = getBlockState();
         if (currentState.hasProperty(RefineryControllerBlock.ACTIVE) && currentState.getValue(RefineryControllerBlock.ACTIVE) != formed) {
-            getLevel().setBlock(getBlockPos(), currentState.setValue(RefineryControllerBlock.ACTIVE, formed), 3);
+            getLevel().setBlock(getBlockPos(), currentState.setValue(RefineryControllerBlock.ACTIVE, formed), Block.UPDATE_CLIENTS);
         }
         return needsPacket;
     }

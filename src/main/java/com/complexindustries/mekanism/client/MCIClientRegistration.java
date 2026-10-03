@@ -20,5 +20,7 @@ public class MCIClientRegistration {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.FREEZER_CONTROLLER, GuiFreezerController::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.AIR_COMPRESSOR, GuiAirCompressor::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.REFINERY_CONTROLLER, com.complexindustries.mekanism.content.refinery.GuiRefineryController::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOLIDIFIER, com.complexindustries.mekanism.client.gui.GuiChemicalSolidifier::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOLIDIFIER_FACTORY, com.complexindustries.mekanism.client.gui.GuiChemicalSolidifierFactory::new);
     }
 }

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "mekanism_complex_industries:block/light_gray_bitumen_slab"
+    },
+    "type=double": {
+      "model": "mekanism_complex_industries:block/light_gray_bitumen_block"
+    },
+    "type=top": {
+      "model": "mekanism_complex_industries:block/light_gray_bitumen_slab_top"
+    }
+  }
+}

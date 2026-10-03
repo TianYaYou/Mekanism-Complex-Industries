@@ -107,5 +107,101 @@ public final class MCIBlocks {
                             .requiresCorrectToolForDrops()
                             .strength(5.0F, 9.0F)));
 
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.decorative.BitumenBlock> BITUMEN_BLOCK = BLOCKS.register("bitumen_block",
+            () -> new com.complexindustries.mekanism.content.block.decorative.BitumenBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.BLACKSTONE)
+                            .requiresCorrectToolForDrops()
+                            .strength(2.0F, 6.0F)
+                            .sound(SoundType.STONE)));
+
+    public static final java.util.Map<net.minecraft.world.item.DyeColor, DeferredBlock<com.complexindustries.mekanism.content.block.decorative.DyedBitumenBlock>> DYED_BITUMEN_BLOCKS =
+            java.util.Arrays.stream(net.minecraft.world.item.DyeColor.values()).collect(java.util.stream.Collectors.toMap(
+                    color -> color,
+                    color -> BLOCKS.register(color.getName() + "_bitumen_block",
+                            () -> new com.complexindustries.mekanism.content.block.decorative.DyedBitumenBlock(color,
+                                     BlockBehaviour.Properties.ofFullCopy(Blocks.BLACKSTONE)
+                                             .requiresCorrectToolForDrops()
+                                             .strength(2.0F, 6.0F)
+                                             .sound(SoundType.STONE))),
+                    (a, b) -> a,
+                    () -> new java.util.EnumMap<>(net.minecraft.world.item.DyeColor.class)
+            ));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.decorative.BitumenStairsBlock> BITUMEN_STAIRS = BLOCKS.register("bitumen_stairs",
+            () -> new com.complexindustries.mekanism.content.block.decorative.BitumenStairsBlock(
+                    BITUMEN_BLOCK.get().defaultBlockState(),
+                    BlockBehaviour.Properties.ofFullCopy(BITUMEN_BLOCK.get())));
+
+    public static final java.util.Map<net.minecraft.world.item.DyeColor, DeferredBlock<com.complexindustries.mekanism.content.block.decorative.DyedBitumenStairsBlock>> DYED_BITUMEN_STAIRS =
+            java.util.Arrays.stream(net.minecraft.world.item.DyeColor.values()).collect(java.util.stream.Collectors.toMap(
+                    color -> color,
+                    color -> BLOCKS.register(color.getName() + "_bitumen_stairs",
+                            () -> new com.complexindustries.mekanism.content.block.decorative.DyedBitumenStairsBlock(
+                                    DYED_BITUMEN_BLOCKS.get(color).get().defaultBlockState(),
+                                    color,
+                                    BlockBehaviour.Properties.ofFullCopy(DYED_BITUMEN_BLOCKS.get(color).get()))),
+                    (a, b) -> a,
+                    () -> new java.util.EnumMap<>(net.minecraft.world.item.DyeColor.class)
+            ));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.decorative.BitumenSlabBlock> BITUMEN_SLAB = BLOCKS.register("bitumen_slab",
+            () -> new com.complexindustries.mekanism.content.block.decorative.BitumenSlabBlock(
+                    BlockBehaviour.Properties.ofFullCopy(BITUMEN_BLOCK.get())));
+
+    public static final java.util.Map<net.minecraft.world.item.DyeColor, DeferredBlock<com.complexindustries.mekanism.content.block.decorative.DyedBitumenSlabBlock>> DYED_BITUMEN_SLABS =
+            java.util.Arrays.stream(net.minecraft.world.item.DyeColor.values()).collect(java.util.stream.Collectors.toMap(
+                    color -> color,
+                    color -> BLOCKS.register(color.getName() + "_bitumen_slab",
+                            () -> new com.complexindustries.mekanism.content.block.decorative.DyedBitumenSlabBlock(
+                                    color,
+                                    BlockBehaviour.Properties.ofFullCopy(DYED_BITUMEN_BLOCKS.get(color).get()))),
+                    (a, b) -> a,
+                    () -> new java.util.EnumMap<>(net.minecraft.world.item.DyeColor.class)
+            ));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSolidifierBlock> CHEMICAL_SOLIDIFIER = BLOCKS.register("chemical_solidifier",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSolidifierBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierBlock.ACTIVE) ? 8 : 0)
+                            .noOcclusion()));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock> BASIC_CHEMICAL_SOLIDIFIER_FACTORY = BLOCKS.register("basic_chemical_solidifier_factory",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock(
+                    mekanism.common.tier.FactoryTier.BASIC,
+                    () -> new mekanism.common.registration.impl.BlockRegistryObject<>(MCIBlocks.ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY, MCIItems.ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock.ACTIVE) ? 8 : 0)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock> ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY = BLOCKS.register("advanced_chemical_solidifier_factory",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock(
+                    mekanism.common.tier.FactoryTier.ADVANCED,
+                    () -> new mekanism.common.registration.impl.BlockRegistryObject<>(MCIBlocks.ELITE_CHEMICAL_SOLIDIFIER_FACTORY, MCIItems.ELITE_CHEMICAL_SOLIDIFIER_FACTORY),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock.ACTIVE) ? 8 : 0)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock> ELITE_CHEMICAL_SOLIDIFIER_FACTORY = BLOCKS.register("elite_chemical_solidifier_factory",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock(
+                    mekanism.common.tier.FactoryTier.ELITE,
+                    () -> new mekanism.common.registration.impl.BlockRegistryObject<>(MCIBlocks.ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY, MCIItems.ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock.ACTIVE) ? 8 : 0)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock> ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY = BLOCKS.register("ultimate_chemical_solidifier_factory",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock(
+                    mekanism.common.tier.FactoryTier.ULTIMATE,
+                    null,
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock.ACTIVE) ? 8 : 0)));
+
     private MCIBlocks() {}
 }

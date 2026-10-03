@@ -17,7 +17,8 @@ public abstract class MixinTileEntityMekanism {
 
     @Inject(method = "supportsUpgrades", at = @At("HEAD"), cancellable = true, remap = false)
     private void mci$supportsUpgrades(CallbackInfoReturnable<Boolean> cir) {
-        if ((Object) this instanceof com.complexindustries.mekanism.content.tile.TileEntityAirCompressor) {
+        if ((Object) this instanceof com.complexindustries.mekanism.content.tile.TileEntityAirCompressor
+                || (Object) this instanceof com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier) {
             cir.setReturnValue(true);
         }
     }

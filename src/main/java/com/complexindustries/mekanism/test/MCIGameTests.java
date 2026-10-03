@@ -67,6 +67,198 @@ public class MCIGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "empty_10x10x10")
+    public static void testChemicalSolidifierAndBitumen(GameTestHelper helper) {
+        BlockPos bitumenPos = new BlockPos(1, 1, 1);
+        BlockPos solidifierPos = new BlockPos(3, 1, 1);
+
+        helper.setBlock(bitumenPos, MCIBlocks.BITUMEN_BLOCK.get());
+        helper.assertBlockPresent(MCIBlocks.BITUMEN_BLOCK.get(), bitumenPos);
+
+        helper.setBlock(solidifierPos, MCIBlocks.CHEMICAL_SOLIDIFIER.get());
+        helper.assertBlockPresent(MCIBlocks.CHEMICAL_SOLIDIFIER.get(), solidifierPos);
+
+        com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier solidifier =
+                (com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier) helper.getBlockEntity(solidifierPos);
+        helper.assertTrue(solidifier != null, "化学品固化机方块实体应为 TileEntityChemicalSolidifier");
+
+        // Verify muffling upgrade limit: at most 1!
+        helper.assertTrue(solidifier.getSupportedUpgrade().contains(mekanism.api.Upgrade.MUFFLING), "化学品固化机应支持静音升级！");
+        int added = solidifier.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.MUFFLING, 4);
+        helper.assertTrue(added == 1, "静音升级应至多安装 1 枚！实际安装: " + added);
+        helper.assertTrue(solidifier.getUpgradeComponent().getUpgrades(mekanism.api.Upgrade.MUFFLING) == 1, "已安装静音升级数应为 1！");
+
+        // Verify speed upgrade can take up to 8
+        int addedSpeed = solidifier.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.SPEED, 8);
+        helper.assertTrue(addedSpeed == 8, "速度升级应能安装 8 枚！实际安装: " + addedSpeed);
+
+        // Verify security support
+        helper.assertTrue(solidifier.hasSecurity(), "化学品固化机应具有安全属性（所有者与安全管理组件）");
+        helper.assertTrue(solidifier.getSecurity() != null, "安全组件不应为空");
+
+        // Verify slot positions for GUI alignment
+        helper.assertTrue(solidifier.getEnergySlotX() == 144, "能量槽 X 坐标应为 144 (对齐于 y=35)");
+
+        // Verify block items implement Mekanism-standard tooltip description
+        helper.assertTrue(com.complexindustries.mekanism.registration.MCIItems.CHEMICAL_SOLIDIFIER.get() instanceof com.complexindustries.mekanism.content.block.MCIBlockItem,
+                "化学品固化机物品应为 MCIBlockItem");
+        helper.assertTrue(com.complexindustries.mekanism.registration.MCIItems.BITUMEN_BLOCK.get() instanceof com.complexindustries.mekanism.content.block.MCIBlockItem,
+                "沥青块物品应为 MCIBlockItem");
+        com.complexindustries.mekanism.content.block.MCIBlockItem solidifierItem =
+                (com.complexindustries.mekanism.content.block.MCIBlockItem) com.complexindustries.mekanism.registration.MCIItems.CHEMICAL_SOLIDIFIER.get();
+        helper.assertTrue(solidifierItem.getBlockDescription() != null, "化学品固化机描述条目不应为空");
+        helper.assertTrue(solidifierItem.getBlockDescription().getTranslationKey().equals("description.mekanism_complex_industries.chemical_solidifier"),
+                "化学品固化机描述键应正确匹配");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testDyedBitumenBlocks(GameTestHelper helper) {
+        int idx = 0;
+        for (net.minecraft.world.item.DyeColor color : net.minecraft.world.item.DyeColor.values()) {
+            int x = (idx % 4) + 1;
+            int z = (idx / 4) + 1;
+            BlockPos pos = new BlockPos(x, 1, z);
+            net.minecraft.world.level.block.Block block = MCIBlocks.DYED_BITUMEN_BLOCKS.get(color).get();
+            helper.setBlock(pos, block);
+            helper.assertBlockPresent(block, pos);
+
+            net.minecraft.world.item.Item item = com.complexindustries.mekanism.registration.MCIItems.DYED_BITUMEN_BLOCKS.get(color).get();
+            helper.assertTrue(item instanceof com.complexindustries.mekanism.content.block.MCIBlockItem, "染色沥青块物品应为 MCIBlockItem: " + color.getName());
+            com.complexindustries.mekanism.content.block.MCIBlockItem blockItem = (com.complexindustries.mekanism.content.block.MCIBlockItem) item;
+            helper.assertTrue(blockItem.getBlockDescription() != null, "染色沥青块描述不应为空");
+            idx++;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testBitumenStairsAndSlabs(GameTestHelper helper) {
+        // 1. Test Plain Bitumen Stairs
+        BlockPos stairsPos = new BlockPos(1, 1, 1);
+        net.minecraft.world.level.block.state.BlockState stairsState = MCIBlocks.BITUMEN_STAIRS.get().defaultBlockState()
+                .setValue(net.minecraft.world.level.block.StairBlock.FACING, Direction.NORTH)
+                .setValue(net.minecraft.world.level.block.StairBlock.HALF, net.minecraft.world.level.block.state.properties.Half.BOTTOM);
+        helper.setBlock(stairsPos, stairsState);
+        helper.assertBlockPresent(MCIBlocks.BITUMEN_STAIRS.get(), stairsPos);
+        helper.assertTrue(helper.getBlockState(stairsPos).getValue(net.minecraft.world.level.block.StairBlock.FACING) == Direction.NORTH, "楼梯朝向应为 NORTH");
+
+        // 2. Test Plain Bitumen Slab & Double Slab
+        BlockPos slabPos = new BlockPos(2, 1, 1);
+        net.minecraft.world.level.block.state.BlockState slabState = MCIBlocks.BITUMEN_SLAB.get().defaultBlockState()
+                .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.BOTTOM);
+        helper.setBlock(slabPos, slabState);
+        helper.assertBlockPresent(MCIBlocks.BITUMEN_SLAB.get(), slabPos);
+        helper.assertTrue(helper.getBlockState(slabPos).getValue(net.minecraft.world.level.block.SlabBlock.TYPE) == net.minecraft.world.level.block.state.properties.SlabType.BOTTOM, "半砖类型应为 BOTTOM");
+
+        // Double slab
+        helper.setBlock(slabPos, slabState.setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.DOUBLE));
+        helper.assertTrue(helper.getBlockState(slabPos).getValue(net.minecraft.world.level.block.SlabBlock.TYPE) == net.minecraft.world.level.block.state.properties.SlabType.DOUBLE, "双层半砖类型应为 DOUBLE");
+
+        // 3. Test Dyed Bitumen Stairs & Slabs for all 16 colors
+        for (net.minecraft.world.item.DyeColor color : net.minecraft.world.item.DyeColor.values()) {
+            net.minecraft.world.level.block.Block dyedStairs = MCIBlocks.DYED_BITUMEN_STAIRS.get(color).get();
+            net.minecraft.world.level.block.Block dyedSlab = MCIBlocks.DYED_BITUMEN_SLABS.get(color).get();
+            helper.assertTrue(dyedStairs instanceof com.complexindustries.mekanism.content.block.decorative.DyedBitumenStairsBlock, "应为 DyedBitumenStairsBlock: " + color.getName());
+            helper.assertTrue(dyedSlab instanceof com.complexindustries.mekanism.content.block.decorative.DyedBitumenSlabBlock, "应为 DyedBitumenSlabBlock: " + color.getName());
+
+            net.minecraft.world.item.Item stairsItem = com.complexindustries.mekanism.registration.MCIItems.DYED_BITUMEN_STAIRS.get(color).get();
+            net.minecraft.world.item.Item slabItem = com.complexindustries.mekanism.registration.MCIItems.DYED_BITUMEN_SLABS.get(color).get();
+            helper.assertTrue(stairsItem instanceof com.complexindustries.mekanism.content.block.MCIBlockItem, "染色楼梯物品应为 MCIBlockItem: " + color.getName());
+            helper.assertTrue(slabItem instanceof com.complexindustries.mekanism.content.block.MCIBlockItem, "染色半砖物品应为 MCIBlockItem: " + color.getName());
+        }
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testChemicalSolidifierFactoryAndTierUpgrade(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(3, 1, 3);
+        helper.setBlock(pos, MCIBlocks.CHEMICAL_SOLIDIFIER.get().defaultBlockState().setValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierBlock.FACING, Direction.WEST));
+        helper.assertBlockPresent(MCIBlocks.CHEMICAL_SOLIDIFIER.get(), pos);
+        helper.assertTrue(helper.getBlockState(pos).getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierBlock.FACING) == Direction.WEST, "初始固化机朝向应为 WEST");
+
+        com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier solidifier =
+                (com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier) helper.getBlockEntity(pos);
+        helper.assertTrue(solidifier != null, "方块实体应为 TileEntityChemicalSolidifier");
+
+        // Insert chemical & upgrades into solidifier before upgrade
+        solidifier.inputTank.setStack(com.complexindustries.mekanism.registration.MCIChemicals.BITUMEN.asStack(4000));
+        solidifier.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.MUFFLING, 1);
+        solidifier.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.SPEED, 4);
+
+        Player fakePlayer = FakePlayerFactory.getMinecraft(helper.getLevel());
+
+        // 1. Upgrade with Basic Tier Installer -> Basic Factory (3 processes)
+        BlockPos absolutePos = helper.absolutePos(pos);
+        net.minecraft.world.item.ItemStack basicInstaller = mekanism.common.registries.MekanismItems.BASIC_TIER_INSTALLER.asStack();
+        fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, basicInstaller);
+        net.minecraft.world.phys.BlockHitResult hit = new net.minecraft.world.phys.BlockHitResult(
+                new net.minecraft.world.phys.Vec3(absolutePos.getX() + 0.5, absolutePos.getY() + 0.5, absolutePos.getZ() + 0.5),
+                Direction.UP, absolutePos, false);
+        net.minecraft.world.item.context.UseOnContext ctx = new net.minecraft.world.item.context.UseOnContext(fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        net.minecraft.world.InteractionResult res = basicInstaller.getItem().useOn(ctx);
+        helper.assertTrue(res == net.minecraft.world.InteractionResult.CONSUME, "初级安装器使用结果应为 CONSUME");
+        helper.assertBlockPresent(MCIBlocks.BASIC_CHEMICAL_SOLIDIFIER_FACTORY.get(), pos);
+        helper.assertTrue(helper.getBlockState(pos).getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock.FACING) == Direction.WEST, "初级工厂升级后朝向应严格保留为 WEST！");
+
+        com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory basicFactory =
+                (com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory) helper.getBlockEntity(pos);
+        helper.assertTrue(basicFactory != null, "方块实体应升级为 TileEntityChemicalSolidifierFactory");
+        helper.assertTrue(basicFactory.tier == mekanism.common.tier.FactoryTier.BASIC, "工厂层级应为 BASIC");
+        helper.assertTrue(basicFactory.tier.processes == 3, "初级工厂流水线数应为 3");
+        helper.assertTrue(basicFactory.hasGui(), "工厂方块实体必须具备 GUI 支持 (hasGui==true)！");
+        com.complexindustries.mekanism.content.solidifier.ContainerChemicalSolidifierFactory basicContainer =
+                new com.complexindustries.mekanism.content.solidifier.ContainerChemicalSolidifierFactory(1, fakePlayer.getInventory(), basicFactory);
+        helper.assertTrue(basicContainer.stillValid(fakePlayer), "工厂容器对于玩家应持续有效 (stillValid==true)，不应秒退！");
+        basicContainer.removed(fakePlayer);
+        helper.assertTrue(basicFactory.chemicalTank.getStack().getAmount() == 4000, "升级后化学品储量应保留为 4000 mB");
+        helper.assertTrue(basicFactory.getUpgradeComponent().getUpgrades(mekanism.api.Upgrade.MUFFLING) == 1, "升级后静音升级数应保留为 1");
+        helper.assertTrue(basicFactory.getUpgradeComponent().getUpgrades(mekanism.api.Upgrade.SPEED) == 4, "升级后速度升级数应保留为 4");
+
+        // 2. Upgrade to Advanced Factory (5 processes)
+        net.minecraft.world.item.ItemStack advInstaller = mekanism.common.registries.MekanismItems.ADVANCED_TIER_INSTALLER.asStack();
+        fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, advInstaller);
+        ctx = new net.minecraft.world.item.context.UseOnContext(fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        res = advInstaller.getItem().useOn(ctx);
+        helper.assertTrue(res == net.minecraft.world.InteractionResult.CONSUME, "高级安装器使用结果应为 CONSUME");
+        helper.assertBlockPresent(MCIBlocks.ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY.get(), pos);
+        helper.assertTrue(helper.getBlockState(pos).getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock.FACING) == Direction.WEST, "高级工厂升级后朝向应严格保留为 WEST！");
+
+        com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory advFactory =
+                (com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory) helper.getBlockEntity(pos);
+        helper.assertTrue(advFactory.tier == mekanism.common.tier.FactoryTier.ADVANCED, "工厂层级应为 ADVANCED");
+        helper.assertTrue(advFactory.tier.processes == 5, "高级工厂流水线数应为 5");
+        helper.assertTrue(advFactory.chemicalTank.getStack().getAmount() == 4000, "高级工厂化学品储量应保留");
+
+        // 3. Upgrade to Elite Factory (7 processes)
+        net.minecraft.world.item.ItemStack eliteInstaller = mekanism.common.registries.MekanismItems.ELITE_TIER_INSTALLER.asStack();
+        fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, eliteInstaller);
+        ctx = new net.minecraft.world.item.context.UseOnContext(fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        res = eliteInstaller.getItem().useOn(ctx);
+        helper.assertTrue(res == net.minecraft.world.InteractionResult.CONSUME, "精英安装器使用结果应为 CONSUME");
+        helper.assertBlockPresent(MCIBlocks.ELITE_CHEMICAL_SOLIDIFIER_FACTORY.get(), pos);
+        helper.assertTrue(helper.getBlockState(pos).getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock.FACING) == Direction.WEST, "精英工厂升级后朝向应严格保留为 WEST！");
+
+        // 4. Upgrade to Ultimate Factory (9 processes)
+        net.minecraft.world.item.ItemStack ultInstaller = mekanism.common.registries.MekanismItems.ULTIMATE_TIER_INSTALLER.asStack();
+        fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ultInstaller);
+        ctx = new net.minecraft.world.item.context.UseOnContext(fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        res = ultInstaller.getItem().useOn(ctx);
+        helper.assertTrue(res == net.minecraft.world.InteractionResult.CONSUME, "终极安装器使用结果应为 CONSUME");
+        helper.assertBlockPresent(MCIBlocks.ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY.get(), pos);
+        helper.assertTrue(helper.getBlockState(pos).getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock.FACING) == Direction.WEST, "终极工厂升级后朝向应严格保留为 WEST！");
+
+        com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory ultFactory =
+                (com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory) helper.getBlockEntity(pos);
+        helper.assertTrue(ultFactory.tier == mekanism.common.tier.FactoryTier.ULTIMATE, "工厂层级应为 ULTIMATE");
+        helper.assertTrue(ultFactory.tier.processes == 9, "终极工厂流水线数应为 9");
+        helper.assertTrue(!ultFactory.canBeUpgraded(), "终极工厂不应再支持继续升级");
+
+        helper.succeed();
+    }
+
     @GameTest(template = "empty_10x10x10", timeoutTicks = 100)
     public static void testFreezerMultiblock(GameTestHelper helper) {
         // Build 4x4x4 Industrial Freezer cube
@@ -435,6 +627,72 @@ public class MCIGameTests {
                 double finalTopTemp = mb.getTopHeatCapacitor().getTemperature();
                 helper.assertTrue(finalTopTemp < initialTopTemp, "顶层温度应该在制冷器作用下降温（即使底层为900K加热态）！初始: " + initialTopTemp + ", 结束: " + finalTopTemp + ", 制冷器温度: " + cooler.getTotalTemperature());
                 helper.assertTrue(cooler.getTotalTemperature() < 200.0, "制冷器冷端应达到超低温！实际: " + cooler.getTotalTemperature());
+
+                helper.succeed();
+            } else {
+                helper.fail("未能找到控制器方块实体！");
+            }
+        });
+    }
+
+    @GameTest(template = "empty_15x25x15", timeoutTicks = 120)
+    public static void testRefineryMultiblockDataPersistenceAndNoUnformLoop(GameTestHelper helper) {
+        int x0 = 2;
+        int z0 = 2;
+        int y0 = 1;
+        int height = 16;
+
+        buildRefineryStructure(helper, x0, y0, z0, height, false);
+
+        BlockPos controllerPos = new BlockPos(x0 + 3, y0 + 1, z0);
+        BlockPos testCasingPos = new BlockPos(x0 + 3, y0, z0); // Base casing block under controller
+
+        helper.runAfterDelay(10, () -> {
+            if (helper.getBlockEntity(controllerPos) instanceof TileEntityRefineryController controller) {
+                controller.getStructure().tick(controller, true);
+                controller.getStructure().runUpdate(controller);
+                helper.assertTrue(controller.getMultiblock().isFormed(), "工业炼化塔应该成型！");
+
+                // 1. Verify controller active blockstate update does NOT trigger unforming loop
+                TileEntityMekanism.tickServer(helper.getLevel(), controllerPos, helper.getBlockState(controllerPos), controller);
+                BlockState stateAfterTick = helper.getBlockState(controllerPos);
+                helper.assertTrue(stateAfterTick.getValue(com.complexindustries.mekanism.content.block.RefineryControllerBlock.ACTIVE), "控制器成型后方块状态ACTIVE应为true！");
+                helper.assertTrue(controller.getMultiblock().isFormed(), "控制器状态更新不应导致多方块解体（杜绝循环解体/重构粒子问题）！");
+
+                // 2. Put chemicals into input tank and an output tank
+                var mb = controller.getMultiblock();
+                long inputAmount = 5_000L;
+                long bitumenAmount = 800L;
+                mb.getInputChemicalTank().setStack(com.complexindustries.mekanism.registration.MCIChemicals.DENSE_CRUDE_OIL.asStack(inputAmount));
+                mb.outputTank1.setStack(com.complexindustries.mekanism.registration.MCIChemicals.BITUMEN.asStack(bitumenAmount));
+
+                java.util.UUID cachedID = controller.getCacheID();
+                helper.assertTrue(cachedID != null, "成型状态下控制器应持有有效的缓存ID！");
+
+                // 3. Break one casing block to simulate disruption
+                helper.setBlock(testCasingPos, Blocks.AIR);
+                controller.getStructure().invalidate(helper.getLevel());
+                helper.assertTrue(!controller.getMultiblock().isFormed(), "移除方块后炼化塔应处于未成型状态！");
+
+                // 4. Verify the multiblock cache in REFINERY_MANAGER preserved all chemicals
+                var manager = com.complexindustries.mekanism.content.refinery.MCIRefineryMultiblock.REFINERY_MANAGER;
+                var cache = manager.getCache(cachedID);
+                helper.assertTrue(cache != null, "REFINERY_MANAGER中应存在已保存的缓存！");
+                var cachedTanks = cache.getChemicalTanks(null);
+                helper.assertTrue(cachedTanks != null && cachedTanks.size() >= 6, "缓存应包含6个化学品槽位！");
+                helper.assertTrue(cachedTanks.get(0).getStored() == inputAmount, "缓存中输入化学品数量不应丢失！期望: " + inputAmount + ", 实际: " + cachedTanks.get(0).getStored());
+                helper.assertTrue(cachedTanks.get(1).getStored() == bitumenAmount, "缓存中沥青产物不应丢失！期望: " + bitumenAmount + ", 实际: " + cachedTanks.get(1).getStored());
+
+                // 5. Replace the casing block and re-form
+                helper.setBlock(testCasingPos, MCIBlocks.REFINERY_CASING.get());
+                controller.getStructure().tick(controller, true);
+                controller.getStructure().runUpdate(controller);
+                helper.assertTrue(controller.getMultiblock().isFormed(), "修复方块后炼化塔应重新成型！");
+
+                // 6. Verify multiblock chemical contents were completely restored (NOT swallowed!)
+                var reformedMb = controller.getMultiblock();
+                helper.assertTrue(reformedMb.getInputChemicalTank().getStored() == inputAmount, "重形成型后输入化学品不应被吞！实际: " + reformedMb.getInputChemicalTank().getStored());
+                helper.assertTrue(reformedMb.outputTank1.getStored() == bitumenAmount, "重形成型后产物不应被吞！实际: " + reformedMb.outputTank1.getStored());
 
                 helper.succeed();
             } else {

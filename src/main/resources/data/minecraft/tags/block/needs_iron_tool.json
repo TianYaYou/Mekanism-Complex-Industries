@@ -11,6 +11,7 @@
     "mekanism_complex_industries:refinery_casing",
     "mekanism_complex_industries:refinery_valve",
     "mekanism_complex_industries:refinery_controller",
-    "mekanism_complex_industries:refinery_dredge_pipe"
+    "mekanism_complex_industries:refinery_dredge_pipe",
+    "mekanism_complex_industries:chemical_solidifier"
   ]
 }

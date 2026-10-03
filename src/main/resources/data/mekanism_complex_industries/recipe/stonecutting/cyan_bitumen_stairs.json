@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "mekanism_complex_industries:cyan_bitumen_block"
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:cyan_bitumen_stairs"
+  }
+}
