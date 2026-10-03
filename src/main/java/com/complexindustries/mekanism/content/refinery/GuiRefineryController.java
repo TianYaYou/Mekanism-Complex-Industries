@@ -63,7 +63,7 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
             );
         }).spacing(1));
 
-        // 2. Horizontal Cracking Rate Bar (0 ~ 160 mB/s load)
+        // 2. Horizontal Cracking Rate Bar (0 ~ 640 mB/s load)
         addRenderableWidget(new GuiHorizontalRateBar(this, new IBarInfoHandler() {
             @Override
             public Component getTooltip() {
@@ -73,7 +73,7 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
 
             @Override
             public double getLevel() {
-                return Math.min(1.0, Math.max(0.0, tile.getMultiblock().lastCrackingRate / 160.0));
+                return Math.min(1.0, Math.max(0.0, tile.getMultiblock().lastCrackingRate / 640.0));
             }
         }, 38, 60));
 

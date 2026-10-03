@@ -13,6 +13,7 @@ import com.complexindustries.mekanism.content.tile.TileEntityResistiveCooler;
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
+import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.core.BlockPos;
@@ -762,5 +763,19 @@ public class MCIGameTests {
                 }
             }
         }
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testDenseCrudeOilRecipes(GameTestHelper helper) {
+        var recipeManager = helper.getLevel().getRecipeManager();
+        var rotaryRecipes = MekanismRecipeType.ROTARY.getRecipes(recipeManager);
+        var reactionRecipes = MekanismRecipeType.REACTION.getRecipes(recipeManager);
+        boolean foundRotary = rotaryRecipes.stream().anyMatch(r -> r.id().toString().contains("mekanism_complex_industries:rotary/crude_oil"));
+        boolean foundReactionFluid = reactionRecipes.stream().anyMatch(r -> r.id().toString().contains("mekanism_complex_industries:reaction/dense_crude_oil_from_fluid"));
+        boolean foundReactionSolid = reactionRecipes.stream().anyMatch(r -> r.id().toString().contains("mekanism_complex_industries:reaction/dense_crude_oil_from_solid"));
+        helper.assertTrue(foundRotary, "未找到浓稠石油 Rotary 循环转化配方");
+        helper.assertTrue(foundReactionFluid, "未找到浓稠石油 PRC 流体合成配方");
+        helper.assertTrue(foundReactionSolid, "未找到浓稠石油 PRC 固态合成配方");
+        helper.succeed();
     }
 }

@@ -50,15 +50,10 @@ public class MCIJEIPlugin implements IModPlugin {
     }
 
     @Override
-    public void registerIngredients(IModIngredientRegistration registry) {
-        try {
-            new MekanismJEI().registerIngredients(registry);
-        } catch (Throwable ignored) {
-        }
-    }
-
-    @Override
     public void registerCategories(IRecipeCategoryRegistration registry) {
+        if (!MekanismJEI.shouldLoad()) {
+            return;
+        }
         IGuiHelper guiHelper = registry.getJeiHelpers().getGuiHelper();
         registry.addRecipeCategories(new FreezerRecipeCategory(guiHelper, FREEZER_JEI_TYPE));
         registry.addRecipeCategories(new AirCompressorRecipeCategory(guiHelper, AIR_COMPRESSOR_JEI_TYPE));
@@ -68,6 +63,9 @@ public class MCIJEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration registry) {
+        if (!MekanismJEI.shouldLoad()) {
+            return;
+        }
         // 1. Freezer Recipes
         List<FreezerJEIRecipe> freezerRecipes = new ArrayList<>();
 
@@ -142,6 +140,9 @@ public class MCIJEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registry) {
+        if (!MekanismJEI.shouldLoad()) {
+            return;
+        }
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.FREEZER_CONTROLLER.get()), FREEZER_JEI_TYPE);
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.FREEZER_CASING.get()), FREEZER_JEI_TYPE);
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.FREEZER_VALVE.get()), FREEZER_JEI_TYPE);
@@ -156,6 +157,9 @@ public class MCIJEIPlugin implements IModPlugin {
 
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registry) {
+        if (!MekanismJEI.shouldLoad()) {
+            return;
+        }
         registry.addRecipeClickArea(GuiFreezerController.class, 42, 18, 92, 44, FREEZER_JEI_TYPE);
         registry.addRecipeClickArea(GuiAirCompressor.class, 48, 23, 80, 42, AIR_COMPRESSOR_JEI_TYPE);
         registry.addRecipeClickArea(GuiRefineryController.class, 31, 13, 96, 56, REFINERY_JEI_TYPE);

@@ -58,7 +58,7 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
     public VariableHeatCapacitor topHeatCapacitor;
 
     @ContainerSync
-    public double lastCrackingRate = 0.0; // Effective cracking rate in mB/s (0.0 .. 160.0)
+    public double lastCrackingRate = 0.0; // Effective cracking rate in mB/s (0.0 .. 640.0)
 
     @ContainerSync
     public int operatingStatus = 0; // 0=Idle/No Input, 1=Temp < 500K, 2=DeltaT < 100K, 3=Active, 4=Outputs Full
@@ -295,19 +295,19 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
         }
 
         // Calculate R_heat (mB/s)
-        // 500 K: 10 mB/s; 1200 K: 80 mB/s
-        double rHeat = 10.0 + 70.0 * (Math.min(bottomTemp, 1200.0) - 500.0) / 700.0;
+        // 500 K: 40 mB/s; 1200 K: 320 mB/s
+        double rHeat = 40.0 + 280.0 * (Math.min(bottomTemp, 1200.0) - 500.0) / 700.0;
 
         // Calculate R_deltaT (mB/s)
-        // deltaT < 100 K: penalty down to -10 mB/s (when deltaT <= 0)
+        // deltaT < 100 K: penalty down to -40 mB/s (when deltaT <= 0)
         // deltaT == 100 K: 0 mB/s
-        // deltaT > 100 K: up to +80 mB/s at 600 K
+        // deltaT > 100 K: up to +320 mB/s at 600 K
         double rDeltaT;
         if (deltaT < 100.0) {
             double ratio = (100.0 - Math.max(0.0, deltaT)) / 100.0;
-            rDeltaT = -10.0 * ratio;
+            rDeltaT = -40.0 * ratio;
         } else {
-            rDeltaT = 80.0 * (Math.min(deltaT, 600.0) - 100.0) / 500.0;
+            rDeltaT = 320.0 * (Math.min(deltaT, 600.0) - 100.0) / 500.0;
         }
 
         double rEffective = Math.max(0.0, rHeat + rDeltaT);

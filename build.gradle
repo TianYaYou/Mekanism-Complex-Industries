@@ -75,6 +75,10 @@ repositories {
             includeGroup 'curse.maven'
         }
     }
+    maven {
+        name = 'Terraformers'
+        url = 'https://maven.terraformersmc.com/releases/'
+    }
 }
 
 dependencies {
@@ -86,6 +90,9 @@ dependencies {
 
     // JEI for recipe viewer integration (compileOnly)
     compileOnly "mezz.jei:jei-${property('minecraft_version')}-neoforge-api:${property('jei_version')}"
+
+    // EMI for recipe viewer integration (compileOnly)
+    compileOnly "dev.emi:emi-neoforge:1.1.24+1.21.1:api"
 }
 
 tasks.withType(JavaCompile).configureEach {
