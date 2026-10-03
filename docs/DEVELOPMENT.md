@@ -1,4 +1,4 @@
-<![CDATA[# Development Guide | 开发指南
+# Development Guide | 开发指南
 
 [English](#english) | [中文](#中文)
 
@@ -321,4 +321,3 @@ cd Mekanism-Complex-Industries
 1. 在 `MCIChemicals` 中注册化学品。
 2. 在两个语言文件中添加翻译。
 3. 如需要，在 `assets/.../textures/chemical/` 中添加化学品材质。
-]]>
