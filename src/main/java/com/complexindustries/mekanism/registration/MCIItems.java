@@ -168,5 +168,31 @@ public final class MCIItems {
             () -> new MCIBlockItem(MCIBlocks.ULTIMATE_CHEMICAL_SOAKING_FACTORY.get(), new Item.Properties(),
                     "description.mekanism_complex_industries.chemical_soaking_factory", true));
 
+    public static final DeferredItem<Item> ENGINEERING_PLASTIC = ITEMS.register("engineering_plastic",
+            () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE)));
+
+    public static final DeferredItem<Item> CRUDE_SILICON = ITEMS.registerSimpleItem("crude_silicon");
+
+    public static final DeferredItem<Item> REFINED_SILICON = ITEMS.registerSimpleItem("refined_silicon");
+
+    private static final mekanism.common.attachments.component.AttachedSideConfig CRYSTAL_GROWTH_SIDE_CONFIG = net.minecraft.Util.make(() -> {
+        java.util.Map<mekanism.common.lib.transmitter.TransmissionType, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo> configInfo =
+                new java.util.EnumMap<>(mekanism.common.lib.transmitter.TransmissionType.class);
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.ITEM, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo.MACHINE);
+        java.util.Map<mekanism.api.RelativeSide, mekanism.common.tile.component.config.DataType> chemicalSides =
+                new java.util.EnumMap<>(mekanism.api.RelativeSide.class);
+        chemicalSides.put(mekanism.api.RelativeSide.LEFT, mekanism.common.tile.component.config.DataType.INPUT_1);
+        chemicalSides.put(mekanism.api.RelativeSide.RIGHT, mekanism.common.tile.component.config.DataType.INPUT_2);
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.CHEMICAL, new mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo(chemicalSides, false));
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.ENERGY, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo.INPUT_ONLY);
+        return new mekanism.common.attachments.component.AttachedSideConfig(configInfo);
+    });
+
+    public static final DeferredItem<BlockItem> CRYSTAL_GROWTH_CHAMBER = ITEMS.register("crystal_growth_chamber",
+            () -> new MCIBlockItem(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get(), new Item.Properties()
+                    .component(mekanism.common.registries.MekanismDataComponents.EJECTOR, mekanism.common.attachments.component.AttachedEjector.DEFAULT)
+                    .component(mekanism.common.registries.MekanismDataComponents.SIDE_CONFIG, CRYSTAL_GROWTH_SIDE_CONFIG),
+                    "description.mekanism_complex_industries.crystal_growth_chamber", true));
+
     private MCIItems() {}
 }

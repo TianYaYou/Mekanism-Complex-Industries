@@ -34,6 +34,7 @@ public class MCIClientRegistration {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.FLOW_REGULATOR, GuiFlowRegulator::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOAKER, com.complexindustries.mekanism.client.gui.GuiChemicalSoaker::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOAKING_FACTORY, com.complexindustries.mekanism.client.gui.GuiChemicalSoakingFactory::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CRYSTAL_GROWTH_CHAMBER, com.complexindustries.mekanism.client.gui.GuiCrystalGrowthChamber::new);
     }
 
     @SubscribeEvent
@@ -57,6 +58,12 @@ public class MCIClientRegistration {
             }
             return -1;
         }, MCIBlocks.FLOW_REGULATOR.asItem());
+    }
+
+    @SubscribeEvent
+    public static void registerRenderers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(com.complexindustries.mekanism.registration.MCITileEntityTypes.CRYSTAL_GROWTH_CHAMBER.get(),
+                com.complexindustries.mekanism.client.render.CrystalGrowthChamberRenderer::new);
     }
 }
 

@@ -62,6 +62,16 @@ public class MCIBlockItem extends ItemBlockMekanism<Block> implements ICapabilit
     }
 
     @Nullable
+    @Override
+    public mekanism.api.tier.ITier getTier() {
+        mekanism.common.block.attribute.AttributeTier<?> attributeTier = Attribute.get(getBlock(), mekanism.common.block.attribute.AttributeTier.class);
+        if (attributeTier != null) {
+            return attributeTier.tier();
+        }
+        return super.getTier();
+    }
+
+    @Nullable
     public ILangEntry getBlockDescription() {
         if (description != null) {
             return description;
@@ -99,6 +109,15 @@ public class MCIBlockItem extends ItemBlockMekanism<Block> implements ICapabilit
     protected void addDetails(@NotNull ItemStack stack, @NotNull Item.TooltipContext context, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
         // 1. Security and Owner
         IItemSecurityUtils.INSTANCE.addSecurityTooltip(stack, tooltip);
+
+        // Factory Type
+        if (getBlock() instanceof ChemicalSoakingFactoryBlock) {
+            tooltip.add(MekanismLang.FACTORY_TYPE.translateColored(EnumColor.INDIGO, EnumColor.GRAY,
+                    Component.translatable("gui.mekanism_complex_industries.chemical_soaking.type")));
+        } else if (getBlock() instanceof ChemicalSolidifierFactoryBlock) {
+            tooltip.add(MekanismLang.FACTORY_TYPE.translateColored(EnumColor.INDIGO, EnumColor.GRAY,
+                    Component.translatable("gui.mekanism_complex_industries.chemical_solidifier.type")));
+        }
 
         // 2. Energy
         AttributeEnergy attributeEnergy = Attribute.get(getBlock(), AttributeEnergy.class);

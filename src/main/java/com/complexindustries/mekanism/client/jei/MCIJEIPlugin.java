@@ -47,6 +47,9 @@ public class MCIJEIPlugin implements IModPlugin {
     public static final RecipeType<ChemicalSoakingJEIRecipe> CHEMICAL_SOAKING_JEI_TYPE =
             new RecipeType<>(ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_soaking"), ChemicalSoakingJEIRecipe.class);
 
+    public static final RecipeType<CrystalGrowthJEIRecipe> CRYSTAL_GROWTH_JEI_TYPE =
+            new RecipeType<>(ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "crystal_growth"), CrystalGrowthJEIRecipe.class);
+
     @NotNull
     @Override
     public ResourceLocation getPluginUid() {
@@ -64,6 +67,7 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeCategories(new RefineryRecipeCategory(guiHelper, REFINERY_JEI_TYPE));
         registry.addRecipeCategories(new ChemicalSolidifierRecipeCategory(guiHelper, CHEMICAL_SOLIDIFIER_JEI_TYPE));
         registry.addRecipeCategories(new ChemicalSoakingRecipeCategory(guiHelper, CHEMICAL_SOAKING_JEI_TYPE));
+        registry.addRecipeCategories(new CrystalGrowthRecipeCategory(guiHelper, CRYSTAL_GROWTH_JEI_TYPE));
     }
 
     @Override
@@ -150,7 +154,22 @@ public class MCIJEIPlugin implements IModPlugin {
                 List.of(MCIChemicals.HEAVY_OIL.asStack(200)),
                 new ItemStack(MCIItems.HEAVY_OIL_FUEL.get())
         ));
+        soakingRecipes.add(new ChemicalSoakingJEIRecipe(
+                List.of(new ItemStack(MCIItems.POLYPROPYLENE_PELLET.get())),
+                List.of(MCIChemicals.STYRENE.asStack(50)),
+                new ItemStack(MCIItems.ENGINEERING_PLASTIC.get())
+        ));
         registry.addRecipes(CHEMICAL_SOAKING_JEI_TYPE, soakingRecipes);
+
+        // 6. Crystal Growth Recipes
+        List<CrystalGrowthJEIRecipe> crystalGrowthRecipes = new ArrayList<>();
+        crystalGrowthRecipes.add(new CrystalGrowthJEIRecipe(
+                List.of(new ItemStack(MCIItems.CRUDE_SILICON.get())),
+                List.of(MCIChemicals.NOBLE_GAS.asStack(100)),
+                List.of(mekanism.common.registries.MekanismChemicals.HYDROGEN.asStack(100)),
+                new ItemStack(MCIItems.REFINED_SILICON.get())
+        ));
+        registry.addRecipes(CRYSTAL_GROWTH_JEI_TYPE, crystalGrowthRecipes);
     }
 
     @Override
@@ -175,6 +194,8 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.ELITE_CHEMICAL_SOAKING_FACTORY.get()), CHEMICAL_SOAKING_JEI_TYPE);
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.ULTIMATE_CHEMICAL_SOAKING_FACTORY.get()), CHEMICAL_SOAKING_JEI_TYPE);
 
+        registry.addRecipeCatalyst(new ItemStack(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get()), CRYSTAL_GROWTH_JEI_TYPE);
+
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_CONTROLLER.get()), REFINERY_JEI_TYPE);
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_CASING.get()), REFINERY_JEI_TYPE);
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_VALVE.get()), REFINERY_JEI_TYPE);
@@ -190,5 +211,6 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeClickArea(GuiRefineryController.class, 31, 13, 96, 56, REFINERY_JEI_TYPE);
         registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiChemicalSolidifier.class, 68, 40, 32, 10, CHEMICAL_SOLIDIFIER_JEI_TYPE);
         registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiChemicalSoaker.class, 86, 38, 20, 10, CHEMICAL_SOAKING_JEI_TYPE);
+        registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiCrystalGrowthChamber.class, 75, 39, 20, 10, CRYSTAL_GROWTH_JEI_TYPE);
     }
 }

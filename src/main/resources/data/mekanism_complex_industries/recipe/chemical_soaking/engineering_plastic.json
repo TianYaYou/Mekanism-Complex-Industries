@@ -1,0 +1,16 @@
+{
+  "type": "mekanism_complex_industries:chemical_soaking",
+  "item_input": {
+    "count": 1,
+    "item": "mekanism_complex_industries:polypropylene_pellet"
+  },
+  "chemical_input": {
+    "amount": 50,
+    "chemical": "mekanism_complex_industries:styrene"
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:engineering_plastic"
+  },
+  "per_tick_usage": false
+}

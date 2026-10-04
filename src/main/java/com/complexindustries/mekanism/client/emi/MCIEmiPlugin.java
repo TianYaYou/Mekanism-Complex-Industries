@@ -8,6 +8,7 @@ import com.complexindustries.mekanism.client.jei.RefineryJEIRecipe;
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import com.complexindustries.mekanism.registration.MCIChemicals;
 import com.complexindustries.mekanism.registration.MCIFluids;
+import com.complexindustries.mekanism.registration.MCIItems;
 import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
@@ -173,6 +174,25 @@ public class MCIEmiPlugin implements EmiPlugin {
                         java.util.List.of(MCIChemicals.HEAVY_OIL.asStack(200)),
                         new ItemStack(com.complexindustries.mekanism.registration.MCIItems.HEAVY_OIL_FUEL.get())
                 )));
+        registry.addRecipe(new ChemicalSoakingEmiRecipe(CHEMICAL_SOAKING_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_soaking/engineering_plastic"),
+                new com.complexindustries.mekanism.client.jei.ChemicalSoakingJEIRecipe(
+                        java.util.List.of(new ItemStack(MCIItems.POLYPROPYLENE_PELLET.get())),
+                        java.util.List.of(MCIChemicals.STYRENE.asStack(50)),
+                        new ItemStack(MCIItems.ENGINEERING_PLASTIC.get())
+                )));
+
+        // 8. Crystal Growth Recipes
+        registry.addCategory(CRYSTAL_GROWTH_CATEGORY);
+        registry.addWorkstation(CRYSTAL_GROWTH_CATEGORY, EmiStack.of(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get()));
+        registry.addRecipe(new CrystalGrowthEmiRecipe(CRYSTAL_GROWTH_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "crystal_growth/refined_silicon"),
+                new com.complexindustries.mekanism.client.jei.CrystalGrowthJEIRecipe(
+                        java.util.List.of(new ItemStack(MCIItems.CRUDE_SILICON.get())),
+                        java.util.List.of(MCIChemicals.NOBLE_GAS.asStack(100)),
+                        java.util.List.of(mekanism.common.registries.MekanismChemicals.HYDROGEN.asStack(100)),
+                        new ItemStack(MCIItems.REFINED_SILICON.get())
+                )));
     }
 
     public static final EmiRecipeCategory CHEMICAL_SOAKING_CATEGORY = new EmiRecipeCategory(
@@ -183,6 +203,17 @@ public class MCIEmiPlugin implements EmiPlugin {
         @Override
         public Component getName() {
             return Component.translatable("gui.mekanism_complex_industries.chemical_soaker.category");
+        }
+    };
+
+    public static final EmiRecipeCategory CRYSTAL_GROWTH_CATEGORY = new EmiRecipeCategory(
+            ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "crystal_growth"),
+            EmiStack.of(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get()),
+            EmiStack.of(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get())
+    ) {
+        @Override
+        public Component getName() {
+            return Component.translatable("gui.mekanism_complex_industries.crystal_growth.category");
         }
     };
 }

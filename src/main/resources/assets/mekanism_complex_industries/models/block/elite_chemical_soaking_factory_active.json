@@ -2,7 +2,7 @@
   "loader": "neoforge:composite",
   "parent": "block/block",
   "textures": {
-    "particle": "mekanism_complex_industries:block/chemical_soaker_factory_front"
+    "particle": "mekanism_complex_industries:block/chemical_soaker_factory_front_active"
   },
   "children": {
     "base": {

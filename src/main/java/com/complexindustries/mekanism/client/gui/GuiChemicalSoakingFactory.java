@@ -6,8 +6,9 @@ import com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFa
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.client.gui.GuiConfigurableTile;
 import mekanism.client.gui.element.GuiDumpButton;
-import mekanism.client.gui.element.bar.GuiChemicalBar;
 import mekanism.client.gui.element.bar.GuiVerticalPowerBar;
+import mekanism.client.gui.element.gauge.GaugeType;
+import mekanism.client.gui.element.gauge.GuiChemicalGauge;
 import mekanism.client.gui.element.progress.GuiProgress;
 import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
@@ -29,8 +30,11 @@ public class GuiChemicalSoakingFactory extends GuiConfigurableTile<TileEntityChe
         imageHeight += 11;
         inventoryLabelY = 85;
         if (tile.tier == FactoryTier.ULTIMATE) {
-            imageWidth += 34;
-            inventoryLabelX = 26;
+            imageWidth += 70;
+            inventoryLabelX = 43;
+        } else if (tile.tier == FactoryTier.ELITE) {
+            imageWidth += 30;
+            inventoryLabelX = 23;
         }
         titleLabelY = 4;
         dynamicSlots = true;
@@ -50,18 +54,16 @@ public class GuiChemicalSoakingFactory extends GuiConfigurableTile<TileEntityChe
         // 3. Energy Tab
         addRenderableWidget(new GuiEnergyTab(this, tile.getEnergyContainer(), tile::getLastUsage));
 
-        // 4. Shared Chemical Resource Bar across bottom
-        int barWidth = tile.tier == FactoryTier.ULTIMATE ? 172 : 138;
-        addRenderableWidget(new GuiChemicalBar(this, GuiChemicalBar.getProvider(tile.chemicalTank, tile.getChemicalTanks(null)), 7, 76, barWidth, 4, true))
+        // 4. Left Large Chemical Tank Gauge (STANDARD 18x60)
+        addRenderableWidget(new GuiChemicalGauge(() -> tile.chemicalTank, () -> tile.getChemicalTanks(null), GaugeType.STANDARD, this, 7, 14))
                 .warning(WarningType.NO_MATCHING_RECIPE, () -> tile.chemicalTank.isEmpty());
 
-        // 5. Dump Button
-        int dumpX = tile.tier == FactoryTier.ULTIMATE ? 182 : 148;
-        dumpButton = addRenderableWidget(new GuiDumpButton<>(this, tile, dumpX, 76));
+        // 5. Dump Button under Chemical Gauge
+        dumpButton = addRenderableWidget(new GuiDumpButton<>(this, tile, 6, 73));
 
         // 6. Process lanes: down progress arrows
-        int baseX = tile.tier == FactoryTier.BASIC ? 55 : tile.tier == FactoryTier.ADVANCED ? 35 : tile.tier == FactoryTier.ELITE ? 29 : 27;
-        int baseXMult = tile.tier == FactoryTier.BASIC ? 38 : tile.tier == FactoryTier.ADVANCED ? 26 : 19;
+        int baseX = tile.tier == FactoryTier.BASIC ? 55 : 49;
+        int baseXMult = tile.tier == FactoryTier.BASIC ? 36 : tile.tier == FactoryTier.ADVANCED ? 22 : 20;
         for (int i = 0; i < tile.tier.processes; i++) {
             int cacheIndex = i;
             addRenderableWidget(new GuiProgress(() -> tile.getScaledProgress(1, cacheIndex), ProgressType.DOWN, this, 4 + baseX + (i * baseXMult), 33))

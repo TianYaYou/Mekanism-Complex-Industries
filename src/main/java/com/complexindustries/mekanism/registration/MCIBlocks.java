@@ -258,5 +258,14 @@ public final class MCIBlocks {
                             .strength(3.5F, 16.0F)
                             .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock.ACTIVE) ? 8 : 0)));
 
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.CrystalGrowthChamberBlock> CRYSTAL_GROWTH_CHAMBER = BLOCKS.register("crystal_growth_chamber",
+            () -> new com.complexindustries.mekanism.content.block.CrystalGrowthChamberBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.CrystalGrowthChamberBlock.ACTIVE) ? 12 : 0)
+                            .noOcclusion()));
+
     private MCIBlocks() {}
 }

@@ -46,6 +46,10 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.REFINERY_VALVE.get());
                         output.accept(MCIItems.REFINERY_CONTROLLER.get());
                         output.accept(MCIItems.REFINERY_DREDGE_PIPE.get());
+                        output.accept(MCIItems.ENGINEERING_PLASTIC.get());
+                        output.accept(MCIItems.CRUDE_SILICON.get());
+                        output.accept(MCIItems.REFINED_SILICON.get());
+                        output.accept(MCIItems.CRYSTAL_GROWTH_CHAMBER.get());
                         output.accept(MCIItems.FLOW_REGULATOR.get());
                     })
                     .build());

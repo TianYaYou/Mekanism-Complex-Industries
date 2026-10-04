@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "include": [
+                "mekanism:lock",
+                "mekanism:energy",
+                "mekanism:upgrades",
+                "mekanism:chemicals",
+                "mekanism:items"
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "mekanism_complex_industries:crystal_growth_chamber"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ]
+}

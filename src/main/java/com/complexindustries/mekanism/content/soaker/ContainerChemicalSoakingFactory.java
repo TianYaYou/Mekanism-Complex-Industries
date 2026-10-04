@@ -20,7 +20,7 @@ public class ContainerChemicalSoakingFactory extends MekanismTileContainer<TileE
 
     @Override
     protected int getInventoryXOffset() {
-        return tile.tier == FactoryTier.ULTIMATE ? 26 : 8;
+        return tile.tier == FactoryTier.ULTIMATE ? 43 : tile.tier == FactoryTier.ELITE ? 23 : 8;
     }
 
     @Override

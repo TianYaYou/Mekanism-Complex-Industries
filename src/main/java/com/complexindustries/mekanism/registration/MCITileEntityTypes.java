@@ -173,5 +173,12 @@ public final class MCITileEntityTypes {
         };
     }
 
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.chamber.TileEntityCrystalGrowthChamber> CRYSTAL_GROWTH_CHAMBER =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.CRYSTAL_GROWTH_CHAMBER, com.complexindustries.mekanism.content.chamber.TileEntityCrystalGrowthChamber::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
     private MCITileEntityTypes() {}
 }

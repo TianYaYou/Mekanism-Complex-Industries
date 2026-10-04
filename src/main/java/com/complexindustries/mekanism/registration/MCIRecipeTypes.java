@@ -23,6 +23,12 @@ public final class MCIRecipeTypes {
     public static final RecipeTypeRegistryObject<mekanism.api.recipes.vanilla_input.SingleItemChemicalRecipeInput, com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe, mekanism.common.recipe.lookup.cache.InputRecipeCache.ItemChemical<com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe>> CHEMICAL_SOAKING =
             RECIPE_TYPES.registerMek("chemical_soaking", name -> createRecipeType(name, recipeType -> new mekanism.common.recipe.lookup.cache.InputRecipeCache.ItemChemical<>(recipeType, com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe::getItemInput, com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe::getChemicalInput)));
 
+    public static final RecipeTypeRegistryObject<com.complexindustries.mekanism.recipe.input.ItemBiChemicalRecipeInput, com.complexindustries.mekanism.recipe.CrystalGrowthRecipe, com.complexindustries.mekanism.recipe.cache.ItemDoubleChemicalInputCache> CRYSTAL_GROWTH =
+            RECIPE_TYPES.registerMek("crystal_growth", name -> createRecipeType(name, recipeType -> new com.complexindustries.mekanism.recipe.cache.ItemDoubleChemicalInputCache(recipeType,
+                    com.complexindustries.mekanism.recipe.CrystalGrowthRecipe::getItemInput,
+                    com.complexindustries.mekanism.recipe.CrystalGrowthRecipe::getChemicalInputA,
+                    com.complexindustries.mekanism.recipe.CrystalGrowthRecipe::getChemicalInputB)));
+
     @SuppressWarnings("unchecked")
     private static <VANILLA_INPUT extends RecipeInput, RECIPE extends mekanism.api.recipes.MekanismRecipe<VANILLA_INPUT>, INPUT_CACHE extends IInputRecipeCache>
     MekanismRecipeType<VANILLA_INPUT, RECIPE, INPUT_CACHE> createRecipeType(ResourceLocation name, Function<MekanismRecipeType<VANILLA_INPUT, RECIPE, INPUT_CACHE>, INPUT_CACHE> inputCacheCreator) {

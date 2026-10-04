@@ -12,6 +12,12 @@ import com.complexindustries.mekanism.content.refinery.TileEntityRefineryValve.V
 import com.complexindustries.mekanism.content.tile.TileEntityResistiveCooler;
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import com.complexindustries.mekanism.registration.MCIFluids;
+import com.complexindustries.mekanism.registration.MCIItems;
+import com.complexindustries.mekanism.registration.MCIChemicals;
+import com.complexindustries.mekanism.content.chamber.TileEntityCrystalGrowthChamber;
+import com.complexindustries.mekanism.content.chamber.ContainerCrystalGrowthChamber;
+import net.minecraft.world.item.Rarity;
+import mekanism.common.registries.MekanismChemicals;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.chemical.BasicChemicalTank;
@@ -1224,6 +1230,101 @@ public class MCIGameTests {
         helper.assertTrue(ultFactory.tier == mekanism.common.tier.FactoryTier.ULTIMATE, "层级应为 ULTIMATE！");
         helper.assertTrue(ultFactory.tier.processes == 9, "终极浸泡工厂流水线数应为 9！");
         helper.assertTrue(!ultFactory.canBeUpgraded(), "终极工厂不应再支持继续升级！");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testCrystalGrowthChamberAndSilicon(GameTestHelper helper) {
+        // 1. Verify item properties
+        ItemStack plasticStack = new ItemStack(MCIItems.ENGINEERING_PLASTIC.get());
+        helper.assertTrue(plasticStack.getRarity() == Rarity.RARE, "工程塑料稀有度应为 RARE (钻石浅蓝色)！");
+        helper.assertTrue(MCIItems.CRUDE_SILICON.get() != null, "粗制硅物品应已注册！");
+        helper.assertTrue(MCIItems.REFINED_SILICON.get() != null, "精制硅物品应已注册！");
+        helper.assertTrue(MCIChemicals.STYRENE.get() != null, "苯乙烯化学品应已注册！");
+
+        // 2. Factory naming verification
+        ItemStack advFactoryStack = new ItemStack(MCIBlocks.ADVANCED_CHEMICAL_SOAKING_FACTORY.get());
+        String advNameKey = advFactoryStack.getItem().getDescriptionId(advFactoryStack);
+        helper.assertTrue(advNameKey.contains("advanced_chemical_soaking_factory"), "高级化学浸泡工厂描述键应正确！");
+
+        // 3. Place Crystal Growth Chamber
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get().defaultBlockState());
+        helper.assertBlockPresent(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get(), pos);
+
+        TileEntityCrystalGrowthChamber chamber = (TileEntityCrystalGrowthChamber) helper.getBlockEntity(pos);
+        helper.assertTrue(chamber != null, "晶体生长机实体应为 TileEntityCrystalGrowthChamber！");
+
+        // 4. Verify no factory upgrade
+        FakePlayer fakePlayer = FakePlayerFactory.getMinecraft(helper.getLevel());
+        BlockPos absolutePos = helper.absolutePos(pos);
+        ItemStack basicInstaller = mekanism.common.registries.MekanismItems.BASIC_TIER_INSTALLER.asStack();
+        fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, basicInstaller);
+        net.minecraft.world.phys.BlockHitResult hit = new net.minecraft.world.phys.BlockHitResult(
+                new net.minecraft.world.phys.Vec3(absolutePos.getX() + 0.5, absolutePos.getY() + 0.5, absolutePos.getZ() + 0.5),
+                Direction.UP, absolutePos, false);
+        net.minecraft.world.item.context.UseOnContext ctx = new net.minecraft.world.item.context.UseOnContext(fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        net.minecraft.world.InteractionResult res = basicInstaller.getItem().useOn(ctx);
+        helper.assertTrue(res != net.minecraft.world.InteractionResult.CONSUME && res != net.minecraft.world.InteractionResult.SUCCESS,
+                "晶体生长机没有工厂机器，不应接受升级安装器！");
+        helper.assertBlockPresent(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get(), pos);
+
+        // 5. Container verification
+        ContainerCrystalGrowthChamber container = new ContainerCrystalGrowthChamber(1, fakePlayer.getInventory(), chamber);
+        helper.assertTrue(container.stillValid(fakePlayer), "晶体生长机容器应处于有效状态！");
+        container.removed(fakePlayer);
+
+        // 6. Test Chemical Capabilities and Mutual Exclusion via Ports (North-facing: East=RelativeSide.LEFT=INPUT_1, West=RelativeSide.RIGHT=INPUT_2)
+        var eastHandler = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.CHEMICAL.block(), absolutePos, Direction.EAST);
+        var westHandler = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.CHEMICAL.block(), absolutePos, Direction.WEST);
+        helper.assertTrue(eastHandler != null, "东侧（相对左侧输入口）应暴露化学品能力！");
+        helper.assertTrue(westHandler != null, "西侧（相对右侧输入口）应暴露化学品能力！");
+
+        // Pipe Noble Gas into Left Port (East = Tank A)
+        var insertEast = eastHandler.insertChemical(MCIChemicals.NOBLE_GAS.asStack(500), Action.EXECUTE);
+        helper.assertTrue(insertEast.isEmpty(), "东侧（左端口 Tank A）应能正常注入稀有气体！");
+        helper.assertTrue(chamber.chemicalTankA.getStored() == 500L, "化学品槽 A 存量应为 500 mB！");
+        helper.assertTrue(chamber.chemicalTankB.getStored() == 0L, "化学品槽 B 应仍为空，不发生串槽！");
+
+        // Try to insert Noble Gas into Right Port (West = Tank B) -> MUST BE REJECTED (mutual exclusion: Tank A already has Noble Gas)
+        var rejectWestNoble = westHandler.insertChemical(MCIChemicals.NOBLE_GAS.asStack(100), Action.EXECUTE);
+        helper.assertTrue(rejectWestNoble.getAmount() == 100L, "槽 A 已存有稀有气体时，西端口（槽 B）应拒绝同种气体输入以防冲突！");
+        helper.assertTrue(chamber.chemicalTankB.getStored() == 0L, "槽 B 存量应仍为 0！");
+
+        // Pipe Hydrogen into Right Port (West = Tank B) -> MUST SUCCEED
+        var insertWest = westHandler.insertChemical(mekanism.common.registries.MekanismChemicals.HYDROGEN.asStack(500), Action.EXECUTE);
+        helper.assertTrue(insertWest.isEmpty(), "西侧（右端口 Tank B）应能正常注入反应所需的氢气！");
+        helper.assertTrue(chamber.chemicalTankB.getStored() == 500L, "化学品槽 B 应成功存入 500 mB 氢气！");
+
+        // Try to insert Hydrogen into Left Port (East = Tank A) -> MUST BE REJECTED
+        var rejectEastHydrogen = eastHandler.insertChemical(mekanism.common.registries.MekanismChemicals.HYDROGEN.asStack(100), Action.EXECUTE);
+        helper.assertTrue(rejectEastHydrogen.getAmount() == 100L, "槽 B 已存有氢气时，东端口（槽 A）应拒绝氢气输入！");
+
+        // 7. Test Recipe processing
+        chamber.inputSlot.setStack(new ItemStack(MCIItems.CRUDE_SILICON.get(), 1));
+        chamber.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.SPEED, 8);
+        chamber.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.ENERGY, 8);
+        chamber.getEnergyContainer().insert(1_000_000L, Action.EXECUTE, AutomationType.INTERNAL);
+
+        helper.assertTrue(chamber.chemicalTankA.getStored() == 500L, "化学品槽 A 应存储 500 mB 稀有气体！");
+        helper.assertTrue(chamber.chemicalTankB.getStored() == 500L, "化学品槽 B 应存储 500 mB 氢气！");
+        helper.assertTrue(chamber.inputSlot.getStack().is(MCIItems.CRUDE_SILICON.get()), "输入槽应放置粗制硅！");
+
+        // Tick chamber until reaction produces Refined Silicon
+        for (int i = 0; i < 60; i++) {
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), chamber);
+            if (!chamber.outputSlot.isEmpty()) {
+                break;
+            }
+        }
+
+        helper.assertTrue(!chamber.outputSlot.isEmpty(), "晶体生长机应完成反应产出精制硅！");
+        helper.assertTrue(chamber.outputSlot.getStack().is(MCIItems.REFINED_SILICON.get()),
+                "输出物品应为精制硅！当前产物: " + chamber.outputSlot.getStack());
+        helper.assertTrue(chamber.chemicalTankA.getStored() == 400L, "稀有气体消耗量应为 100 mB！剩余: " + chamber.chemicalTankA.getStored());
+        helper.assertTrue(chamber.chemicalTankB.getStored() == 400L, "氢气消耗量应为 100 mB！剩余: " + chamber.chemicalTankB.getStored());
+        helper.assertTrue(chamber.inputSlot.isEmpty(), "粗制硅输入槽应被消耗完毕！");
 
         helper.succeed();
     }

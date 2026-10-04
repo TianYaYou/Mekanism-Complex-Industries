@@ -67,6 +67,13 @@
     "mekanism_complex_industries:brown_bitumen_slab",
     "mekanism_complex_industries:green_bitumen_slab",
     "mekanism_complex_industries:red_bitumen_slab",
-    "mekanism_complex_industries:black_bitumen_slab"
+    "mekanism_complex_industries:black_bitumen_slab",
+    "mekanism_complex_industries:flow_regulator",
+    "mekanism_complex_industries:chemical_soaker",
+    "mekanism_complex_industries:basic_chemical_soaking_factory",
+    "mekanism_complex_industries:advanced_chemical_soaking_factory",
+    "mekanism_complex_industries:elite_chemical_soaking_factory",
+    "mekanism_complex_industries:ultimate_chemical_soaking_factory",
+    "mekanism_complex_industries:crystal_growth_chamber"
   ]
 }

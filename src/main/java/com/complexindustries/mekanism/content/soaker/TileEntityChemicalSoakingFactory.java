@@ -128,8 +128,8 @@ public class TileEntityChemicalSoakingFactory extends TileEntityConfigurableMach
     }
 
     public int getXPos(int process) {
-        int baseX = tier == FactoryTier.BASIC ? 55 : tier == FactoryTier.ADVANCED ? 35 : tier == FactoryTier.ELITE ? 29 : 27;
-        int baseXMult = tier == FactoryTier.BASIC ? 38 : tier == FactoryTier.ADVANCED ? 26 : 19;
+        int baseX = tier == FactoryTier.BASIC ? 55 : 49;
+        int baseXMult = tier == FactoryTier.BASIC ? 36 : tier == FactoryTier.ADVANCED ? 22 : 20;
         return baseX + (process * baseXMult);
     }
 
@@ -155,8 +155,8 @@ public class TileEntityChemicalSoakingFactory extends TileEntityConfigurableMach
     @Override
     protected IInventorySlotHolder getInitialInventory(IContentsListener listener) {
         InventorySlotHelper builder = InventorySlotHelper.forSideWithConfig(this);
-        builder.addSlot(energySlot = EnergyInventorySlot.fillOrConvert(energyContainer, this::getLevel, listener, 7, 13));
-        builder.addSlot(extraSlot = ChemicalInventorySlot.fillOrConvert(chemicalTank, this::getLevel, listener, 7, 57));
+        builder.addSlot(energySlot = EnergyInventorySlot.fillOrConvert(energyContainer, this::getLevel, listener, 27, 13));
+        builder.addSlot(extraSlot = ChemicalInventorySlot.fillOrConvert(chemicalTank, this::getLevel, listener, 27, 57));
         extraSlot.setSlotOverlay(SlotOverlay.MINUS);
 
         inputSlots.clear();

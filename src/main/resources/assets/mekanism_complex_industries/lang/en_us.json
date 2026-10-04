@@ -239,10 +239,18 @@
   "block.mekanism_complex_industries.ultimate_chemical_soaking_factory": "Ultimate Chemical Soaking Factory",
   "description.mekanism_complex_industries.chemical_soaking_factory": "A high-throughput multi-lane industrial chemical soaking factory.",
   "gui.mekanism_complex_industries.chemical_soaker.category": "Chemical Soaking",
+  "gui.mekanism_complex_industries.chemical_soaking.type": "Soaking",
   "container.mekanism_complex_industries.chemical_soaker": "Chemical Soaker",
   "container.mekanism_complex_industries.chemical_soaking_factory": "Chemical Soaking Factory",
   "container.mekanism_complex_industries.basic_chemical_soaking_factory": "Basic Chemical Soaking Factory",
   "container.mekanism_complex_industries.advanced_chemical_soaking_factory": "Advanced Chemical Soaking Factory",
   "container.mekanism_complex_industries.elite_chemical_soaking_factory": "Elite Chemical Soaking Factory",
-  "container.mekanism_complex_industries.ultimate_chemical_soaking_factory": "Ultimate Chemical Soaking Factory"
+  "container.mekanism_complex_industries.ultimate_chemical_soaking_factory": "Ultimate Chemical Soaking Factory",
+  "item.mekanism_complex_industries.engineering_plastic": "Engineering Plastic",
+  "item.mekanism_complex_industries.crude_silicon": "Crude Silicon",
+  "item.mekanism_complex_industries.refined_silicon": "Refined Silicon",
+  "block.mekanism_complex_industries.crystal_growth_chamber": "Crystal Growth Chamber",
+  "description.mekanism_complex_industries.crystal_growth_chamber": "A precision chemical apparatus for growing monocrystalline silicon boules in noble gas and reducing atmospheres.",
+  "container.mekanism_complex_industries.crystal_growth_chamber": "Crystal Growth Chamber",
+  "gui.mekanism_complex_industries.crystal_growth.category": "Crystal Growth"
 }

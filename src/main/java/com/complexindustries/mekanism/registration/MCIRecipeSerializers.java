@@ -18,5 +18,8 @@ public final class MCIRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe>> CHEMICAL_SOAKING =
             RECIPE_SERIALIZERS.register("chemical_soaking", () -> mekanism.common.recipe.serializer.MekanismRecipeSerializer.itemChemicalToItem(com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe::new));
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<com.complexindustries.mekanism.recipe.CrystalGrowthRecipe>> CRYSTAL_GROWTH =
+            RECIPE_SERIALIZERS.register("crystal_growth", com.complexindustries.mekanism.recipe.CrystalGrowthRecipeSerializer::create);
+
     private MCIRecipeSerializers() {}
 }

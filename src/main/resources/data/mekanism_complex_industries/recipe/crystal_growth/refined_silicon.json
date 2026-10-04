@@ -1,0 +1,20 @@
+{
+  "type": "mekanism_complex_industries:crystal_growth",
+  "item_input": {
+    "count": 1,
+    "item": "mekanism_complex_industries:crude_silicon"
+  },
+  "chemical_input_a": {
+    "amount": 100,
+    "chemical": "mekanism_complex_industries:noble_gas"
+  },
+  "chemical_input_b": {
+    "amount": 100,
+    "chemical": "mekanism:hydrogen"
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:refined_silicon"
+  },
+  "duration": 200
+}

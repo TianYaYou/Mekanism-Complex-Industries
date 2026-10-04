@@ -41,5 +41,8 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.soaker.ContainerChemicalSoakingFactory> CHEMICAL_SOAKING_FACTORY =
             CONTAINER_TYPES.register("chemical_soaking_factory", com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory.class, com.complexindustries.mekanism.content.soaker.ContainerChemicalSoakingFactory::new);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.chamber.ContainerCrystalGrowthChamber> CRYSTAL_GROWTH_CHAMBER =
+            CONTAINER_TYPES.register("crystal_growth_chamber", com.complexindustries.mekanism.content.chamber.TileEntityCrystalGrowthChamber.class, com.complexindustries.mekanism.content.chamber.ContainerCrystalGrowthChamber::new);
+
     private MCIContainerTypes() {}
 }
