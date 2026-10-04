@@ -19,9 +19,12 @@ import net.minecraft.resources.ResourceLocation;
 public class RefineryEmiRecipe extends MekanismEmiRecipe<RefineryJEIRecipe> {
 
     public RefineryEmiRecipe(EmiRecipeCategory category, ResourceLocation id, RefineryJEIRecipe recipe) {
-        super(category, id, recipe, 0, 0, 206, 70);
+        super(category, id, recipe, 0, 0, 224, 70);
         if (recipe.inputChemical() != null) {
             addInputDefinition(IngredientCreatorAccess.chemicalStack().from(recipe.inputChemical()));
+        }
+        if (recipe.nitrogen() != null) {
+            addInputDefinition(IngredientCreatorAccess.chemicalStack().from(recipe.nitrogen()));
         }
         if (recipe.bitumen() != null) {
             addChemicalOutputDefinition(List.of(recipe.bitumen()));
@@ -42,12 +45,17 @@ public class RefineryEmiRecipe extends MekanismEmiRecipe<RefineryJEIRecipe> {
 
     @Override
     public void addWidgets(WidgetHolder widgetHolder) {
-        // 1. Left Input Chemical Gauge (Dense Crude Oil)
+        // 1. Left Input Chemical Gauges
+        // 1a. Dense Crude Oil
         GuiGauge<?> inputGauge = GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.INPUT), this, 5, 5);
         initTank(widgetHolder, inputGauge, input(0));
 
+        // 1b. Nitrogen Atmosphere
+        GuiGauge<?> nitrogenGauge = GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.INPUT), this, 23, 5);
+        initTank(widgetHolder, nitrogenGauge, input(1));
+
         // 2. Center Terminal Screen
-        addElement(widgetHolder, new GuiInnerScreen(this, 27, 5, 80, 46, () -> List.of(
+        addElement(widgetHolder, new GuiInnerScreen(this, 45, 5, 80, 46, () -> List.of(
                 recipe.title() != null ? recipe.title() : Component.translatable("gui.mekanism_complex_industries.jei.refinery.title"),
                 recipe.heatRequirement() != null ? recipe.heatRequirement() : Component.translatable("gui.mekanism_complex_industries.jei.refinery.short_heat"),
                 recipe.deltaRequirement() != null ? recipe.deltaRequirement() : Component.translatable("gui.mekanism_complex_industries.jei.refinery.short_delta"),
@@ -57,17 +65,18 @@ public class RefineryEmiRecipe extends MekanismEmiRecipe<RefineryJEIRecipe> {
                 Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.dimensions"),
                 Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.heat"),
                 Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.delta"),
+                Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.nitrogen"),
                 Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.warning")
         )));
 
         // 3. Center Cracking Horizontal Rate Bar (80x8)
-        addElement(widgetHolder, new GuiHorizontalRateBar(this, RecipeViewerUtils.FULL_BAR, 27, 54));
+        addElement(widgetHolder, new GuiHorizontalRateBar(this, RecipeViewerUtils.FULL_BAR, 45, 54));
 
         // 4. Right 5 Output Chemical Gauges (Layer 1 ~ Layer 5)
-        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 111, 5), output(0)).recipeContext(this);
-        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 129, 5), output(1)).recipeContext(this);
-        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 147, 5), output(2)).recipeContext(this);
-        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 165, 5), output(3)).recipeContext(this);
-        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 183, 5), output(4)).recipeContext(this);
+        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 129, 5), output(0)).recipeContext(this);
+        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 147, 5), output(1)).recipeContext(this);
+        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 165, 5), output(2)).recipeContext(this);
+        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 183, 5), output(3)).recipeContext(this);
+        initTank(widgetHolder, GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 201, 5), output(4)).recipeContext(this);
     }
 }

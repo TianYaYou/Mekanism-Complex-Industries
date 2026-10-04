@@ -28,6 +28,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 
 import java.util.Collections;
+import java.util.List;
 
 public class TileEntityRefineryValve extends TileEntityRefineryCasing implements IConfigurable {
 
@@ -195,6 +196,13 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
         return side -> {
             if (!getMultiblock().isFormed()) {
                 return Collections.emptyList();
+            }
+            int layer = getEffectiveLayer();
+            if (layer == 1 && mode == ValveMode.INPUT) {
+                RefineryMultiblockData mb = getMultiblock();
+                if (mb.getInputChemicalTank() != null && mb.getNitrogenChemicalTank() != null) {
+                    return List.of(mb.getInputChemicalTank(), mb.getNitrogenChemicalTank());
+                }
             }
             IChemicalTank tank = getActiveChemicalTank();
             return tank == null ? Collections.emptyList() : Collections.singletonList(tank);

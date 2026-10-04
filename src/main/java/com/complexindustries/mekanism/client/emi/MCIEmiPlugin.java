@@ -136,6 +136,7 @@ public class MCIEmiPlugin implements EmiPlugin {
                 ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "refinery/cracking"),
                 new RefineryJEIRecipe(
                         MCIChemicals.DENSE_CRUDE_OIL.asStack(1000),
+                        MCIChemicals.NITROGEN.asStack(1000),
                         MCIChemicals.BITUMEN.asStack(150),
                         MCIChemicals.HEAVY_OIL.asStack(100),
                         MCIChemicals.REFINED_FUEL.asStack(100),

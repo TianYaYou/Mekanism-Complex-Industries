@@ -115,6 +115,7 @@ public class MCIJEIPlugin implements IModPlugin {
         List<RefineryJEIRecipe> refineryRecipes = new ArrayList<>();
         refineryRecipes.add(new RefineryJEIRecipe(
                 MCIChemicals.DENSE_CRUDE_OIL.asStack(1000),
+                MCIChemicals.NITROGEN.asStack(1000),
                 MCIChemicals.BITUMEN.asStack(150),
                 MCIChemicals.HEAVY_OIL.asStack(100),
                 MCIChemicals.REFINED_FUEL.asStack(100),

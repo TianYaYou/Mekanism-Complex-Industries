@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 public class RefineryRecipeCategory extends BaseRecipeCategory<RefineryJEIRecipe> {
 
     private final GuiGauge<?> inputChemical;
+    private final GuiGauge<?> inputNitrogen;
     private final GuiGauge<?> outputBitumen;
     private final GuiGauge<?> outputHeavyOil;
     private final GuiGauge<?> outputRefinedFuel;
@@ -41,13 +42,16 @@ public class RefineryRecipeCategory extends BaseRecipeCategory<RefineryJEIRecipe
     public RefineryRecipeCategory(IGuiHelper helper, RecipeType<RefineryJEIRecipe> recipeType) {
         super(helper, recipeType, Component.translatable("gui.mekanism_complex_industries.refinery.category"),
                 helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(MCIBlocks.REFINERY_CONTROLLER.get())),
-                0, 0, 206, 70);
+                0, 0, 224, 70);
 
-        // 1. Left Input Chemical Gauge (Dense Crude Oil)
+        // 1. Left Input Chemical Gauges
+        // 1a. Dense Crude Oil
         inputChemical = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.INPUT), this, 5, 5));
+        // 1b. Nitrogen Atmosphere
+        inputNitrogen = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.INPUT), this, 23, 5));
 
         // 2. Center Terminal Screen (80x46)
-        addElement(new GuiInnerScreen(this, 27, 5, 80, 46, () -> {
+        addElement(new GuiInnerScreen(this, 45, 5, 80, 46, () -> {
             Component titleComp = currentRecipe != null ? currentRecipe.title() : Component.translatable("gui.mekanism_complex_industries.jei.refinery.title");
             Component heatComp = currentRecipe != null ? currentRecipe.heatRequirement() : Component.translatable("gui.mekanism_complex_industries.jei.refinery.short_heat");
             Component deltaComp = currentRecipe != null ? currentRecipe.deltaRequirement() : Component.translatable("gui.mekanism_complex_industries.jei.refinery.short_delta");
@@ -58,18 +62,19 @@ public class RefineryRecipeCategory extends BaseRecipeCategory<RefineryJEIRecipe
                 Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.dimensions"),
                 Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.heat"),
                 Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.delta"),
+                Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.nitrogen"),
                 Component.translatable("gui.mekanism_complex_industries.jei.refinery.tooltip.warning")
         )));
 
         // 3. Center Cracking Horizontal Rate Bar (80x8)
-        addElement(new GuiHorizontalRateBar(this, RecipeViewerUtils.FULL_BAR, 27, 54));
+        addElement(new GuiHorizontalRateBar(this, RecipeViewerUtils.FULL_BAR, 45, 54));
 
         // 4. Right 5 Output Chemical Gauges (Layer 1 ~ Layer 5)
-        outputBitumen = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 111, 5));
-        outputHeavyOil = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 129, 5));
-        outputRefinedFuel = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 147, 5));
-        outputNaphtha = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 165, 5));
-        outputPetroleumGas = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 183, 5));
+        outputBitumen = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 129, 5));
+        outputHeavyOil = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 147, 5));
+        outputRefinedFuel = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 165, 5));
+        outputNaphtha = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 183, 5));
+        outputPetroleumGas = addElement(GuiChemicalGauge.getDummy(GaugeType.STANDARD.with(DataType.OUTPUT), this, 201, 5));
     }
 
     @Nullable
@@ -94,6 +99,9 @@ public class RefineryRecipeCategory extends BaseRecipeCategory<RefineryJEIRecipe
     public void setRecipe(@NotNull IRecipeLayoutBuilder builder, RefineryJEIRecipe recipe, @NotNull IFocusGroup focusGroup) {
         if (recipe.inputChemical() != null) {
             initChemical(builder, RecipeIngredientRole.INPUT, inputChemical, Collections.singletonList(recipe.inputChemical()));
+        }
+        if (recipe.nitrogen() != null) {
+            initChemical(builder, RecipeIngredientRole.INPUT, inputNitrogen, Collections.singletonList(recipe.nitrogen()));
         }
         if (recipe.bitumen() != null) {
             initChemical(builder, RecipeIngredientRole.OUTPUT, outputBitumen, Collections.singletonList(recipe.bitumen()));

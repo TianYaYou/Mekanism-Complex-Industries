@@ -660,11 +660,13 @@ public class MCIGameTests {
                 helper.assertTrue(stateAfterTick.getValue(com.complexindustries.mekanism.content.block.RefineryControllerBlock.ACTIVE), "控制器成型后方块状态ACTIVE应为true！");
                 helper.assertTrue(controller.getMultiblock().isFormed(), "控制器状态更新不应导致多方块解体（杜绝循环解体/重构粒子问题）！");
 
-                // 2. Put chemicals into input tank and an output tank
+                // 2. Put chemicals into input tanks and an output tank
                 var mb = controller.getMultiblock();
                 long inputAmount = 5_000L;
+                long nitrogenAmount = 1_200L;
                 long bitumenAmount = 800L;
                 mb.getInputChemicalTank().setStack(com.complexindustries.mekanism.registration.MCIChemicals.DENSE_CRUDE_OIL.asStack(inputAmount));
+                mb.getNitrogenChemicalTank().setStack(com.complexindustries.mekanism.registration.MCIChemicals.NITROGEN.asStack(nitrogenAmount));
                 mb.outputTank1.setStack(com.complexindustries.mekanism.registration.MCIChemicals.BITUMEN.asStack(bitumenAmount));
 
                 java.util.UUID cachedID = controller.getCacheID();
@@ -680,9 +682,10 @@ public class MCIGameTests {
                 var cache = manager.getCache(cachedID);
                 helper.assertTrue(cache != null, "REFINERY_MANAGER中应存在已保存的缓存！");
                 var cachedTanks = cache.getChemicalTanks(null);
-                helper.assertTrue(cachedTanks != null && cachedTanks.size() >= 6, "缓存应包含6个化学品槽位！");
+                helper.assertTrue(cachedTanks != null && cachedTanks.size() >= 7, "缓存应包含7个化学品槽位！");
                 helper.assertTrue(cachedTanks.get(0).getStored() == inputAmount, "缓存中输入化学品数量不应丢失！期望: " + inputAmount + ", 实际: " + cachedTanks.get(0).getStored());
-                helper.assertTrue(cachedTanks.get(1).getStored() == bitumenAmount, "缓存中沥青产物不应丢失！期望: " + bitumenAmount + ", 实际: " + cachedTanks.get(1).getStored());
+                helper.assertTrue(cachedTanks.get(1).getStored() == nitrogenAmount, "缓存中氮气气氛数量不应丢失！期望: " + nitrogenAmount + ", 实际: " + cachedTanks.get(1).getStored());
+                helper.assertTrue(cachedTanks.get(2).getStored() == bitumenAmount, "缓存中沥青产物不应丢失！期望: " + bitumenAmount + ", 实际: " + cachedTanks.get(2).getStored());
 
                 // 5. Replace the casing block and re-form
                 helper.setBlock(testCasingPos, MCIBlocks.REFINERY_CASING.get());
@@ -693,6 +696,7 @@ public class MCIGameTests {
                 // 6. Verify multiblock chemical contents were completely restored (NOT swallowed!)
                 var reformedMb = controller.getMultiblock();
                 helper.assertTrue(reformedMb.getInputChemicalTank().getStored() == inputAmount, "重形成型后输入化学品不应被吞！实际: " + reformedMb.getInputChemicalTank().getStored());
+                helper.assertTrue(reformedMb.getNitrogenChemicalTank().getStored() == nitrogenAmount, "重形成型后氮气气氛不应被吞！实际: " + reformedMb.getNitrogenChemicalTank().getStored());
                 helper.assertTrue(reformedMb.outputTank1.getStored() == bitumenAmount, "重形成型后产物不应被吞！实际: " + reformedMb.outputTank1.getStored());
 
                 helper.succeed();
@@ -777,5 +781,53 @@ public class MCIGameTests {
         helper.assertTrue(foundReactionFluid, "未找到浓稠石油 PRC 流体合成配方");
         helper.assertTrue(foundReactionSolid, "未找到浓稠石油 PRC 固态合成配方");
         helper.succeed();
+    }
+
+    @GameTest(template = "empty_15x25x15", timeoutTicks = 120)
+    public static void testNitrogenDissipationAndYieldScaling(GameTestHelper helper) {
+        int x0 = 2;
+        int z0 = 2;
+        int y0 = 1;
+        int height = 16;
+
+        buildRefineryStructure(helper, x0, y0, z0, height, false);
+        BlockPos controllerPos = new BlockPos(x0 + 3, y0 + 1, z0);
+
+        helper.runAfterDelay(10, () -> {
+            if (helper.getBlockEntity(controllerPos) instanceof TileEntityRefineryController controller) {
+                controller.getStructure().tick(controller, true);
+                controller.getStructure().runUpdate(controller);
+                helper.assertTrue(controller.getMultiblock().isFormed(), "工业炼化塔应该成型！");
+
+                var mb = controller.getMultiblock();
+
+                // 1. 0% nitrogen yield multiplier is exactly 0.20
+                helper.assertTrue(Math.abs(mb.getYieldMultiplier() - 0.20) < 0.001, "无氮气时产率倍率应为 0.20！实际: " + mb.getYieldMultiplier());
+
+                // 2. Insert 1000 mB Nitrogen
+                mb.getNitrogenChemicalTank().setStack(com.complexindustries.mekanism.registration.MCIChemicals.NITROGEN.asStack(1000));
+                long initialStored = mb.getNitrogenChemicalTank().getStored();
+                helper.assertTrue(initialStored == 1000, "氮气存量应为 1000 mB！");
+
+                // 3. Tick multiblock and verify dissipation (1/1000 per tick)
+                mb.tick(helper.getLevel());
+                long after1Tick = mb.getNitrogenChemicalTank().getStored();
+                helper.assertTrue(after1Tick == 999, "1 tick 后氮气应自然逸散 1 mB (0.1%)！实际: " + after1Tick);
+
+                // 4. Fill nitrogen to 100% capacity
+                long cap = mb.getInputTankCapacityLong();
+                mb.getNitrogenChemicalTank().setStack(com.complexindustries.mekanism.registration.MCIChemicals.NITROGEN.asStack(cap));
+                helper.assertTrue(Math.abs(mb.getNitrogenRatio() - 1.0) < 0.001, "氮气注满时比例应为 100%！");
+                helper.assertTrue(Math.abs(mb.getYieldMultiplier() - 1.20) < 0.001, "满氮气时产率倍率应为 1.20！实际: " + mb.getYieldMultiplier());
+
+                // 5. Test 50% capacity
+                mb.getNitrogenChemicalTank().setStack(com.complexindustries.mekanism.registration.MCIChemicals.NITROGEN.asStack(cap / 2));
+                helper.assertTrue(Math.abs(mb.getYieldMultiplier() - 0.70) < 0.01, "50% 氮气时产率倍率应为 0.70！实际: " + mb.getYieldMultiplier());
+
+                helper.succeed();
+            } else {
+                helper.fail("未能找到控制器方块实体！");
+            }
+        });
     }
 }

@@ -25,8 +25,8 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
 
     public GuiRefineryController(ContainerRefineryController container, Inventory inv, Component title) {
         super(container, inv, title);
-        imageWidth += 50;
-        inventoryLabelX += 25;
+        imageWidth += 68;
+        inventoryLabelX += 34;
         inventoryLabelY += 2;
         titleLabelY = 4;
         dynamicSlots = true;
@@ -36,8 +36,8 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
     protected void addGuiElements() {
         super.addGuiElements();
 
-        // 1. Center Terminal Screen (31, 13, 96, 44)
-        addRenderableWidget(new GuiInnerScreen(this, 31, 13, 96, 44, () -> {
+        // 1. Center Terminal Screen (47, 13, 96, 44)
+        addRenderableWidget(new GuiInnerScreen(this, 47, 13, 96, 44, () -> {
             RefineryMultiblockData multiblock = tile.getMultiblock();
             if (!multiblock.isFormed()) {
                 return List.of(Component.translatable("gui.mekanism_complex_industries.refinery.unformed"));
@@ -50,6 +50,8 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                     ? multiblock.getTopHeatCapacitor().getTemperature()
                     : HeatAPI.AMBIENT_TEMP;
             double deltaT = bottomTemp - topTemp;
+            double n2Ratio = multiblock.getNitrogenRatio() * 100.0;
+            double yieldMult = multiblock.getYieldMultiplier() * 100.0;
 
             return List.of(
                     Component.translatable("gui.mekanism_complex_industries.refinery.dimensions",
@@ -59,7 +61,9 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                     Component.translatable("gui.mekanism_complex_industries.refinery.top_temp",
                             MekanismUtils.getTemperatureDisplay(topTemp, TemperatureUnit.KELVIN, true)),
                     Component.translatable("gui.mekanism_complex_industries.refinery.delta_temp",
-                            MekanismUtils.getTemperatureDisplay(deltaT, TemperatureUnit.KELVIN, false))
+                            MekanismUtils.getTemperatureDisplay(deltaT, TemperatureUnit.KELVIN, false)),
+                    Component.translatable("gui.mekanism_complex_industries.refinery.nitrogen_atmosphere",
+                            String.format("%.1f%%", n2Ratio), String.format("%.0f%%", yieldMult))
             );
         }).spacing(1));
 
@@ -75,9 +79,10 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
             public double getLevel() {
                 return Math.min(1.0, Math.max(0.0, tile.getMultiblock().lastCrackingRate / 640.0));
             }
-        }, 38, 60));
+        }, 56, 60));
 
-        // 3. Left Input Chemical Tank Gauge (Dense Crude Oil)
+        // 3. Left Input Chemical Tank Gauges
+        // 3a. Dense Crude Oil Gauge (7, 13)
         GuiChemicalGauge inputGauge = addRenderableWidget(new GuiChemicalGauge(
                 () -> tile.getMultiblock().inputChemicalTank,
                 () -> tile.getMultiblock().getChemicalTanks(null),
@@ -85,12 +90,20 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
         ));
         inputGauge.setDummyType(MCIChemicals.DENSE_CRUDE_OIL.asStack(1));
 
+        // 3b. Nitrogen Atmosphere Gauge (25, 13)
+        GuiChemicalGauge nitrogenGauge = addRenderableWidget(new GuiChemicalGauge(
+                () -> tile.getMultiblock().nitrogenChemicalTank,
+                () -> tile.getMultiblock().getChemicalTanks(null),
+                GaugeType.STANDARD, this, 25, 13
+        ));
+        nitrogenGauge.setDummyType(MCIChemicals.NITROGEN.asStack(1));
+
         // 4. Right 5 Output Chemical Tank Gauges (Layers 1..5)
         // Layer 1: Bitumen
         GuiChemicalGauge out1 = addRenderableWidget(new GuiChemicalGauge(
                 () -> tile.getMultiblock().outputTank1,
                 () -> tile.getMultiblock().getChemicalTanks(null),
-                GaugeType.STANDARD, this, 129, 13
+                GaugeType.STANDARD, this, 147, 13
         ));
         out1.setDummyType(MCIChemicals.BITUMEN.asStack(1));
         out1.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {
@@ -102,7 +115,7 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
         GuiChemicalGauge out2 = addRenderableWidget(new GuiChemicalGauge(
                 () -> tile.getMultiblock().outputTank2,
                 () -> tile.getMultiblock().getChemicalTanks(null),
-                GaugeType.STANDARD, this, 147, 13
+                GaugeType.STANDARD, this, 165, 13
         ));
         out2.setDummyType(MCIChemicals.HEAVY_OIL.asStack(1));
         out2.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {
@@ -114,7 +127,7 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
         GuiChemicalGauge out3 = addRenderableWidget(new GuiChemicalGauge(
                 () -> tile.getMultiblock().outputTank3,
                 () -> tile.getMultiblock().getChemicalTanks(null),
-                GaugeType.STANDARD, this, 165, 13
+                GaugeType.STANDARD, this, 183, 13
         ));
         out3.setDummyType(MCIChemicals.REFINED_FUEL.asStack(1));
         out3.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {
@@ -126,7 +139,7 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
         GuiChemicalGauge out4 = addRenderableWidget(new GuiChemicalGauge(
                 () -> tile.getMultiblock().outputTank4,
                 () -> tile.getMultiblock().getChemicalTanks(null),
-                GaugeType.STANDARD, this, 183, 13
+                GaugeType.STANDARD, this, 201, 13
         ));
         out4.setDummyType(MCIChemicals.NAPHTHA.asStack(1));
         out4.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {
@@ -138,7 +151,7 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
         GuiChemicalGauge out5 = addRenderableWidget(new GuiChemicalGauge(
                 () -> tile.getMultiblock().outputTank5,
                 () -> tile.getMultiblock().getChemicalTanks(null),
-                GaugeType.STANDARD, this, 201, 13
+                GaugeType.STANDARD, this, 219, 13
         ));
         out5.setDummyType(MCIChemicals.PETROLEUM_GAS.asStack(1));
         out5.warning(WarningTracker.WarningType.NO_SPACE_IN_OUTPUT, () -> {

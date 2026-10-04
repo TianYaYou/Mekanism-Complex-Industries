@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 
 public record RefineryJEIRecipe(
         ChemicalStack inputChemical,
+        ChemicalStack nitrogen,
         ChemicalStack bitumen,
         ChemicalStack heavyOil,
         ChemicalStack refinedFuel,

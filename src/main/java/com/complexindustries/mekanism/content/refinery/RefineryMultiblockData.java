@@ -39,6 +39,9 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
     public IChemicalTank inputChemicalTank;
 
     @ContainerSync
+    public IChemicalTank nitrogenChemicalTank;
+
+    @ContainerSync
     public IChemicalTank outputTank1; // Layer 1 (Bottom): Bitumen (ratio 0.15)
     @ContainerSync
     public IChemicalTank outputTank2; // Layer 2: Heavy Oil (ratio 0.10)
@@ -73,11 +76,15 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
     private double fuelBuffer = 0.0;
     private double heavyOilBuffer = 0.0;
     private double bitumenBuffer = 0.0;
+    private double nitrogenLossBuffer = 0.0;
 
     public RefineryMultiblockData(TileEntityMultiblock<?> tile) {
         super(tile);
-        // 1 Chemical Input Tank (Layer 1) - Capacity scaled to 1/100 of original
-        chemicalTanks.add(inputChemicalTank = VariableCapacityChemicalTank.input(this, this::getInputTankCapacityLong, ConstantPredicates.alwaysTrue(), this));
+        // 1 Chemical Input Tank (Dense Crude Oil) - Capacity scaled to 1/100 of original
+        chemicalTanks.add(inputChemicalTank = VariableCapacityChemicalTank.input(this, this::getInputTankCapacityLong, this::isValidInputChemical, this));
+
+        // 1 Nitrogen Atmosphere Tank - Capacity equal to input tank capacity
+        chemicalTanks.add(nitrogenChemicalTank = VariableCapacityChemicalTank.input(this, this::getInputTankCapacityLong, this::isValidNitrogenChemical, this));
 
         // 5 Chemical Output Tanks (Layers 1..5) - Capacity scaled to 1/1000 of original (1/10 of input capacity)
         outputTank1 = VariableCapacityChemicalTank.output(this, this::getOutputTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
@@ -126,8 +133,32 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
         return getInputTankCapacityLong();
     }
 
+    public boolean isValidInputChemical(@NotNull ChemicalStack chemicalStack) {
+        return !chemicalStack.isEmpty() && chemicalStack.is(MCIChemicals.DENSE_CRUDE_OIL.get());
+    }
+
+    public boolean isValidNitrogenChemical(@NotNull ChemicalStack chemicalStack) {
+        return !chemicalStack.isEmpty() && chemicalStack.is(MCIChemicals.NITROGEN.get());
+    }
+
     public IChemicalTank getInputChemicalTank() {
         return inputChemicalTank;
+    }
+
+    public IChemicalTank getNitrogenChemicalTank() {
+        return nitrogenChemicalTank;
+    }
+
+    public double getNitrogenRatio() {
+        if (nitrogenChemicalTank == null || nitrogenChemicalTank.isEmpty()) {
+            return 0.0;
+        }
+        long cap = getInputTankCapacityLong();
+        return cap > 0 ? Math.min(1.0, (double) nitrogenChemicalTank.getStored() / (double) cap) : 0.0;
+    }
+
+    public double getYieldMultiplier() {
+        return 0.20 + 1.00 * getNitrogenRatio();
     }
 
     public IChemicalTank getOutputChemicalTank(int layerIndex) {
@@ -255,6 +286,19 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
             // Flush heat buffer updates
             updateHeatCapacitors(null);
 
+            // Nitrogen dissipation (0.1% per tick, continuous when formed)
+            if (nitrogenChemicalTank != null && !nitrogenChemicalTank.isEmpty()) {
+                long nStored = nitrogenChemicalTank.getStored();
+                nitrogenLossBuffer += nStored * 0.001;
+                long toDeduct = (long) nitrogenLossBuffer;
+                if (toDeduct > 0) {
+                    long actualLoss = Math.min(toDeduct, nStored);
+                    nitrogenChemicalTank.shrinkStack(actualLoss, Action.EXECUTE);
+                    nitrogenLossBuffer -= actualLoss;
+                    needsPacket = true;
+                }
+            }
+
             // Cracking process
             needsPacket |= updateCrackingProcess(bottomTemp, topTemp, diff);
         } else {
@@ -352,22 +396,24 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
             ChemicalStack heavyOilStack = MCIChemicals.HEAVY_OIL.asStack(1);
             ChemicalStack bitumenStack = MCIChemicals.BITUMEN.asStack(1);
 
+            double yieldMultiplier = getYieldMultiplier();
+
             long actual = available;
-            actual = Math.min(actual, getAcceptableInputForTank(outputTank5, gasStack, 2.0));
-            actual = Math.min(actual, getAcceptableInputForTank(outputTank4, naphthaStack, 0.2));
-            actual = Math.min(actual, getAcceptableInputForTank(outputTank3, fuelStack, 0.1));
-            actual = Math.min(actual, getAcceptableInputForTank(outputTank2, heavyOilStack, 0.1));
-            actual = Math.min(actual, getAcceptableInputForTank(outputTank1, bitumenStack, 0.15));
+            actual = Math.min(actual, getAcceptableInputForTank(outputTank5, gasStack, 2.0 * yieldMultiplier));
+            actual = Math.min(actual, getAcceptableInputForTank(outputTank4, naphthaStack, 0.2 * yieldMultiplier));
+            actual = Math.min(actual, getAcceptableInputForTank(outputTank3, fuelStack, 0.1 * yieldMultiplier));
+            actual = Math.min(actual, getAcceptableInputForTank(outputTank2, heavyOilStack, 0.1 * yieldMultiplier));
+            actual = Math.min(actual, getAcceptableInputForTank(outputTank1, bitumenStack, 0.15 * yieldMultiplier));
 
             if (actual > 0) {
                 inputChemicalTank.shrinkStack(actual, Action.EXECUTE);
                 inputBuffer -= actual;
 
-                gasBuffer += actual * 2.0;
-                naphthaBuffer += actual * 0.2;
-                fuelBuffer += actual * 0.1;
-                heavyOilBuffer += actual * 0.1;
-                bitumenBuffer += actual * 0.15;
+                gasBuffer += actual * 2.0 * yieldMultiplier;
+                naphthaBuffer += actual * 0.2 * yieldMultiplier;
+                fuelBuffer += actual * 0.1 * yieldMultiplier;
+                heavyOilBuffer += actual * 0.1 * yieldMultiplier;
+                bitumenBuffer += actual * 0.15 * yieldMultiplier;
 
                 long g = (long) gasBuffer;
                 if (g > 0) {
@@ -427,6 +473,7 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
     @Override
     public void readUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
         super.readUpdateTag(tag, provider);
+        readValves(tag);
         if (tag.contains("partitionFloors")) {
             partitionFloors = tag.getIntArray("partitionFloors");
         }
@@ -436,14 +483,19 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
         if (tag.contains("operatingStatus")) {
             operatingStatus = tag.getInt("operatingStatus");
         }
+        if (tag.contains("nitrogenLossBuffer")) {
+            nitrogenLossBuffer = tag.getDouble("nitrogenLossBuffer");
+        }
     }
 
     @Override
     public void writeUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
         super.writeUpdateTag(tag, provider);
+        writeValves(tag);
         tag.putIntArray("partitionFloors", partitionFloors);
         tag.putDouble("lastCrackingRate", lastCrackingRate);
         tag.putInt("operatingStatus", operatingStatus);
+        tag.putDouble("nitrogenLossBuffer", nitrogenLossBuffer);
     }
 
     /**
