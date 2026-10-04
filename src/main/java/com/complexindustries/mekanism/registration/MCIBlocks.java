@@ -107,6 +107,13 @@ public final class MCIBlocks {
                             .requiresCorrectToolForDrops()
                             .strength(5.0F, 9.0F)));
 
+    public static final DeferredBlock<com.complexindustries.mekanism.content.flowregulator.BlockFlowRegulator> FLOW_REGULATOR = BLOCKS.register("flow_regulator",
+            () -> new com.complexindustries.mekanism.content.flowregulator.BlockFlowRegulator(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .noOcclusion()));
+
     public static final DeferredBlock<com.complexindustries.mekanism.content.block.decorative.BitumenBlock> BITUMEN_BLOCK = BLOCKS.register("bitumen_block",
             () -> new com.complexindustries.mekanism.content.block.decorative.BitumenBlock(
                     BlockBehaviour.Properties.ofFullCopy(Blocks.BLACKSTONE)
@@ -202,6 +209,54 @@ public final class MCIBlocks {
                             .requiresCorrectToolForDrops()
                             .strength(3.5F, 16.0F)
                             .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSolidifierFactoryBlock.ACTIVE) ? 8 : 0)));
+
+    public static final DeferredBlock<LiquidBlock> LIQUID_PROPYLENE_BLOCK = BLOCKS.register("liquid_propylene",
+            () -> new LiquidBlock(MCIFluids.SOURCE_LIQUID_PROPYLENE.get(),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noCollission().strength(100.0F).noLootTable()));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSoakerBlock> CHEMICAL_SOAKER = BLOCKS.register("chemical_soaker",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSoakerBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSoakerBlock.ACTIVE) ? 8 : 0)
+                            .noOcclusion()));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock> BASIC_CHEMICAL_SOAKING_FACTORY = BLOCKS.register("basic_chemical_soaking_factory",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock(
+                    mekanism.common.tier.FactoryTier.BASIC,
+                    () -> new mekanism.common.registration.impl.BlockRegistryObject<>(MCIBlocks.ADVANCED_CHEMICAL_SOAKING_FACTORY, MCIItems.ADVANCED_CHEMICAL_SOAKING_FACTORY),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock.ACTIVE) ? 8 : 0)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock> ADVANCED_CHEMICAL_SOAKING_FACTORY = BLOCKS.register("advanced_chemical_soaking_factory",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock(
+                    mekanism.common.tier.FactoryTier.ADVANCED,
+                    () -> new mekanism.common.registration.impl.BlockRegistryObject<>(MCIBlocks.ELITE_CHEMICAL_SOAKING_FACTORY, MCIItems.ELITE_CHEMICAL_SOAKING_FACTORY),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock.ACTIVE) ? 8 : 0)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock> ELITE_CHEMICAL_SOAKING_FACTORY = BLOCKS.register("elite_chemical_soaking_factory",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock(
+                    mekanism.common.tier.FactoryTier.ELITE,
+                    () -> new mekanism.common.registration.impl.BlockRegistryObject<>(MCIBlocks.ULTIMATE_CHEMICAL_SOAKING_FACTORY, MCIItems.ULTIMATE_CHEMICAL_SOAKING_FACTORY),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock.ACTIVE) ? 8 : 0)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock> ULTIMATE_CHEMICAL_SOAKING_FACTORY = BLOCKS.register("ultimate_chemical_soaking_factory",
+            () -> new com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock(
+                    mekanism.common.tier.FactoryTier.ULTIMATE,
+                    null,
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock.ACTIVE) ? 8 : 0)));
 
     private MCIBlocks() {}
 }

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "tag": "c:circuits/ultimate"
+    },
+    "G": {
+      "tag": "c:glass_blocks"
+    },
+    "R": {
+      "item": "mekanism_complex_industries:soaking_rod"
+    },
+    "S": {
+      "item": "mekanism:chemical_crystallizer"
+    }
+  },
+  "pattern": [
+    "GGG",
+    "CSC",
+    " R "
+  ],
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:chemical_soaker"
+  }
+}

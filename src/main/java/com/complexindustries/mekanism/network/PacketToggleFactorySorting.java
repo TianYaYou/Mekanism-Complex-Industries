@@ -39,10 +39,16 @@ public record PacketToggleFactorySorting(BlockPos pos) implements IMekanismPacke
     @Override
     public void handle(IPayloadContext context) {
         Player player = context.player();
-        TileEntityChemicalSolidifierFactory factory = WorldUtils.getTileEntity(
+        TileEntityChemicalSolidifierFactory solidifierFactory = WorldUtils.getTileEntity(
                 TileEntityChemicalSolidifierFactory.class, player.level(), pos);
-        if (factory != null) {
-            factory.setSorting(!factory.isSorting());
+        if (solidifierFactory != null) {
+            solidifierFactory.setSorting(!solidifierFactory.isSorting());
+            return;
+        }
+        com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory soakingFactory = WorldUtils.getTileEntity(
+                com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory.class, player.level(), pos);
+        if (soakingFactory != null) {
+            soakingFactory.setSorting(!soakingFactory.isSorting());
         }
     }
 }

@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryController, ContainerRefineryController> {
@@ -50,8 +51,6 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                     ? multiblock.getTopHeatCapacitor().getTemperature()
                     : HeatAPI.AMBIENT_TEMP;
             double deltaT = bottomTemp - topTemp;
-            double n2Ratio = multiblock.getNitrogenRatio() * 100.0;
-            double yieldMult = multiblock.getYieldMultiplier() * 100.0;
 
             return List.of(
                     Component.translatable("gui.mekanism_complex_industries.refinery.dimensions",
@@ -61,9 +60,7 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
                     Component.translatable("gui.mekanism_complex_industries.refinery.top_temp",
                             MekanismUtils.getTemperatureDisplay(topTemp, TemperatureUnit.KELVIN, true)),
                     Component.translatable("gui.mekanism_complex_industries.refinery.delta_temp",
-                            MekanismUtils.getTemperatureDisplay(deltaT, TemperatureUnit.KELVIN, false)),
-                    Component.translatable("gui.mekanism_complex_industries.refinery.nitrogen_atmosphere",
-                            String.format("%.1f%%", n2Ratio), String.format("%.0f%%", yieldMult))
+                            MekanismUtils.getTemperatureDisplay(deltaT, TemperatureUnit.KELVIN, false))
             );
         }).spacing(1));
 
@@ -90,12 +87,29 @@ public class GuiRefineryController extends GuiMekanismTile<TileEntityRefineryCon
         ));
         inputGauge.setDummyType(MCIChemicals.DENSE_CRUDE_OIL.asStack(1));
 
-        // 3b. Nitrogen Atmosphere Gauge (25, 13)
+        // 3b. Nitrogen Atmosphere Gauge (25, 13) - Hover shows dissipation rate & yield efficiency
         GuiChemicalGauge nitrogenGauge = addRenderableWidget(new GuiChemicalGauge(
                 () -> tile.getMultiblock().nitrogenChemicalTank,
                 () -> tile.getMultiblock().getChemicalTanks(null),
                 GaugeType.STANDARD, this, 25, 13
-        ));
+        ) {
+            @Override
+            public List<Component> getTooltipText() {
+                List<Component> list = new ArrayList<>(super.getTooltipText());
+                RefineryMultiblockData mb = tile.getMultiblock();
+                if (mb.isFormed()) {
+                    double n2Ratio = mb.getNitrogenRatio() * 100.0;
+                    double yieldMult = mb.getYieldMultiplier() * 100.0;
+                    long nStored = mb.nitrogenChemicalTank != null ? mb.nitrogenChemicalTank.getStored() : 0L;
+                    double dissipationPerSec = (nStored * 0.001) * 20.0;
+
+                    list.add(Component.translatable("gui.mekanism_complex_industries.refinery.tooltip.nitrogen_ratio", String.format("%.1f%%", n2Ratio)));
+                    list.add(Component.translatable("gui.mekanism_complex_industries.refinery.tooltip.yield_efficiency", String.format("%.0f%%", yieldMult)));
+                    list.add(Component.translatable("gui.mekanism_complex_industries.refinery.tooltip.dissipation_rate", String.format("%.1f mB/s", dissipationPerSec)));
+                }
+                return list;
+            }
+        });
         nitrogenGauge.setDummyType(MCIChemicals.NITROGEN.asStack(1));
 
         // 4. Right 5 Output Chemical Tank Gauges (Layers 1..5)

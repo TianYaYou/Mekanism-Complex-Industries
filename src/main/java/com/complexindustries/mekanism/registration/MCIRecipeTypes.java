@@ -20,6 +20,9 @@ public final class MCIRecipeTypes {
     public static final RecipeTypeRegistryObject<SingleChemicalRecipeInput, ChemicalSolidifierRecipe, SingleChemical<ChemicalSolidifierRecipe>> SOLIDIFYING =
             RECIPE_TYPES.registerMek("chemical_solidifying", name -> createRecipeType(name, recipeType -> new SingleChemical<>(recipeType, ChemicalSolidifierRecipe::getInput)));
 
+    public static final RecipeTypeRegistryObject<mekanism.api.recipes.vanilla_input.SingleItemChemicalRecipeInput, com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe, mekanism.common.recipe.lookup.cache.InputRecipeCache.ItemChemical<com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe>> CHEMICAL_SOAKING =
+            RECIPE_TYPES.registerMek("chemical_soaking", name -> createRecipeType(name, recipeType -> new mekanism.common.recipe.lookup.cache.InputRecipeCache.ItemChemical<>(recipeType, com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe::getItemInput, com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe::getChemicalInput)));
+
     @SuppressWarnings("unchecked")
     private static <VANILLA_INPUT extends RecipeInput, RECIPE extends mekanism.api.recipes.MekanismRecipe<VANILLA_INPUT>, INPUT_CACHE extends IInputRecipeCache>
     MekanismRecipeType<VANILLA_INPUT, RECIPE, INPUT_CACHE> createRecipeType(ResourceLocation name, Function<MekanismRecipeType<VANILLA_INPUT, RECIPE, INPUT_CACHE>, INPUT_CACHE> inputCacheCreator) {

@@ -1,0 +1,15 @@
+{
+  "type": "mekanism:chemical_infusing",
+  "left_input": {
+    "amount": 1,
+    "chemical": "mekanism_complex_industries:benzene"
+  },
+  "right_input": {
+    "amount": 1,
+    "chemical": "mekanism:ethene"
+  },
+  "output": {
+    "amount": 1,
+    "id": "mekanism_complex_industries:styrene"
+  }
+}

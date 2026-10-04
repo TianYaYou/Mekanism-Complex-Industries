@@ -1,0 +1,16 @@
+{
+  "type": "mekanism_complex_industries:chemical_soaking",
+  "item_input": {
+    "count": 1,
+    "item": "mekanism:sawdust"
+  },
+  "chemical_input": {
+    "amount": 200,
+    "chemical": "mekanism_complex_industries:heavy_oil"
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:heavy_oil_fuel"
+  },
+  "per_tick_usage": false
+}

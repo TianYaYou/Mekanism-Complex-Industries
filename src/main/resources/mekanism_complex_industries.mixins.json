@@ -12,10 +12,12 @@
     "MixinUpgrade",
     "MixinUpgradeUtils",
     "MixinTileEntityMekanism",
-    "MixinTileComponentUpgrade"
+    "MixinTileComponentUpgrade",
+    "MixinBoilerMultiblockData"
   ],
   "client": [
-    "MixinGuiUpgradeWindow"
+    "MixinGuiUpgradeWindow",
+    "client.MixinBoilerRecipeViewerRecipe"
   ],
   "injectors": {
     "defaultRequire": 1

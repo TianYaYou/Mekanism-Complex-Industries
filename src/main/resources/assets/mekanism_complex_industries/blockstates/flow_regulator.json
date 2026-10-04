@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "mekanism_complex_industries:block/flow_regulator",
+      "x": 90
+    },
+    "facing=up": {
+      "model": "mekanism_complex_industries:block/flow_regulator",
+      "x": 270
+    },
+    "facing=north": {
+      "model": "mekanism_complex_industries:block/flow_regulator"
+    },
+    "facing=south": {
+      "model": "mekanism_complex_industries:block/flow_regulator",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mekanism_complex_industries:block/flow_regulator",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "mekanism_complex_industries:block/flow_regulator",
+      "y": 90
+    }
+  }
+}

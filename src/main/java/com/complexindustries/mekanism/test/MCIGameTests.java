@@ -11,9 +11,12 @@ import com.complexindustries.mekanism.content.refinery.TileEntityRefineryValve;
 import com.complexindustries.mekanism.content.refinery.TileEntityRefineryValve.ValveMode;
 import com.complexindustries.mekanism.content.tile.TileEntityResistiveCooler;
 import com.complexindustries.mekanism.registration.MCIBlocks;
+import com.complexindustries.mekanism.registration.MCIFluids;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.chemical.BasicChemicalTank;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import com.complexindustries.mekanism.content.refinery.RefineryMultiblockCache;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismBlocks;
@@ -854,5 +857,374 @@ public class MCIGameTests {
         } else {
             helper.fail("未能找到控制器方块实体！");
         }
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testFlowRegulatorBlockAndDyeing(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(2, 2, 2);
+        helper.setBlock(pos, MCIBlocks.FLOW_REGULATOR.get().defaultBlockState().setValue(com.complexindustries.mekanism.content.flowregulator.BlockFlowRegulator.FACING, Direction.NORTH));
+        helper.assertBlockPresent(MCIBlocks.FLOW_REGULATOR.get(), pos);
+
+        if (helper.getBlockEntity(pos) instanceof com.complexindustries.mekanism.content.flowregulator.TileEntityFlowRegulator regulator) {
+            helper.assertTrue(regulator.getDirection() == Direction.NORTH, "限流阀朝向应为 NORTH");
+            helper.assertTrue(regulator.getRingColor() == net.minecraft.world.item.DyeColor.WHITE, "限流阀圆环初始颜色应为白色");
+
+            regulator.setRingColor(net.minecraft.world.item.DyeColor.RED);
+            helper.assertTrue(regulator.getRingColor() == net.minecraft.world.item.DyeColor.RED, "限流阀染色后圆环颜色应为红色");
+            helper.succeed();
+        } else {
+            helper.fail("未能找到限流阀方块实体！");
+        }
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testFlowRegulatorRateLimitingAndDirectionality(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(3, 2, 3);
+        helper.setBlock(pos, MCIBlocks.FLOW_REGULATOR.get().defaultBlockState().setValue(com.complexindustries.mekanism.content.flowregulator.BlockFlowRegulator.FACING, Direction.NORTH));
+
+        if (helper.getBlockEntity(pos) instanceof com.complexindustries.mekanism.content.flowregulator.TileEntityFlowRegulator regulator) {
+            // Set limit to 200 mB/s (= 10 mB/t)
+            regulator.setFlowRate(200L);
+            helper.assertTrue(regulator.getFlowRate() == 200L, "流速限制应为 200 mB/s");
+
+            var nitrogen = com.complexindustries.mekanism.registration.MCIChemicals.NITROGEN.asStack(500);
+
+            // 1. Output face (NORTH) must REJECT insertion
+            var insertOutput = regulator.insertChemical(nitrogen.copy(), Direction.NORTH, Action.EXECUTE);
+            helper.assertTrue(insertOutput.getAmount() == 500L, "输出面应当拒绝化学品输入");
+
+            // 2. Input face (SOUTH) must ACCEPT insertion
+            var insertInput = regulator.insertChemical(nitrogen.copy(), Direction.SOUTH, Action.EXECUTE);
+            helper.assertTrue(insertInput.isEmpty(), "输入面应当接收化学品输入");
+            helper.assertTrue(regulator.bufferTank.getStored() == 500L, "内部缓冲槽应存入 500 mB");
+
+            // 3. Input face (SOUTH) must REJECT extraction
+            var extractInput = regulator.extractChemical(100L, Direction.SOUTH, Action.EXECUTE);
+            helper.assertTrue(extractInput.isEmpty(), "输入面应当拒绝化学品抽取");
+
+            // 4. Tick server to calculate budget (10 mB this tick)
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, regulator.getBlockState(), regulator);
+
+            // 5. Output face (NORTH) extraction should be capped at 10 mB
+            var extractOutput = regulator.extractChemical(100L, Direction.NORTH, Action.EXECUTE);
+            helper.assertTrue(extractOutput.getAmount() == 10L, "单 tick 抽取应严格受限于 10 mB (200 mB/s)");
+            helper.assertTrue(regulator.bufferTank.getStored() == 490L, "抽取后内部缓冲槽剩余 490 mB");
+
+            // Further extraction in the same tick should be empty (budget exhausted)
+            var extractMore = regulator.extractChemical(100L, Direction.NORTH, Action.EXECUTE);
+            helper.assertTrue(extractMore.isEmpty(), "同 tick 预算用尽后应当无法继续抽取");
+
+            helper.succeed();
+        } else {
+            helper.fail("未能找到限流阀方块实体！");
+        }
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testFlowRegulatorRedstoneControl(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(4, 2, 4);
+        helper.setBlock(pos, MCIBlocks.FLOW_REGULATOR.get().defaultBlockState().setValue(com.complexindustries.mekanism.content.flowregulator.BlockFlowRegulator.FACING, Direction.NORTH));
+
+        if (helper.getBlockEntity(pos) instanceof com.complexindustries.mekanism.content.flowregulator.TileEntityFlowRegulator regulator) {
+            regulator.setControlType(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.HIGH);
+            helper.assertTrue(!regulator.canFunction(), "高电平模式且无红石信号时，限流阀应关闭！");
+
+            var nitrogen = com.complexindustries.mekanism.registration.MCIChemicals.NITROGEN.asStack(200);
+            var inserted = regulator.insertChemical(nitrogen.copy(), Direction.SOUTH, Action.EXECUTE);
+            helper.assertTrue(inserted.getAmount() == 200L, "红石关闭时应拒绝化学品输入！");
+
+            regulator.setControlType(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED);
+            helper.assertTrue(regulator.canFunction(), "禁用红石控制模式下，限流阀应处于开启工作状态！");
+            var insertedEnabled = regulator.insertChemical(nitrogen.copy(), Direction.SOUTH, Action.EXECUTE);
+            helper.assertTrue(insertedEnabled.isEmpty(), "开启状态下应正常接收化学品输入！");
+
+            helper.succeed();
+        } else {
+            helper.fail("未能找到限流阀方块实体！");
+        }
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testNewPetrochemicalsRegistered(GameTestHelper helper) {
+        // Verify chemicals are registered and valid
+        helper.assertTrue(com.complexindustries.mekanism.registration.MCIChemicals.PROPYLENE.get() != null, "丙烯 (Propylene) 应成功注册！");
+        helper.assertTrue(com.complexindustries.mekanism.registration.MCIChemicals.BENZENE.get() != null, "苯 (Benzene) 应成功注册！");
+        helper.assertTrue(com.complexindustries.mekanism.registration.MCIChemicals.STYRENE.get() != null, "苯乙烯 (Styrene) 应成功注册！");
+
+        var propyleneStack = com.complexindustries.mekanism.registration.MCIChemicals.PROPYLENE.asStack(100);
+        helper.assertTrue(propyleneStack.getAmount() == 100L, "丙烯 ChemicalStack 数量应为 100");
+
+        var benzeneStack = com.complexindustries.mekanism.registration.MCIChemicals.BENZENE.asStack(250);
+        helper.assertTrue(benzeneStack.getAmount() == 250L, "苯 ChemicalStack 数量应为 250");
+
+        var styreneStack = com.complexindustries.mekanism.registration.MCIChemicals.STYRENE.asStack(500);
+        helper.assertTrue(styreneStack.getAmount() == 500L, "苯乙烯 ChemicalStack 数量应为 500");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testChemicalInfuserRecipes(GameTestHelper helper) {
+        var recipeManager = helper.getLevel().getRecipeManager();
+
+        // 1. Petroleum Gas + Hydrogen -> Propylene (1:1 -> 1)
+        net.minecraft.resources.ResourceLocation propyleneId =
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_infusing/propylene");
+        var propyleneHolder = recipeManager.byKey(propyleneId).orElse(null);
+        helper.assertTrue(propyleneHolder != null, "配方 chemical_infusing/propylene 应存在于配方管理器中！");
+        var propyleneRecipe = (mekanism.api.recipes.basic.BasicChemicalInfuserRecipe) propyleneHolder.value();
+        helper.assertTrue(propyleneRecipe.getOutputRaw().is(com.complexindustries.mekanism.registration.MCIChemicals.PROPYLENE),
+                "丙烯配方产物应为 Propylene！");
+
+        // 2. Naphtha + Oxygen -> Benzene (1:1 -> 1)
+        net.minecraft.resources.ResourceLocation benzeneId =
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_infusing/benzene");
+        var benzeneHolder = recipeManager.byKey(benzeneId).orElse(null);
+        helper.assertTrue(benzeneHolder != null, "配方 chemical_infusing/benzene 应存在于配方管理器中！");
+        var benzeneRecipe = (mekanism.api.recipes.basic.BasicChemicalInfuserRecipe) benzeneHolder.value();
+        helper.assertTrue(benzeneRecipe.getOutputRaw().is(com.complexindustries.mekanism.registration.MCIChemicals.BENZENE),
+                "苯配方产物应为 Benzene！");
+
+        // 3. Benzene + Ethene -> Styrene (1:1 -> 1)
+        net.minecraft.resources.ResourceLocation styreneId =
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_infusing/styrene");
+        var styreneHolder = recipeManager.byKey(styreneId).orElse(null);
+        helper.assertTrue(styreneHolder != null, "配方 chemical_infusing/styrene 应存在于配方管理器中！");
+        var styreneRecipe = (mekanism.api.recipes.basic.BasicChemicalInfuserRecipe) styreneHolder.value();
+        helper.assertTrue(styreneRecipe.getOutputRaw().is(com.complexindustries.mekanism.registration.MCIChemicals.STYRENE),
+                "苯乙烯配方产物应为 Styrene！");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testThermoelectricBoilerCrackingReaction(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(2, 2, 2);
+        helper.setBlock(pos, MekanismBlocks.BOILER_CASING.get());
+        mekanism.common.tile.multiblock.TileEntityBoilerCasing casing =
+                (mekanism.common.tile.multiblock.TileEntityBoilerCasing) helper.getBlockEntity(pos);
+        helper.assertTrue(casing != null, "锅炉外壳方块实体不应为空！");
+
+        mekanism.common.content.boiler.BoilerMultiblockData mb = new mekanism.common.content.boiler.BoilerMultiblockData(casing);
+        mb.setFormedForce(true);
+        mb.setWaterVolume(10);
+        mb.setSteamVolume(10);
+        mb.superheatingElements = 4;
+        mb.heatCapacitor.setHeatCapacity(1000.0, true);
+
+        // 1. Verify Petroleum Gas can be inserted into superheatedCoolantTank
+        var insertedGas = mb.superheatedCoolantTank.insert(
+                com.complexindustries.mekanism.registration.MCIChemicals.PETROLEUM_GAS.asStack(2000),
+                Action.EXECUTE, AutomationType.EXTERNAL);
+        helper.assertTrue(insertedGas.isEmpty(), "石油气应能成功注入锅炉加热冷却剂槽！");
+        helper.assertTrue(mb.superheatedCoolantTank.getStored() == 2000L, "加热冷却剂槽石油气存量应为 2000 mB！");
+
+        // 2. Verify Water can be inserted into waterTank
+        var insertedWater = mb.waterTank.insert(
+                new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER, 1000),
+                Action.EXECUTE, AutomationType.EXTERNAL);
+        helper.assertTrue(insertedWater.isEmpty(), "水应能成功注入锅炉水槽！");
+        helper.assertTrue(mb.waterTank.getFluidAmount() == 1000, "锅炉水存量应为 1000 mB！");
+
+        // 3. Test temperature < 800 K (e.g. 600 K): normal boiling suppressed, cracking NOT running
+        mb.heatCapacitor.setHeat(600.0 * mb.heatCapacitor.getHeatCapacity());
+        mb.tick(helper.getLevel());
+
+        helper.assertTrue(mb.lastBoilRate == 0, "低于 800 K 时不应发生反应，boilRate 应为 0！");
+        helper.assertTrue(mb.steamTank.isEmpty(), "低于 800 K 且注入石油气时，常规沸腾应被抑制，蒸汽槽应保持为空！");
+        helper.assertTrue(mb.superheatedCoolantTank.getStored() == 2000L, "低于 800 K 时石油气不应被消耗！");
+        helper.assertTrue(mb.waterTank.getFluidAmount() == 1000, "低于 800 K 时水不应被消耗！");
+
+        // 4. Test temperature >= 800 K (e.g. 850 K): steam cracking runs!
+        mb.heatCapacitor.setHeat(850.0 * mb.heatCapacitor.getHeatCapacity());
+        mb.tick(helper.getLevel());
+
+        helper.assertTrue(mb.lastBoilRate > 0, "达到 850 K 时裂解反应应启动，boilRate 应大于 0！实际: " + mb.lastBoilRate);
+        int cracked = mb.lastBoilRate;
+
+        // Check products in steamTank (Propylene) and cooledCoolantTank (Ethylene)
+        helper.assertTrue(mb.steamTank.getStack().is(com.complexindustries.mekanism.registration.MCIChemicals.PROPYLENE),
+                "锅炉蒸汽产物槽应产出丙烯 (Propylene)！");
+        helper.assertTrue(mb.steamTank.getStored() == (long) cracked,
+                "丙烯产出量应与裂解量完全匹配 (1:1)！期望: " + cracked + ", 实际: " + mb.steamTank.getStored());
+
+        helper.assertTrue(mb.cooledCoolantTank.getStack().is(mekanism.common.registries.MekanismChemicals.ETHENE),
+                "锅炉冷却剂槽应产出乙烯 (Ethene)！");
+        helper.assertTrue(mb.cooledCoolantTank.getStored() == (long) cracked,
+                "乙烯产出量应与裂解量完全匹配 (1:1)！期望: " + cracked + ", 实际: " + mb.cooledCoolantTank.getStored());
+
+        // Check inputs consumed: Petroleum Gas consumed 2x, Water consumed 1x (2:1 -> 1:1)
+        long expectedGasRemaining = 2000L - (cracked * 2L);
+        int expectedWaterRemaining = 1000 - cracked;
+        helper.assertTrue(mb.superheatedCoolantTank.getStored() == expectedGasRemaining,
+                "石油气消耗应严格为裂解量的2倍！期望剩余: " + expectedGasRemaining + ", 实际: " + mb.superheatedCoolantTank.getStored());
+        helper.assertTrue(mb.waterTank.getFluidAmount() == expectedWaterRemaining,
+                "水消耗应严格为裂解量的1倍！期望剩余: " + expectedWaterRemaining + ", 实际: " + mb.waterTank.getFluidAmount());
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testLiquidPropyleneAndRotaryCondensentrator(GameTestHelper helper) {
+        // 1. Verify fluid and bucket registration
+        helper.assertTrue(MCIFluids.SOURCE_LIQUID_PROPYLENE.get() != null, "液态丙烯源流体应成功注册！");
+        helper.assertTrue(MCIFluids.FLOWING_LIQUID_PROPYLENE.get() != null, "液态丙烯流动流体应成功注册！");
+        helper.assertTrue(com.complexindustries.mekanism.registration.MCIItems.LIQUID_PROPYLENE_BUCKET.get() != null, "液态丙烯桶应成功注册！");
+
+        // 2. Verify Rotary Condensentrator recipe
+        var recipeManager = helper.getLevel().getRecipeManager();
+        net.minecraft.resources.ResourceLocation rotaryId =
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "rotary/liquid_propylene");
+        var holder = recipeManager.byKey(rotaryId).orElse(null);
+        helper.assertTrue(holder != null, "旋转冷凝机配方 rotary/liquid_propylene 应存在！");
+        helper.assertTrue(holder.value() instanceof mekanism.api.recipes.basic.BasicRotaryRecipe, "配方类型应为 BasicRotaryRecipe！");
+
+        var recipe = (mekanism.api.recipes.basic.BasicRotaryRecipe) holder.value();
+        helper.assertTrue(recipe.hasChemicalToFluid(), "配方应支持 气态丙烯 -> 液态丙烯！");
+        helper.assertTrue(recipe.hasFluidToChemical(), "配方应支持 液态丙烯 -> 气态丙烯！");
+        helper.assertTrue(recipe.getChemicalOutputRaw().is(com.complexindustries.mekanism.registration.MCIChemicals.PROPYLENE), "汽化产物应为气态丙烯！");
+        helper.assertTrue(recipe.getFluidOutputRaw().getFluid() == MCIFluids.SOURCE_LIQUID_PROPYLENE.get(), "冷凝产物应为液态丙烯！");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testPolypropylenePelletReactionRecipe(GameTestHelper helper) {
+        helper.assertTrue(com.complexindustries.mekanism.registration.MCIItems.POLYPROPYLENE_PELLET.get() != null, "聚丙烯颗粒应成功注册！");
+
+        var recipeManager = helper.getLevel().getRecipeManager();
+        net.minecraft.resources.ResourceLocation reactionId =
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "reaction/polypropylene_pellet");
+        var holder = recipeManager.byKey(reactionId).orElse(null);
+        helper.assertTrue(holder != null, "加压反应室配方 reaction/polypropylene_pellet 应存在！");
+        helper.assertTrue(holder.value() instanceof mekanism.api.recipes.basic.BasicPressurizedReactionRecipe, "配方类型应为 BasicPressurizedReactionRecipe！");
+
+        var recipe = (mekanism.api.recipes.basic.BasicPressurizedReactionRecipe) holder.value();
+        helper.assertTrue(recipe.getOutputItem().is(com.complexindustries.mekanism.registration.MCIItems.POLYPROPYLENE_PELLET.get()), "反应产物物品应为聚丙烯颗粒！");
+        helper.assertTrue(recipe.getInputFluid().test(new FluidStack(MCIFluids.SOURCE_LIQUID_PROPYLENE.get(), 50)), "液态丙烯消耗应为 50 mB！");
+        helper.assertTrue(recipe.getInputChemical().amount() == 10, "氧气消耗应为 10 mB！");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testSoakingRodCraftingRecipe(GameTestHelper helper) {
+        helper.assertTrue(com.complexindustries.mekanism.registration.MCIItems.SOAKING_ROD.get() != null, "浸泡棒应成功注册！");
+
+        var recipeManager = helper.getLevel().getRecipeManager();
+        net.minecraft.resources.ResourceLocation rodId =
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "soaking_rod");
+        var holder = recipeManager.byKey(rodId).orElse(null);
+        helper.assertTrue(holder != null, "浸泡棒合成配方 soaking_rod 应存在！");
+        helper.assertTrue(holder.value().getResultItem(helper.getLevel().registryAccess()).is(com.complexindustries.mekanism.registration.MCIItems.SOAKING_ROD.get()), "合成产物应为浸泡棒！");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testHeavyOilFuelProperties(GameTestHelper helper) {
+        var fuelItem = com.complexindustries.mekanism.registration.MCIItems.HEAVY_OIL_FUEL.get();
+        helper.assertTrue(fuelItem instanceof com.complexindustries.mekanism.content.item.HeavyOilFuelItem, "重油燃料物品应为 HeavyOilFuelItem！");
+        var fuelStack = new ItemStack(fuelItem);
+        int burnTime = fuelItem.getBurnTime(fuelStack, null);
+        helper.assertTrue(burnTime == 25600, "重油燃料燃烧时间应严格为 25600 ticks (1280 秒)！实际: " + burnTime);
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testChemicalSoakerOperationAndUpgrade(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(2, 2, 2);
+        helper.setBlock(pos, MCIBlocks.CHEMICAL_SOAKER.get().defaultBlockState());
+        helper.assertBlockPresent(MCIBlocks.CHEMICAL_SOAKER.get(), pos);
+
+        // Verify non-full block shape / noOcclusion
+        BlockState state = helper.getBlockState(pos);
+        helper.assertTrue(!state.canOcclude(), "化学浸泡室方块必须为非完整方块 (noOcclusion)！");
+
+        var te = helper.getBlockEntity(pos);
+        helper.assertTrue(te instanceof com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoaker, "方块实体应为 TileEntityChemicalSoaker！");
+        var soaker = (com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoaker) te;
+
+        // Supply inputs: Heavy Oil (200 mB) + Sawdust (1) + Energy
+        soaker.chemicalTank.setStack(com.complexindustries.mekanism.registration.MCIChemicals.HEAVY_OIL.asStack(1000));
+        soaker.inputSlot.setStack(new ItemStack(mekanism.common.registries.MekanismItems.SAWDUST.asItem(), 5));
+        // Add 8 Speed and 8 Energy upgrades to make processing fast and efficient
+        soaker.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.SPEED, 8);
+        soaker.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.ENERGY, 8);
+        soaker.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.MUFFLING, 1);
+        helper.assertTrue(soaker.getUpgradeComponent().getUpgrades(mekanism.api.Upgrade.MUFFLING) == 1, "静音升级应至多安装1枚！");
+        soaker.getEnergyContainer().insert(1_000_000L, Action.EXECUTE, AutomationType.INTERNAL);
+
+        // Tick soaker until reaction produces Heavy Oil Fuel
+        for (int i = 0; i < 40; i++) {
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), soaker);
+            if (!soaker.outputSlot.isEmpty()) {
+                break;
+            }
+        }
+
+        helper.assertTrue(!soaker.outputSlot.isEmpty(), "化学浸泡反应应完成并产生输出！");
+        helper.assertTrue(soaker.outputSlot.getStack().is(com.complexindustries.mekanism.registration.MCIItems.HEAVY_OIL_FUEL.get()), "输出物品应为重油燃料！");
+        helper.assertTrue(soaker.chemicalTank.getStored() == 800L, "重油消耗量应为 200 mB！剩余: " + soaker.chemicalTank.getStored());
+        helper.assertTrue(soaker.inputSlot.getStack().getCount() == 4, "木屑消耗量应为 1！剩余: " + soaker.inputSlot.getStack().getCount());
+
+        // Test Tier Installer upgrade to Basic Chemical Soaking Factory
+        Player fakePlayer = FakePlayerFactory.getMinecraft(helper.getLevel());
+        BlockPos absolutePos = helper.absolutePos(pos);
+        ItemStack basicInstaller = mekanism.common.registries.MekanismItems.BASIC_TIER_INSTALLER.asStack();
+        fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, basicInstaller);
+        net.minecraft.world.phys.BlockHitResult hit = new net.minecraft.world.phys.BlockHitResult(
+                new net.minecraft.world.phys.Vec3(absolutePos.getX() + 0.5, absolutePos.getY() + 0.5, absolutePos.getZ() + 0.5),
+                Direction.UP, absolutePos, false);
+        net.minecraft.world.item.context.UseOnContext ctx = new net.minecraft.world.item.context.UseOnContext(fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        net.minecraft.world.InteractionResult res = basicInstaller.getItem().useOn(ctx);
+        helper.assertTrue(res == net.minecraft.world.InteractionResult.CONSUME, "初级安装器使用结果应为 CONSUME");
+        helper.assertBlockPresent(MCIBlocks.BASIC_CHEMICAL_SOAKING_FACTORY.get(), pos);
+
+        var basicFactory = (com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory) helper.getBlockEntity(pos);
+        helper.assertTrue(basicFactory != null, "升级后实体应为 TileEntityChemicalSoakingFactory！");
+        helper.assertTrue(basicFactory.tier == mekanism.common.tier.FactoryTier.BASIC, "层级应为 BASIC！");
+        helper.assertTrue(basicFactory.tier.processes == 3, "初级浸泡工厂应有 3 条流水线！");
+        helper.assertTrue(basicFactory.chemicalTank.getStored() == 800L, "升级后重油存量应保留 800 mB！");
+        helper.assertTrue(basicFactory.inputSlots.get(0).getStack().getCount() == 4, "升级后输入槽木屑应保留！");
+        helper.assertTrue(basicFactory.outputSlots.get(0).getStack().is(com.complexindustries.mekanism.registration.MCIItems.HEAVY_OIL_FUEL.get()), "升级后输出槽燃料应保留！");
+
+        // Test Container validity
+        var container = new com.complexindustries.mekanism.content.soaker.ContainerChemicalSoakingFactory(1, fakePlayer.getInventory(), basicFactory);
+        helper.assertTrue(container.stillValid(fakePlayer), "工厂容器应处于有效状态！");
+        container.removed(fakePlayer);
+
+        // Test Sorting toggle
+        helper.assertTrue(basicFactory.isSorting(), "初始应开启自动分流排序！");
+        basicFactory.setSorting(false);
+        helper.assertTrue(!basicFactory.isSorting(), "切换后分流排序应为关闭！");
+        basicFactory.setSorting(true);
+
+        // Test Upgrade chain to Ultimate Factory
+        ItemStack advInstaller = mekanism.common.registries.MekanismItems.ADVANCED_TIER_INSTALLER.asStack();
+        fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, advInstaller);
+        ctx = new net.minecraft.world.item.context.UseOnContext(fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        advInstaller.getItem().useOn(ctx);
+        helper.assertBlockPresent(MCIBlocks.ADVANCED_CHEMICAL_SOAKING_FACTORY.get(), pos);
+
+        ItemStack eliteInstaller = mekanism.common.registries.MekanismItems.ELITE_TIER_INSTALLER.asStack();
+        fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, eliteInstaller);
+        ctx = new net.minecraft.world.item.context.UseOnContext(fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        eliteInstaller.getItem().useOn(ctx);
+        helper.assertBlockPresent(MCIBlocks.ELITE_CHEMICAL_SOAKING_FACTORY.get(), pos);
+
+        ItemStack ultInstaller = mekanism.common.registries.MekanismItems.ULTIMATE_TIER_INSTALLER.asStack();
+        fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ultInstaller);
+        ctx = new net.minecraft.world.item.context.UseOnContext(fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+        ultInstaller.getItem().useOn(ctx);
+        helper.assertBlockPresent(MCIBlocks.ULTIMATE_CHEMICAL_SOAKING_FACTORY.get(), pos);
+
+        var ultFactory = (com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory) helper.getBlockEntity(pos);
+        helper.assertTrue(ultFactory.tier == mekanism.common.tier.FactoryTier.ULTIMATE, "层级应为 ULTIMATE！");
+        helper.assertTrue(ultFactory.tier.processes == 9, "终极浸泡工厂流水线数应为 9！");
+        helper.assertTrue(!ultFactory.canBeUpgraded(), "终极工厂不应再支持继续升级！");
+
+        helper.succeed();
     }
 }

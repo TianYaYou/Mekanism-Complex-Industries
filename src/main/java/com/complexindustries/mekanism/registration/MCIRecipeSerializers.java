@@ -15,5 +15,8 @@ public final class MCIRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<BasicChemicalSolidifierRecipe>> SOLIDIFYING =
             RECIPE_SERIALIZERS.register("chemical_solidifying", ChemicalSolidifierRecipeSerializer::create);
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe>> CHEMICAL_SOAKING =
+            RECIPE_SERIALIZERS.register("chemical_soaking", () -> mekanism.common.recipe.serializer.MekanismRecipeSerializer.itemChemicalToItem(com.complexindustries.mekanism.recipe.ChemicalSoakingRecipe::new));
+
     private MCIRecipeSerializers() {}
 }

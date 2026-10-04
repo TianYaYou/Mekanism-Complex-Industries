@@ -4,6 +4,8 @@ import com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolid
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import com.complexindustries.mekanism.registration.MCIContainerTypes;
 import com.complexindustries.mekanism.registration.MCITileEntityTypes;
+import mekanism.common.block.attribute.Attribute;
+import mekanism.common.block.attribute.AttributeGui;
 import mekanism.common.block.attribute.AttributeSideConfig;
 import mekanism.common.block.interfaces.IHasTileEntity;
 import mekanism.common.block.interfaces.ITypeBlock;
@@ -13,6 +15,7 @@ import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.base.WrenchResult;
 import mekanism.common.util.MekanismUtils;
+import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -109,41 +112,33 @@ public class ChemicalSolidifierBlock extends Block implements IHasTileEntity<Til
 
     @NotNull
     @Override
-    protected ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player,
+    protected ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player,
             @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
         if (stack.isEmpty()) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        if (level.getBlockEntity(pos) instanceof TileEntityChemicalSolidifier tile) {
-            if (MekanismUtils.canUseAsWrench(stack)) {
-                if (!level.isClientSide) {
-                    WrenchResult result = tile.tryWrench(state, player, stack);
-                    if (result != WrenchResult.PASS) {
-                        return ItemInteractionResult.SUCCESS;
-                    }
-                }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        TileEntityMekanism tile = WorldUtils.getTileEntity(TileEntityMekanism.class, world, pos);
+        if (tile == null) {
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        } else if (world.isClientSide) {
+            if (!Attribute.has(this, AttributeGui.class) && MekanismUtils.canUseAsWrench(stack)) {
+                return ItemInteractionResult.SUCCESS;
             }
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return tile.tryWrench(state, player, stack).getInteractionResult();
     }
 
     @NotNull
     @Override
-    protected InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hit) {
-        if (level.getBlockEntity(pos) instanceof TileEntityChemicalSolidifier tile) {
-            if (player.isShiftKeyDown()) {
-                return InteractionResult.PASS;
-            }
-            if (!level.isClientSide) {
-                player.openMenu(
-                        MCIContainerTypes.CHEMICAL_SOLIDIFIER.getProvider(tile.getDisplayName(), tile, false),
-                        buf -> buf.writeBlockPos(pos)
-                );
-            }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+    protected InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hit) {
+        TileEntityMekanism tile = WorldUtils.getTileEntity(TileEntityMekanism.class, world, pos);
+        if (tile == null) {
+            return InteractionResult.PASS;
+        } else if (world.isClientSide) {
+            return Attribute.has(this, AttributeGui.class) ? InteractionResult.SUCCESS : InteractionResult.PASS;
         }
-        return InteractionResult.PASS;
+        return tile.openGui(player);
     }
 
     @Nullable

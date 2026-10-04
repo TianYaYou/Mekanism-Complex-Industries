@@ -56,5 +56,24 @@ public final class MCIFluids {
             .levelDecreasePerBlock(2)
             .tickRate(15);
 
+    public static final DeferredHolder<FluidType, FluidType> LIQUID_PROPYLENE_TYPE =
+            FLUID_TYPES.register("liquid_propylene", com.complexindustries.mekanism.content.fluid.LiquidPropyleneFluidType::new);
+
+    public static final DeferredHolder<Fluid, FlowingFluid> SOURCE_LIQUID_PROPYLENE = FLUIDS.register("liquid_propylene",
+            () -> new BaseFlowingFluid.Source(MCIFluids.LIQUID_PROPYLENE_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> FLOWING_LIQUID_PROPYLENE = FLUIDS.register("flowing_liquid_propylene",
+            () -> new BaseFlowingFluid.Flowing(MCIFluids.LIQUID_PROPYLENE_PROPERTIES));
+
+    public static final BaseFlowingFluid.Properties LIQUID_PROPYLENE_PROPERTIES = new BaseFlowingFluid.Properties(
+            LIQUID_PROPYLENE_TYPE,
+            SOURCE_LIQUID_PROPYLENE,
+            FLOWING_LIQUID_PROPYLENE)
+            .bucket(MCIItems.LIQUID_PROPYLENE_BUCKET)
+            .block(MCIBlocks.LIQUID_PROPYLENE_BLOCK)
+            .slopeFindDistance(4)
+            .levelDecreasePerBlock(1)
+            .tickRate(5);
+
     private MCIFluids() {}
 }

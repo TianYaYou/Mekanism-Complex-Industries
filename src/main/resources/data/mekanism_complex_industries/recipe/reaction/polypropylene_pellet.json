@@ -1,0 +1,20 @@
+{
+  "type": "mekanism:reaction",
+  "chemical_input": {
+    "amount": 10,
+    "chemical": "mekanism:oxygen"
+  },
+  "duration": 60,
+  "fluid_input": {
+    "amount": 50,
+    "fluid": "mekanism_complex_industries:liquid_propylene"
+  },
+  "item_input": {
+    "count": 1,
+    "item": "mekanism:substrate"
+  },
+  "item_output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:polypropylene_pellet"
+  }
+}

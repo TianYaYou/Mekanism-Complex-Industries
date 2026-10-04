@@ -28,5 +28,13 @@ public final class MCIChemicals {
     // Layer 1 (Bottom): Bitumen: 0x1A1A1A
     public static final DeferredChemical<Chemical> BITUMEN = CHEMICALS.register("bitumen", 0x1A1A1A);
 
+    // Petrochemical Products:
+    // Propylene: 0xD8E866 (lime-yellow alkene)
+    public static final DeferredChemical<Chemical> PROPYLENE = CHEMICALS.register("propylene", 0xD8E866);
+    // Benzene: 0x7EC8E3 (sky-blue aromatic)
+    public static final DeferredChemical<Chemical> BENZENE = CHEMICALS.register("benzene", 0x7EC8E3);
+    // Styrene: 0xE6A8D7 (orchid/pink monomer)
+    public static final DeferredChemical<Chemical> STYRENE = CHEMICALS.register("styrene", 0xE6A8D7);
+
     private MCIChemicals() {}
 }

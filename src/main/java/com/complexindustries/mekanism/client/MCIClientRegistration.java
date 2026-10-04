@@ -2,13 +2,22 @@ package com.complexindustries.mekanism.client;
 
 import com.complexindustries.mekanism.MCIConstants;
 import com.complexindustries.mekanism.client.gui.GuiAirCompressor;
+import com.complexindustries.mekanism.client.gui.GuiChemicalSolidifier;
+import com.complexindustries.mekanism.client.gui.GuiChemicalSolidifierFactory;
 import com.complexindustries.mekanism.client.gui.GuiResistiveCooler;
+import com.complexindustries.mekanism.content.flowregulator.GuiFlowRegulator;
+import com.complexindustries.mekanism.content.flowregulator.TileEntityFlowRegulator;
 import com.complexindustries.mekanism.content.freezer.GuiFreezerController;
+import com.complexindustries.mekanism.content.refinery.GuiRefineryController;
+import com.complexindustries.mekanism.registration.MCIBlocks;
 import com.complexindustries.mekanism.registration.MCIContainerTypes;
 import mekanism.client.ClientRegistrationUtil;
+import mekanism.common.util.WorldUtils;
+import net.minecraft.world.item.DyeColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 @EventBusSubscriber(modid = MCIConstants.MODID, value = Dist.CLIENT)
@@ -19,8 +28,35 @@ public class MCIClientRegistration {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.RESISTIVE_COOLER, GuiResistiveCooler::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.FREEZER_CONTROLLER, GuiFreezerController::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.AIR_COMPRESSOR, GuiAirCompressor::new);
-        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.REFINERY_CONTROLLER, com.complexindustries.mekanism.content.refinery.GuiRefineryController::new);
-        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOLIDIFIER, com.complexindustries.mekanism.client.gui.GuiChemicalSolidifier::new);
-        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOLIDIFIER_FACTORY, com.complexindustries.mekanism.client.gui.GuiChemicalSolidifierFactory::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.REFINERY_CONTROLLER, GuiRefineryController::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOLIDIFIER, GuiChemicalSolidifier::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOLIDIFIER_FACTORY, GuiChemicalSolidifierFactory::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.FLOW_REGULATOR, GuiFlowRegulator::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOAKER, com.complexindustries.mekanism.client.gui.GuiChemicalSoaker::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOAKING_FACTORY, com.complexindustries.mekanism.client.gui.GuiChemicalSoakingFactory::new);
+    }
+
+    @SubscribeEvent
+    public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        event.register((state, level, pos, tintIndex) -> {
+            if (tintIndex == 0 && level != null && pos != null) {
+                TileEntityFlowRegulator tile = WorldUtils.getTileEntity(TileEntityFlowRegulator.class, level, pos);
+                if (tile != null) {
+                    return tile.getRingColor().getTextureDiffuseColor();
+                }
+            }
+            return -1;
+        }, MCIBlocks.FLOW_REGULATOR.get());
+    }
+
+    @SubscribeEvent
+    public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        event.register((stack, tintIndex) -> {
+            if (tintIndex == 0) {
+                return DyeColor.WHITE.getTextureDiffuseColor();
+            }
+            return -1;
+        }, MCIBlocks.FLOW_REGULATOR.asItem());
     }
 }
+

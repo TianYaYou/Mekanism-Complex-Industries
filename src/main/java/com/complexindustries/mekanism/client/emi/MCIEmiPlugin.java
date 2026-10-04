@@ -157,5 +157,32 @@ public class MCIEmiPlugin implements EmiPlugin {
                         Component.translatable("gui.mekanism_complex_industries.jei.chemical_solidifier.usage_val"),
                         Component.translatable("gui.mekanism_complex_industries.jei.chemical_solidifier.duration_val")
                 )));
+
+        // 7. Chemical Soaking Recipes
+        registry.addCategory(CHEMICAL_SOAKING_CATEGORY);
+        registry.addWorkstation(CHEMICAL_SOAKING_CATEGORY, EmiStack.of(MCIBlocks.CHEMICAL_SOAKER.get()));
+        registry.addWorkstation(CHEMICAL_SOAKING_CATEGORY, EmiStack.of(MCIBlocks.BASIC_CHEMICAL_SOAKING_FACTORY.get()));
+        registry.addWorkstation(CHEMICAL_SOAKING_CATEGORY, EmiStack.of(MCIBlocks.ADVANCED_CHEMICAL_SOAKING_FACTORY.get()));
+        registry.addWorkstation(CHEMICAL_SOAKING_CATEGORY, EmiStack.of(MCIBlocks.ELITE_CHEMICAL_SOAKING_FACTORY.get()));
+        registry.addWorkstation(CHEMICAL_SOAKING_CATEGORY, EmiStack.of(MCIBlocks.ULTIMATE_CHEMICAL_SOAKING_FACTORY.get()));
+
+        registry.addRecipe(new ChemicalSoakingEmiRecipe(CHEMICAL_SOAKING_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_soaking/heavy_oil_fuel"),
+                new com.complexindustries.mekanism.client.jei.ChemicalSoakingJEIRecipe(
+                        java.util.List.of(new ItemStack(mekanism.common.registries.MekanismItems.SAWDUST.asItem())),
+                        java.util.List.of(MCIChemicals.HEAVY_OIL.asStack(200)),
+                        new ItemStack(com.complexindustries.mekanism.registration.MCIItems.HEAVY_OIL_FUEL.get())
+                )));
     }
+
+    public static final EmiRecipeCategory CHEMICAL_SOAKING_CATEGORY = new EmiRecipeCategory(
+            ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_soaking"),
+            EmiStack.of(MCIBlocks.CHEMICAL_SOAKER.get()),
+            EmiStack.of(MCIBlocks.CHEMICAL_SOAKER.get())
+    ) {
+        @Override
+        public Component getName() {
+            return Component.translatable("gui.mekanism_complex_industries.chemical_soaker.category");
+        }
+    };
 }

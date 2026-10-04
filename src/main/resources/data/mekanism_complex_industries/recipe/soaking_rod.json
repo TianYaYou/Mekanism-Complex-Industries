@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "tag": "c:glass_blocks"
+    },
+    "P": {
+      "item": "mekanism_complex_industries:polypropylene_pellet"
+    }
+  },
+  "pattern": [
+    "GPG",
+    "GPG",
+    "GPG"
+  ],
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:soaking_rod"
+  }
+}

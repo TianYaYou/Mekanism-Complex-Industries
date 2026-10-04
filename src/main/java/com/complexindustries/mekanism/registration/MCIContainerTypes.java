@@ -32,5 +32,14 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.ContainerChemicalSolidifierFactory> CHEMICAL_SOLIDIFIER_FACTORY =
             CONTAINER_TYPES.register("chemical_solidifier_factory", com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifierFactory.class, com.complexindustries.mekanism.content.solidifier.ContainerChemicalSolidifierFactory::new);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.flowregulator.ContainerFlowRegulator> FLOW_REGULATOR =
+            CONTAINER_TYPES.register("flow_regulator", com.complexindustries.mekanism.content.flowregulator.TileEntityFlowRegulator.class, com.complexindustries.mekanism.content.flowregulator.ContainerFlowRegulator::new);
+
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.soaker.ContainerChemicalSoaker> CHEMICAL_SOAKER =
+            CONTAINER_TYPES.register("chemical_soaker", com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoaker.class, com.complexindustries.mekanism.content.soaker.ContainerChemicalSoaker::new);
+
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.soaker.ContainerChemicalSoakingFactory> CHEMICAL_SOAKING_FACTORY =
+            CONTAINER_TYPES.register("chemical_soaking_factory", com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory.class, com.complexindustries.mekanism.content.soaker.ContainerChemicalSoakingFactory::new);
+
     private MCIContainerTypes() {}
 }

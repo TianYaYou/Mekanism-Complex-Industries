@@ -78,6 +78,13 @@ public final class MCITileEntityTypes {
                     .withSimple(Capabilities.CONFIGURABLE)
                     .build();
 
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.flowregulator.TileEntityFlowRegulator> FLOW_REGULATOR =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.FLOW_REGULATOR, com.complexindustries.mekanism.content.flowregulator.TileEntityFlowRegulator::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
     public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier> CHEMICAL_SOLIDIFIER =
             TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.CHEMICAL_SOLIDIFIER, com.complexindustries.mekanism.content.solidifier.TileEntityChemicalSolidifier::new)
                     .clientTicker(TileEntityMekanism::tickClient)
@@ -119,6 +126,50 @@ public final class MCITileEntityTypes {
             case ADVANCED -> ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY;
             case ELITE -> ELITE_CHEMICAL_SOLIDIFIER_FACTORY;
             case ULTIMATE -> ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY;
+        };
+    }
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoaker> CHEMICAL_SOAKER =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.CHEMICAL_SOAKER, com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoaker::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory> BASIC_CHEMICAL_SOAKING_FACTORY =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.BASIC_CHEMICAL_SOAKING_FACTORY, com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory> ADVANCED_CHEMICAL_SOAKING_FACTORY =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.ADVANCED_CHEMICAL_SOAKING_FACTORY, com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory> ELITE_CHEMICAL_SOAKING_FACTORY =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.ELITE_CHEMICAL_SOAKING_FACTORY, com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory> ULTIMATE_CHEMICAL_SOAKING_FACTORY =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.ULTIMATE_CHEMICAL_SOAKING_FACTORY, com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory> getSoakingFactoryTile(mekanism.common.tier.FactoryTier tier) {
+        return switch (tier) {
+            case BASIC -> BASIC_CHEMICAL_SOAKING_FACTORY;
+            case ADVANCED -> ADVANCED_CHEMICAL_SOAKING_FACTORY;
+            case ELITE -> ELITE_CHEMICAL_SOAKING_FACTORY;
+            case ULTIMATE -> ULTIMATE_CHEMICAL_SOAKING_FACTORY;
         };
     }
 

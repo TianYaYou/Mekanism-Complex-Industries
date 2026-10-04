@@ -33,10 +33,20 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.ADVANCED_CHEMICAL_SOLIDIFIER_FACTORY.get());
                         output.accept(MCIItems.ELITE_CHEMICAL_SOLIDIFIER_FACTORY.get());
                         output.accept(MCIItems.ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY.get());
+                        output.accept(MCIItems.LIQUID_PROPYLENE_BUCKET.get());
+                        output.accept(MCIItems.POLYPROPYLENE_PELLET.get());
+                        output.accept(MCIItems.SOAKING_ROD.get());
+                        output.accept(MCIItems.HEAVY_OIL_FUEL.get());
+                        output.accept(MCIItems.CHEMICAL_SOAKER.get());
+                        output.accept(MCIItems.BASIC_CHEMICAL_SOAKING_FACTORY.get());
+                        output.accept(MCIItems.ADVANCED_CHEMICAL_SOAKING_FACTORY.get());
+                        output.accept(MCIItems.ELITE_CHEMICAL_SOAKING_FACTORY.get());
+                        output.accept(MCIItems.ULTIMATE_CHEMICAL_SOAKING_FACTORY.get());
                         output.accept(MCIItems.REFINERY_CASING.get());
                         output.accept(MCIItems.REFINERY_VALVE.get());
                         output.accept(MCIItems.REFINERY_CONTROLLER.get());
                         output.accept(MCIItems.REFINERY_DREDGE_PIPE.get());
+                        output.accept(MCIItems.FLOW_REGULATOR.get());
                     })
                     .build());
 

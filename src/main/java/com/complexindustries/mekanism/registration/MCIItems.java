@@ -72,6 +72,10 @@ public final class MCIItems {
             () -> new MCIBlockItem(MCIBlocks.REFINERY_DREDGE_PIPE.get(), new Item.Properties(),
                     "description.mekanism_complex_industries.refinery_dredge_pipe", false));
 
+    public static final DeferredItem<BlockItem> FLOW_REGULATOR = ITEMS.register("flow_regulator",
+            () -> new MCIBlockItem(MCIBlocks.FLOW_REGULATOR.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.flow_regulator", true));
+
     public static final DeferredItem<BlockItem> BITUMEN_BLOCK = ITEMS.register("bitumen_block",
             () -> new MCIBlockItem(MCIBlocks.BITUMEN_BLOCK.get(), new Item.Properties(),
                     "description.mekanism_complex_industries.bitumen_block", false));
@@ -133,6 +137,36 @@ public final class MCIItems {
     public static final DeferredItem<BlockItem> ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY = ITEMS.register("ultimate_chemical_solidifier_factory",
             () -> new MCIBlockItem(MCIBlocks.ULTIMATE_CHEMICAL_SOLIDIFIER_FACTORY.get(), new Item.Properties(),
                     "description.mekanism_complex_industries.chemical_solidifier_factory", true));
+
+    public static final DeferredItem<BucketItem> LIQUID_PROPYLENE_BUCKET = ITEMS.register("liquid_propylene_bucket",
+            () -> new BucketItem(MCIFluids.SOURCE_LIQUID_PROPYLENE.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
+
+    public static final DeferredItem<Item> POLYPROPYLENE_PELLET = ITEMS.registerSimpleItem("polypropylene_pellet");
+
+    public static final DeferredItem<Item> SOAKING_ROD = ITEMS.registerSimpleItem("soaking_rod");
+
+    public static final DeferredItem<com.complexindustries.mekanism.content.item.HeavyOilFuelItem> HEAVY_OIL_FUEL = ITEMS.register("heavy_oil_fuel",
+            () -> new com.complexindustries.mekanism.content.item.HeavyOilFuelItem(new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> CHEMICAL_SOAKER = ITEMS.register("chemical_soaker",
+            () -> new MCIBlockItem(MCIBlocks.CHEMICAL_SOAKER.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.chemical_soaker", true));
+
+    public static final DeferredItem<BlockItem> BASIC_CHEMICAL_SOAKING_FACTORY = ITEMS.register("basic_chemical_soaking_factory",
+            () -> new MCIBlockItem(MCIBlocks.BASIC_CHEMICAL_SOAKING_FACTORY.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.chemical_soaking_factory", true));
+
+    public static final DeferredItem<BlockItem> ADVANCED_CHEMICAL_SOAKING_FACTORY = ITEMS.register("advanced_chemical_soaking_factory",
+            () -> new MCIBlockItem(MCIBlocks.ADVANCED_CHEMICAL_SOAKING_FACTORY.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.chemical_soaking_factory", true));
+
+    public static final DeferredItem<BlockItem> ELITE_CHEMICAL_SOAKING_FACTORY = ITEMS.register("elite_chemical_soaking_factory",
+            () -> new MCIBlockItem(MCIBlocks.ELITE_CHEMICAL_SOAKING_FACTORY.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.chemical_soaking_factory", true));
+
+    public static final DeferredItem<BlockItem> ULTIMATE_CHEMICAL_SOAKING_FACTORY = ITEMS.register("ultimate_chemical_soaking_factory",
+            () -> new MCIBlockItem(MCIBlocks.ULTIMATE_CHEMICAL_SOAKING_FACTORY.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.chemical_soaking_factory", true));
 
     private MCIItems() {}
 }
