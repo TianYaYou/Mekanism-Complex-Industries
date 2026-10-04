@@ -5,7 +5,7 @@ import mekanism.common.lib.multiblock.MultiblockManager;
 
 public final class MCIRefineryMultiblock {
     public static final MultiblockManager<RefineryMultiblockData> REFINERY_MANAGER =
-            new MultiblockManager<>("industrialRefinery", MultiblockCache::new, RefineryValidator::new);
+            new MultiblockManager<>("industrialRefinery", RefineryMultiblockCache::new, RefineryValidator::new);
 
     private MCIRefineryMultiblock() {}
 }

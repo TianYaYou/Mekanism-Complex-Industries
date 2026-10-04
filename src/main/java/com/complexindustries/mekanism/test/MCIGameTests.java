@@ -13,6 +13,8 @@ import com.complexindustries.mekanism.content.tile.TileEntityResistiveCooler;
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
+import mekanism.api.chemical.BasicChemicalTank;
+import com.complexindustries.mekanism.content.refinery.RefineryMultiblockCache;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.TileEntityMekanism;
@@ -684,8 +686,8 @@ public class MCIGameTests {
                 var cachedTanks = cache.getChemicalTanks(null);
                 helper.assertTrue(cachedTanks != null && cachedTanks.size() >= 7, "缓存应包含7个化学品槽位！");
                 helper.assertTrue(cachedTanks.get(0).getStored() == inputAmount, "缓存中输入化学品数量不应丢失！期望: " + inputAmount + ", 实际: " + cachedTanks.get(0).getStored());
-                helper.assertTrue(cachedTanks.get(1).getStored() == nitrogenAmount, "缓存中氮气气氛数量不应丢失！期望: " + nitrogenAmount + ", 实际: " + cachedTanks.get(1).getStored());
-                helper.assertTrue(cachedTanks.get(2).getStored() == bitumenAmount, "缓存中沥青产物不应丢失！期望: " + bitumenAmount + ", 实际: " + cachedTanks.get(2).getStored());
+                helper.assertTrue(cachedTanks.get(1).getStored() == bitumenAmount, "缓存中沥青产物不应丢失！期望: " + bitumenAmount + ", 实际: " + cachedTanks.get(1).getStored());
+                helper.assertTrue(cachedTanks.get(6).getStored() == nitrogenAmount, "缓存中氮气气氛数量不应丢失！期望: " + nitrogenAmount + ", 实际: " + cachedTanks.get(6).getStored());
 
                 // 5. Replace the casing block and re-form
                 helper.setBlock(testCasingPos, MCIBlocks.REFINERY_CASING.get());
@@ -829,5 +831,28 @@ public class MCIGameTests {
                 helper.fail("未能找到控制器方块实体！");
             }
         });
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testLegacy6TankCacheBackwardCompatibility(GameTestHelper helper) {
+        // Simulate a legacy save with only 6 chemical tanks
+        var cache = new RefineryMultiblockCache();
+        var cacheTanks = cache.getChemicalTanks(null);
+        for (int i = 0; i < 6; i++) {
+            cacheTanks.add(BasicChemicalTank.createAllValid(Long.MAX_VALUE, cache));
+        }
+        helper.assertTrue(cacheTanks.size() == 6, "旧存档缓存应为 6 个化学品槽！");
+
+        BlockPos controllerPos = new BlockPos(1, 1, 1);
+        helper.setBlock(controllerPos, MCIBlocks.REFINERY_CONTROLLER.get());
+        if (helper.getBlockEntity(controllerPos) instanceof TileEntityRefineryController controller) {
+            var mb = controller.getMultiblock();
+            // sync data into the 6-tank cache - MUST NOT THROW IndexOutOfBoundsException!
+            cache.sync(mb);
+            helper.assertTrue(cache.getChemicalTanks(null).size() == 7, "同步后缓存应自动安全扩展至 7 个化学品槽！");
+            helper.succeed();
+        } else {
+            helper.fail("未能找到控制器方块实体！");
+        }
     }
 }

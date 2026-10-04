@@ -80,13 +80,10 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
 
     public RefineryMultiblockData(TileEntityMultiblock<?> tile) {
         super(tile);
-        // 1 Chemical Input Tank (Dense Crude Oil) - Capacity scaled to 1/100 of original
+        // 1 Chemical Input Tank (Dense Crude Oil) - Capacity scaled to 1/100 of original (Index 0)
         chemicalTanks.add(inputChemicalTank = VariableCapacityChemicalTank.input(this, this::getInputTankCapacityLong, this::isValidInputChemical, this));
 
-        // 1 Nitrogen Atmosphere Tank - Capacity equal to input tank capacity
-        chemicalTanks.add(nitrogenChemicalTank = VariableCapacityChemicalTank.input(this, this::getInputTankCapacityLong, this::isValidNitrogenChemical, this));
-
-        // 5 Chemical Output Tanks (Layers 1..5) - Capacity scaled to 1/1000 of original (1/10 of input capacity)
+        // 5 Chemical Output Tanks (Layers 1..5) - Capacity scaled to 1/1000 of original (Indices 1..5)
         outputTank1 = VariableCapacityChemicalTank.output(this, this::getOutputTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
         outputTank2 = VariableCapacityChemicalTank.output(this, this::getOutputTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
         outputTank3 = VariableCapacityChemicalTank.output(this, this::getOutputTankCapacityLong, ConstantPredicates.alwaysTrue(), this);
@@ -102,6 +99,9 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
         for (IChemicalTank tank : outputChemicalTanks) {
             chemicalTanks.add(tank);
         }
+
+        // 1 Nitrogen Atmosphere Tank - Capacity equal to input tank capacity (Index 6, backward compatible)
+        chemicalTanks.add(nitrogenChemicalTank = VariableCapacityChemicalTank.input(this, this::getInputTankCapacityLong, this::isValidNitrogenChemical, this));
 
         // Bottom Heat Input Capacitor (Bottom Heating)
         heatCapacitors.add(bottomHeatCapacitor = VariableHeatCapacitor.create(Math.max(64, getVolume()) * 40.0, () -> biomeAmbientTemp, this));
@@ -147,6 +147,10 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
 
     public IChemicalTank getNitrogenChemicalTank() {
         return nitrogenChemicalTank;
+    }
+
+    public List<IChemicalTank> getFormedChemicalTanks() {
+        return chemicalTanks;
     }
 
     public double getNitrogenRatio() {
