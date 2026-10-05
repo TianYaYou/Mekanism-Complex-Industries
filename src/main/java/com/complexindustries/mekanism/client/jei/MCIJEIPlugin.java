@@ -56,6 +56,9 @@ public class MCIJEIPlugin implements IModPlugin {
     public static final RecipeType<PhotolithographyJEIRecipe> PHOTOLITHOGRAPHY_JEI_TYPE =
             new RecipeType<>(ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "photolithography"), PhotolithographyJEIRecipe.class);
 
+    public static final RecipeType<ChemicalFilmCoatingJEIRecipe> CHEMICAL_FILM_COATING_JEI_TYPE =
+            new RecipeType<>(ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_film_coating"), ChemicalFilmCoatingJEIRecipe.class);
+
     @NotNull
     @Override
     public ResourceLocation getPluginUid() {
@@ -76,6 +79,7 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeCategories(new CrystalGrowthRecipeCategory(guiHelper, CRYSTAL_GROWTH_JEI_TYPE));
         registry.addRecipeCategories(new SiliconSlicingRecipeCategory(guiHelper, SILICON_SLICING_JEI_TYPE));
         registry.addRecipeCategories(new PhotolithographyRecipeCategory(guiHelper, PHOTOLITHOGRAPHY_JEI_TYPE));
+        registry.addRecipeCategories(new ChemicalFilmCoatingRecipeCategory(guiHelper, CHEMICAL_FILM_COATING_JEI_TYPE));
     }
 
     @Override
@@ -188,8 +192,9 @@ public class MCIJEIPlugin implements IModPlugin {
         ));
         registry.addRecipes(SILICON_SLICING_JEI_TYPE, siliconSlicingRecipes);
 
-        // 8. Photolithography Recipes
+        // 8. Photolithography Recipes (All Tiers)
         List<PhotolithographyJEIRecipe> lithoRecipes = new ArrayList<>();
+        // Tier 1: Wafer -> Base Semi-finished
         lithoRecipes.add(new PhotolithographyJEIRecipe(
                 List.of(new ItemStack(MCIItems.BLANK_SILICON_WAFER.get())),
                 List.of(new ItemStack(MCIItems.CALCULATION_MASK.get())),
@@ -202,7 +207,85 @@ public class MCIJEIPlugin implements IModPlugin {
                 List.of(MCIChemicals.NITROGEN.asStack(50)),
                 new ItemStack(MCIItems.SEMIFINISHED_LOGIC_CHIP.get())
         ));
+        // Tier 2: Infused Chip -> Semi-finished Infused
+        lithoRecipes.add(new PhotolithographyJEIRecipe(
+                List.of(new ItemStack(MCIItems.INFUSED_CALCULATION_CHIP.get())),
+                List.of(new ItemStack(MCIItems.CALCULATION_MASK.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.SEMIFINISHED_INFUSED_CALCULATION_CHIP.get())
+        ));
+        lithoRecipes.add(new PhotolithographyJEIRecipe(
+                List.of(new ItemStack(MCIItems.INFUSED_LOGIC_CHIP.get())),
+                List.of(new ItemStack(MCIItems.LOGIC_MASK.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.SEMIFINISHED_INFUSED_LOGIC_CHIP.get())
+        ));
+        // Tier 3: Reinforced Chip -> Semi-finished Reinforced
+        lithoRecipes.add(new PhotolithographyJEIRecipe(
+                List.of(new ItemStack(MCIItems.REINFORCED_CALCULATION_CHIP.get())),
+                List.of(new ItemStack(MCIItems.CALCULATION_MASK.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.SEMIFINISHED_REINFORCED_CALCULATION_CHIP.get())
+        ));
+        lithoRecipes.add(new PhotolithographyJEIRecipe(
+                List.of(new ItemStack(MCIItems.REINFORCED_LOGIC_CHIP.get())),
+                List.of(new ItemStack(MCIItems.LOGIC_MASK.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.SEMIFINISHED_REINFORCED_LOGIC_CHIP.get())
+        ));
         registry.addRecipes(PHOTOLITHOGRAPHY_JEI_TYPE, lithoRecipes);
+
+        // 9. Chemical Film Coating Recipes (5 stages of coating)
+        List<ChemicalFilmCoatingJEIRecipe> coaterRecipes = new ArrayList<>();
+        ItemStack infusedAlloy = mekanism.common.registries.MekanismItems.INFUSED_ALLOY.asStack();
+        ItemStack reinforcedAlloy = mekanism.common.registries.MekanismItems.REINFORCED_ALLOY.asStack();
+        ItemStack atomicAlloy = mekanism.common.registries.MekanismItems.ATOMIC_ALLOY.asStack();
+
+        coaterRecipes.add(new ChemicalFilmCoatingJEIRecipe(
+                List.of(infusedAlloy),
+                List.of(new ItemStack(MCIItems.SEMIFINISHED_CALCULATION_CHIP.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.INFUSED_CALCULATION_CHIP.get())
+        ));
+        coaterRecipes.add(new ChemicalFilmCoatingJEIRecipe(
+                List.of(infusedAlloy),
+                List.of(new ItemStack(MCIItems.SEMIFINISHED_LOGIC_CHIP.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.INFUSED_LOGIC_CHIP.get())
+        ));
+        coaterRecipes.add(new ChemicalFilmCoatingJEIRecipe(
+                List.of(reinforcedAlloy),
+                List.of(new ItemStack(MCIItems.SEMIFINISHED_INFUSED_CALCULATION_CHIP.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.REINFORCED_CALCULATION_CHIP.get())
+        ));
+        coaterRecipes.add(new ChemicalFilmCoatingJEIRecipe(
+                List.of(reinforcedAlloy),
+                List.of(new ItemStack(MCIItems.SEMIFINISHED_INFUSED_LOGIC_CHIP.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.REINFORCED_LOGIC_CHIP.get())
+        ));
+        coaterRecipes.add(new ChemicalFilmCoatingJEIRecipe(
+                List.of(atomicAlloy),
+                List.of(new ItemStack(MCIItems.SEMIFINISHED_REINFORCED_CALCULATION_CHIP.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.ATOMIC_CALCULATION_CHIP.get())
+        ));
+        coaterRecipes.add(new ChemicalFilmCoatingJEIRecipe(
+                List.of(atomicAlloy),
+                List.of(new ItemStack(MCIItems.SEMIFINISHED_REINFORCED_LOGIC_CHIP.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.ATOMIC_LOGIC_CHIP.get())
+        ));
+        registry.addRecipes(CHEMICAL_FILM_COATING_JEI_TYPE, coaterRecipes);
+    }
+
+    private static net.minecraft.world.item.Item REFORCE_CALCULATION_CHIP_FALLBACK() {
+        return MCIItems.REINFORCED_CALCULATION_CHIP.get();
+    }
+
+    private static net.minecraft.world.item.Item REFORCE_LOGIC_CHIP_FALLBACK() {
+        return MCIItems.REINFORCED_LOGIC_CHIP.get();
     }
 
     @Override
@@ -230,6 +313,7 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get()), CRYSTAL_GROWTH_JEI_TYPE);
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.SILICON_SLICER.get()), SILICON_SLICING_JEI_TYPE);
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.PHOTOLITHOGRAPHY_MACHINE.get()), PHOTOLITHOGRAPHY_JEI_TYPE);
+        registry.addRecipeCatalyst(new ItemStack(MCIBlocks.CHEMICAL_FILM_COATER.get()), CHEMICAL_FILM_COATING_JEI_TYPE);
 
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_CONTROLLER.get()), REFINERY_JEI_TYPE);
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_CASING.get()), REFINERY_JEI_TYPE);
@@ -248,6 +332,7 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiChemicalSoaker.class, 86, 38, 20, 10, CHEMICAL_SOAKING_JEI_TYPE);
         registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiCrystalGrowthChamber.class, 75, 39, 20, 10, CRYSTAL_GROWTH_JEI_TYPE);
         registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiSiliconSlicer.class, 79, 43, 24, 16, SILICON_SLICING_JEI_TYPE);
-        registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiPhotolithographyMachine.class, 79, 42, 24, 16, PHOTOLITHOGRAPHY_JEI_TYPE);
+        registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiPhotolithographyMachine.class, 78, 47, 32, 10, PHOTOLITHOGRAPHY_JEI_TYPE);
+        registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiChemicalFilmCoater.class, 78, 47, 32, 10, CHEMICAL_FILM_COATING_JEI_TYPE);
     }
 }

@@ -200,7 +200,15 @@ public final class MCITileEntityTypes {
                     .serverTicker(TileEntityMekanism::tickServer)
                     .withSimple(Capabilities.CONFIGURABLE)
                     .withSimple(Capabilities.CONFIG_CARD)
-                    .with(Capabilities.LASER_RECEPTOR, (tile, side) -> tile.getLaserReceptor())
+                    .with(Capabilities.LASER_RECEPTOR, (tile, side) -> tile.getLaserReceptor(side))
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.coater.TileEntityChemicalFilmCoater> CHEMICAL_FILM_COATER =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.CHEMICAL_FILM_COATER, com.complexindustries.mekanism.content.coater.TileEntityChemicalFilmCoater::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .withSimple(Capabilities.CONFIG_CARD)
                     .build();
 
     private MCITileEntityTypes() {}

@@ -1,0 +1,20 @@
+{
+  "type": "mekanism_complex_industries:photolithography",
+  "item_input": {
+    "count": 1,
+    "item": "mekanism_complex_industries:reinforced_calculation_chip"
+  },
+  "mask": {
+    "count": 1,
+    "item": "mekanism_complex_industries:calculation_mask"
+  },
+  "chemical_input": {
+    "amount": 50,
+    "chemical": "mekanism_complex_industries:nitrogen"
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:semifinished_reinforced_calculation_chip"
+  },
+  "duration": 1100
+}

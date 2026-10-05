@@ -205,7 +205,7 @@ public class MCIEmiPlugin implements EmiPlugin {
                         new ItemStack(MCIItems.BLANK_SILICON_WAFER.get(), 8)
                 )));
 
-        // 10. Photolithography Recipes
+        // 10. Photolithography Recipes (All Tiers)
         registry.addCategory(PHOTOLITHOGRAPHY_CATEGORY);
         registry.addWorkstation(PHOTOLITHOGRAPHY_CATEGORY, EmiStack.of(MCIBlocks.PHOTOLITHOGRAPHY_MACHINE.get()));
         registry.addRecipe(new PhotolithographyEmiRecipe(PHOTOLITHOGRAPHY_CATEGORY,
@@ -223,6 +223,94 @@ public class MCIEmiPlugin implements EmiPlugin {
                         java.util.List.of(new ItemStack(MCIItems.LOGIC_MASK.get())),
                         java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
                         new ItemStack(MCIItems.SEMIFINISHED_LOGIC_CHIP.get())
+                )));
+        registry.addRecipe(new PhotolithographyEmiRecipe(PHOTOLITHOGRAPHY_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "photolithography/semifinished_infused_calculation_chip"),
+                new com.complexindustries.mekanism.client.jei.PhotolithographyJEIRecipe(
+                        java.util.List.of(new ItemStack(MCIItems.INFUSED_CALCULATION_CHIP.get())),
+                        java.util.List.of(new ItemStack(MCIItems.CALCULATION_MASK.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.SEMIFINISHED_INFUSED_CALCULATION_CHIP.get())
+                )));
+        registry.addRecipe(new PhotolithographyEmiRecipe(PHOTOLITHOGRAPHY_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "photolithography/semifinished_infused_logic_chip"),
+                new com.complexindustries.mekanism.client.jei.PhotolithographyJEIRecipe(
+                        java.util.List.of(new ItemStack(MCIItems.INFUSED_LOGIC_CHIP.get())),
+                        java.util.List.of(new ItemStack(MCIItems.LOGIC_MASK.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.SEMIFINISHED_INFUSED_LOGIC_CHIP.get())
+                )));
+        registry.addRecipe(new PhotolithographyEmiRecipe(PHOTOLITHOGRAPHY_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "photolithography/semifinished_reinforced_calculation_chip"),
+                new com.complexindustries.mekanism.client.jei.PhotolithographyJEIRecipe(
+                        java.util.List.of(new ItemStack(MCIItems.REINFORCED_CALCULATION_CHIP.get())),
+                        java.util.List.of(new ItemStack(MCIItems.CALCULATION_MASK.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.SEMIFINISHED_REINFORCED_CALCULATION_CHIP.get())
+                )));
+        registry.addRecipe(new PhotolithographyEmiRecipe(PHOTOLITHOGRAPHY_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "photolithography/semifinished_reinforced_logic_chip"),
+                new com.complexindustries.mekanism.client.jei.PhotolithographyJEIRecipe(
+                        java.util.List.of(new ItemStack(MCIItems.REINFORCED_LOGIC_CHIP.get())),
+                        java.util.List.of(new ItemStack(MCIItems.LOGIC_MASK.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.SEMIFINISHED_REINFORCED_LOGIC_CHIP.get())
+                )));
+
+        // 11. Chemical Film Coating Recipes
+        registry.addCategory(CHEMICAL_FILM_COATING_CATEGORY);
+        registry.addWorkstation(CHEMICAL_FILM_COATING_CATEGORY, EmiStack.of(MCIBlocks.CHEMICAL_FILM_COATER.get()));
+        ItemStack infusedAlloy = mekanism.common.registries.MekanismItems.INFUSED_ALLOY.asStack();
+        ItemStack reinforcedAlloy = mekanism.common.registries.MekanismItems.REINFORCED_ALLOY.asStack();
+        ItemStack atomicAlloy = mekanism.common.registries.MekanismItems.ATOMIC_ALLOY.asStack();
+
+        registry.addRecipe(new ChemicalFilmCoatingEmiRecipe(CHEMICAL_FILM_COATING_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_film_coating/infused_calculation_chip"),
+                new com.complexindustries.mekanism.client.jei.ChemicalFilmCoatingJEIRecipe(
+                        java.util.List.of(infusedAlloy),
+                        java.util.List.of(new ItemStack(MCIItems.SEMIFINISHED_CALCULATION_CHIP.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.INFUSED_CALCULATION_CHIP.get())
+                )));
+        registry.addRecipe(new ChemicalFilmCoatingEmiRecipe(CHEMICAL_FILM_COATING_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_film_coating/infused_logic_chip"),
+                new com.complexindustries.mekanism.client.jei.ChemicalFilmCoatingJEIRecipe(
+                        java.util.List.of(infusedAlloy),
+                        java.util.List.of(new ItemStack(MCIItems.SEMIFINISHED_LOGIC_CHIP.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.INFUSED_LOGIC_CHIP.get())
+                )));
+        registry.addRecipe(new ChemicalFilmCoatingEmiRecipe(CHEMICAL_FILM_COATING_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_film_coating/reinforced_calculation_chip"),
+                new com.complexindustries.mekanism.client.jei.ChemicalFilmCoatingJEIRecipe(
+                        java.util.List.of(reinforcedAlloy),
+                        java.util.List.of(new ItemStack(MCIItems.SEMIFINISHED_INFUSED_CALCULATION_CHIP.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.REINFORCED_CALCULATION_CHIP.get())
+                )));
+        registry.addRecipe(new ChemicalFilmCoatingEmiRecipe(CHEMICAL_FILM_COATING_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_film_coating/reinforced_logic_chip"),
+                new com.complexindustries.mekanism.client.jei.ChemicalFilmCoatingJEIRecipe(
+                        java.util.List.of(reinforcedAlloy),
+                        java.util.List.of(new ItemStack(MCIItems.SEMIFINISHED_INFUSED_LOGIC_CHIP.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.REINFORCED_LOGIC_CHIP.get())
+                )));
+        registry.addRecipe(new ChemicalFilmCoatingEmiRecipe(CHEMICAL_FILM_COATING_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_film_coating/atomic_calculation_chip"),
+                new com.complexindustries.mekanism.client.jei.ChemicalFilmCoatingJEIRecipe(
+                        java.util.List.of(atomicAlloy),
+                        java.util.List.of(new ItemStack(MCIItems.SEMIFINISHED_REINFORCED_CALCULATION_CHIP.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.ATOMIC_CALCULATION_CHIP.get())
+                )));
+        registry.addRecipe(new ChemicalFilmCoatingEmiRecipe(CHEMICAL_FILM_COATING_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_film_coating/atomic_logic_chip"),
+                new com.complexindustries.mekanism.client.jei.ChemicalFilmCoatingJEIRecipe(
+                        java.util.List.of(atomicAlloy),
+                        java.util.List.of(new ItemStack(MCIItems.SEMIFINISHED_REINFORCED_LOGIC_CHIP.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.ATOMIC_LOGIC_CHIP.get())
                 )));
     }
 
@@ -267,6 +355,17 @@ public class MCIEmiPlugin implements EmiPlugin {
         @Override
         public Component getName() {
             return Component.translatable("gui.mekanism_complex_industries.photolithography.category");
+        }
+    };
+
+    public static final EmiRecipeCategory CHEMICAL_FILM_COATING_CATEGORY = new EmiRecipeCategory(
+            ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "chemical_film_coating"),
+            EmiStack.of(MCIBlocks.CHEMICAL_FILM_COATER.get()),
+            EmiStack.of(MCIBlocks.CHEMICAL_FILM_COATER.get())
+    ) {
+        @Override
+        public Component getName() {
+            return Component.translatable("gui.mekanism_complex_industries.chemical_film_coating.category");
         }
     };
 }

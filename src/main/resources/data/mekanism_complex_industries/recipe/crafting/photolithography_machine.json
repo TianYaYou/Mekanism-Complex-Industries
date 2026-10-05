@@ -2,22 +2,22 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "ACA",
-    "TGT",
+    "OOO",
+    "GRI",
     "PPP"
   ],
   "key": {
-    "A": {
-      "item": "mekanism:alloy_infused"
-    },
-    "C": {
-      "item": "mekanism:ultimate_control_circuit"
-    },
-    "T": {
-      "item": "mekanism:basic_chemical_tank"
+    "O": {
+      "item": "mekanism:ingot_osmium"
     },
     "G": {
-      "item": "mekanism_complex_industries:filtered_glass"
+      "item": "mekanism:structural_glass"
+    },
+    "R": {
+      "item": "mekanism_complex_industries:reinforced_polypropylene_sheet"
+    },
+    "I": {
+      "item": "mekanism:ingot_steel"
     },
     "P": {
       "item": "mekanism_complex_industries:engineering_plastic"

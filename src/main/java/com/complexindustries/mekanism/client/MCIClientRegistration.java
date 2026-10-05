@@ -37,6 +37,7 @@ public class MCIClientRegistration {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CRYSTAL_GROWTH_CHAMBER, com.complexindustries.mekanism.client.gui.GuiCrystalGrowthChamber::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.SILICON_SLICER, com.complexindustries.mekanism.client.gui.GuiSiliconSlicer::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.PHOTOLITHOGRAPHY_MACHINE, com.complexindustries.mekanism.client.gui.GuiPhotolithographyMachine::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_FILM_COATER, com.complexindustries.mekanism.client.gui.GuiChemicalFilmCoater::new);
     }
 
     @SubscribeEvent

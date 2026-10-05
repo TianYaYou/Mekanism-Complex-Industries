@@ -1,0 +1,16 @@
+{
+  "type": "mekanism:metallurgic_infusing",
+  "chemical_input": {
+    "amount": 80,
+    "tag": "mekanism:refined_obsidian"
+  },
+  "item_input": {
+    "count": 1,
+    "item": "mekanism_complex_industries:polypropylene_sheet"
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:reinforced_polypropylene_sheet"
+  },
+  "per_tick_usage": false
+}

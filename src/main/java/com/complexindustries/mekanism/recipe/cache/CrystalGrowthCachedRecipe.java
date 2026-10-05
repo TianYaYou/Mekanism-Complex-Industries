@@ -42,14 +42,18 @@ public class CrystalGrowthCachedRecipe extends CachedRecipe<CrystalGrowthRecipe>
         if (tracker.shouldContinueChecking()) {
             recipeItem = itemInputHandler.getRecipeInput(recipe.getItemInput());
             if (recipeItem.isEmpty()) {
-                tracker.addError(OperationTracker.RecipeError.NOT_ENOUGH_INPUT);
-            } else {
-                itemInputHandler.calculateOperationsCanSupport(tracker, recipeItem);
+                tracker.mismatchedRecipe();
+                return;
             }
+            itemInputHandler.calculateOperationsCanSupport(tracker, recipeItem);
         }
         if (tracker.shouldContinueChecking()) {
             ChemicalStack chemStackA = chemicalInputHandlerA.getInput();
             ChemicalStack chemStackB = chemicalInputHandlerB.getInput();
+            if (chemStackA.isEmpty() || chemStackB.isEmpty()) {
+                tracker.mismatchedRecipe();
+                return;
+            }
 
             if (recipe.getChemicalInputA().test(chemStackA) && recipe.getChemicalInputB().test(chemStackB)) {
                 swappedChemicals = false;
@@ -68,7 +72,8 @@ public class CrystalGrowthCachedRecipe extends CachedRecipe<CrystalGrowthRecipe>
                     chemicalInputHandlerA.calculateOperationsCanSupport(tracker, recipeChemicalB);
                 }
             } else {
-                tracker.addError(OperationTracker.RecipeError.NOT_ENOUGH_SECONDARY_INPUT);
+                tracker.mismatchedRecipe();
+                return;
             }
         }
         if (tracker.shouldContinueChecking()) {
@@ -83,7 +88,17 @@ public class CrystalGrowthCachedRecipe extends CachedRecipe<CrystalGrowthRecipe>
         if (item.isEmpty()) return false;
         ChemicalStack chemA = chemicalInputHandlerA.getInput();
         ChemicalStack chemB = chemicalInputHandlerB.getInput();
+        if (chemA.isEmpty() || chemB.isEmpty()) return false;
         return recipe.test(item, chemA, chemB);
+    }
+
+    @Override
+    protected void resetCache() {
+        super.resetCache();
+        recipeItem = ItemStack.EMPTY;
+        recipeChemicalA = ChemicalStack.EMPTY;
+        recipeChemicalB = ChemicalStack.EMPTY;
+        recipeOutput = ItemStack.EMPTY;
     }
 
     @Override

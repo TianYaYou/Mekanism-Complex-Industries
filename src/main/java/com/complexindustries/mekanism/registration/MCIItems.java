@@ -177,15 +177,55 @@ public final class MCIItems {
 
     public static final DeferredItem<Item> BLANK_SILICON_WAFER = ITEMS.registerSimpleItem("blank_silicon_wafer");
 
+    public static final DeferredItem<Item> POLYPROPYLENE_SHEET = ITEMS.register("polypropylene_sheet",
+            () -> new com.complexindustries.mekanism.content.item.ColoredItem(new Item.Properties(), net.minecraft.ChatFormatting.GREEN));
+
+    public static final DeferredItem<Item> REINFORCED_POLYPROPYLENE_SHEET = ITEMS.register("reinforced_polypropylene_sheet",
+            () -> new com.complexindustries.mekanism.content.item.ColoredItem(new Item.Properties(), net.minecraft.ChatFormatting.DARK_PURPLE));
+
     public static final DeferredItem<Item> CALCULATION_MASK = ITEMS.register("calculation_mask",
             () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
     public static final DeferredItem<Item> LOGIC_MASK = ITEMS.register("logic_mask",
             () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
-    public static final DeferredItem<Item> SEMIFINISHED_CALCULATION_CHIP = ITEMS.registerSimpleItem("semifinished_calculation_chip");
+    // Chips: Semi-finished (5 stages of progress/durability)
+    public static final DeferredItem<Item> SEMIFINISHED_CALCULATION_CHIP = ITEMS.register("semifinished_calculation_chip",
+            () -> new com.complexindustries.mekanism.content.item.SemiFinishedChipItem(new Item.Properties(), net.minecraft.ChatFormatting.AQUA, 0x00D0FF));
 
-    public static final DeferredItem<Item> SEMIFINISHED_LOGIC_CHIP = ITEMS.registerSimpleItem("semifinished_logic_chip");
+    public static final DeferredItem<Item> SEMIFINISHED_LOGIC_CHIP = ITEMS.register("semifinished_logic_chip",
+            () -> new com.complexindustries.mekanism.content.item.SemiFinishedChipItem(new Item.Properties(), net.minecraft.ChatFormatting.GREEN, 0x00FF66));
+
+    public static final DeferredItem<Item> SEMIFINISHED_INFUSED_CALCULATION_CHIP = ITEMS.register("semifinished_infused_calculation_chip",
+            () -> new com.complexindustries.mekanism.content.item.SemiFinishedChipItem(new Item.Properties(), net.minecraft.ChatFormatting.RED, 0xFF3333));
+
+    public static final DeferredItem<Item> SEMIFINISHED_INFUSED_LOGIC_CHIP = ITEMS.register("semifinished_infused_logic_chip",
+            () -> new com.complexindustries.mekanism.content.item.SemiFinishedChipItem(new Item.Properties(), net.minecraft.ChatFormatting.RED, 0xFF3333));
+
+    public static final DeferredItem<Item> SEMIFINISHED_REINFORCED_CALCULATION_CHIP = ITEMS.register("semifinished_reinforced_calculation_chip",
+            () -> new com.complexindustries.mekanism.content.item.SemiFinishedChipItem(new Item.Properties(), net.minecraft.ChatFormatting.AQUA, 0x33CCFF));
+
+    public static final DeferredItem<Item> SEMIFINISHED_REINFORCED_LOGIC_CHIP = ITEMS.register("semifinished_reinforced_logic_chip",
+            () -> new com.complexindustries.mekanism.content.item.SemiFinishedChipItem(new Item.Properties(), net.minecraft.ChatFormatting.AQUA, 0x33CCFF));
+
+    // Chips: Finished (full durability)
+    public static final DeferredItem<Item> INFUSED_CALCULATION_CHIP = ITEMS.register("infused_calculation_chip",
+            () -> new com.complexindustries.mekanism.content.item.ColoredItem(new Item.Properties(), net.minecraft.ChatFormatting.RED));
+
+    public static final DeferredItem<Item> INFUSED_LOGIC_CHIP = ITEMS.register("infused_logic_chip",
+            () -> new com.complexindustries.mekanism.content.item.ColoredItem(new Item.Properties(), net.minecraft.ChatFormatting.RED));
+
+    public static final DeferredItem<Item> REINFORCED_CALCULATION_CHIP = ITEMS.register("reinforced_calculation_chip",
+            () -> new com.complexindustries.mekanism.content.item.ColoredItem(new Item.Properties(), net.minecraft.ChatFormatting.AQUA));
+
+    public static final DeferredItem<Item> REINFORCED_LOGIC_CHIP = ITEMS.register("reinforced_logic_chip",
+            () -> new com.complexindustries.mekanism.content.item.ColoredItem(new Item.Properties(), net.minecraft.ChatFormatting.AQUA));
+
+    public static final DeferredItem<Item> ATOMIC_CALCULATION_CHIP = ITEMS.register("atomic_calculation_chip",
+            () -> new com.complexindustries.mekanism.content.item.ColoredItem(new Item.Properties(), net.minecraft.ChatFormatting.LIGHT_PURPLE));
+
+    public static final DeferredItem<Item> ATOMIC_LOGIC_CHIP = ITEMS.register("atomic_logic_chip",
+            () -> new com.complexindustries.mekanism.content.item.ColoredItem(new Item.Properties(), net.minecraft.ChatFormatting.LIGHT_PURPLE));
 
     private static final mekanism.common.attachments.component.AttachedSideConfig CRYSTAL_GROWTH_SIDE_CONFIG = net.minecraft.Util.make(() -> {
         java.util.Map<mekanism.common.lib.transmitter.TransmissionType, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo> configInfo =
@@ -245,6 +285,12 @@ public final class MCIItems {
                     .component(mekanism.common.registries.MekanismDataComponents.EJECTOR, mekanism.common.attachments.component.AttachedEjector.DEFAULT)
                     .component(mekanism.common.registries.MekanismDataComponents.SIDE_CONFIG, PHOTOLITHOGRAPHY_MACHINE_SIDE_CONFIG),
                     "description.mekanism_complex_industries.photolithography_machine", true));
+
+    public static final DeferredItem<BlockItem> CHEMICAL_FILM_COATER = ITEMS.register("chemical_film_coater",
+            () -> new MCIBlockItem(MCIBlocks.CHEMICAL_FILM_COATER.get(), new Item.Properties()
+                    .component(mekanism.common.registries.MekanismDataComponents.EJECTOR, mekanism.common.attachments.component.AttachedEjector.DEFAULT)
+                    .component(mekanism.common.registries.MekanismDataComponents.SIDE_CONFIG, SILICON_SLICER_SIDE_CONFIG),
+                    "description.mekanism_complex_industries.chemical_film_coater", true));
 
     private MCIItems() {}
 }

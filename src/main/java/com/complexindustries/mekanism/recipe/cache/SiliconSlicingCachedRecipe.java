@@ -30,6 +30,7 @@ public class SiliconSlicingCachedRecipe extends TwoInputCachedRecipe<ItemStack, 
         // Condition: Nitrogen must be at least 80% (800 mB) full to work
         if (chemicalTank == null || chemicalTank.getStored() < 800L) {
             tracker.addError(OperationTracker.RecipeError.NOT_ENOUGH_SECONDARY_INPUT);
+            tracker.updateOperations(0);
             return;
         }
         super.calculateOperationsThisTick(tracker);

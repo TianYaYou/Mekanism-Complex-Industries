@@ -45,36 +45,7 @@ public class GuiPhotolithographyMachine extends GuiConfigurableTile<TileEntityPh
         GuiChemicalGauge nitrogenGauge = addRenderableWidget(new GuiChemicalGauge(() -> tile.chemicalTank, () -> tile.getChemicalTanks(null), GaugeType.STANDARD.with(mekanism.common.tile.component.config.DataType.INPUT), this, 28, 16));
         nitrogenGauge.warning(WarningType.NO_MATCHING_RECIPE, tile.getWarningCheck(RecipeError.NOT_ENOUGH_SECONDARY_INPUT));
 
-        // 4. Prominent Center-top Laser Status Screen (Clear visual indicator!)
-        addRenderableWidget(new GuiInnerScreen(this, 75, 17, 62, 22, () -> {
-            if (tile.hasActiveLaser()) {
-                return List.of(
-                        Component.translatable("gui.mekanism_complex_industries.photolithography.laser_active_short").withStyle(ChatFormatting.LIGHT_PURPLE),
-                        Component.literal(tile.getCurrentLaserEnergy() + " J | " + String.format("%.1fs", tile.getExposureDurationSeconds())).withStyle(ChatFormatting.WHITE)
-                );
-            } else {
-                return List.of(
-                        Component.translatable("gui.mekanism_complex_industries.photolithography.laser_offline_short").withStyle(ChatFormatting.RED),
-                        Component.translatable("gui.mekanism_complex_industries.photolithography.laser_waiting_short").withStyle(ChatFormatting.GRAY)
-                );
-            }
-        }).clearFormat().tooltip(() -> {
-            if (tile.hasActiveLaser()) {
-                return List.of(
-                        Component.translatable("gui.mekanism_complex_industries.photolithography.laser_active"),
-                        Component.translatable("gui.mekanism_complex_industries.photolithography.speed",
-                                String.format("%.1fs", tile.getExposureDurationSeconds()),
-                                tile.getCurrentLaserEnergy())
-                );
-            } else {
-                return List.of(
-                        Component.translatable("gui.mekanism_complex_industries.photolithography.laser_offline"),
-                        Component.translatable("gui.mekanism_complex_industries.photolithography.laser_required")
-                );
-            }
-        }));
-
-        // 5. Optical Laser Aperture Indicator (Replacing meaningless dump button at 141, 44)
+        // 4. Optical Laser Aperture Indicator (Located at 141, 44)
         addRenderableWidget(new GuiElement(this, 141, 44, 18, 18) {
             @Override
             public void drawBackground(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
@@ -116,8 +87,8 @@ public class GuiPhotolithographyMachine extends GuiConfigurableTile<TileEntityPh
             }
         });
 
-        // 6. Progress Arrow
-        addRenderableWidget(new GuiProgress(tile::getScaledProgress, ProgressType.RIGHT, this, 79, 42) {
+        // 5. Progress Arrow - Horizontally centered on the exact same line as input and output slots (Y=47)
+        addRenderableWidget(new GuiProgress(tile::getScaledProgress, ProgressType.RIGHT, this, 78, 47) {
             @Override
             public void updateTooltip(int mouseX, int mouseY) {
                 if (tile.hasActiveLaser()) {

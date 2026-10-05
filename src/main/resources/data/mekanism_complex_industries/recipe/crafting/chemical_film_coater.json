@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RCR",
+    "GDG",
+    "PPP"
+  ],
+  "key": {
+    "R": {
+      "item": "mekanism_complex_industries:reinforced_polypropylene_sheet"
+    },
+    "C": {
+      "item": "mekanism:ultimate_control_circuit"
+    },
+    "G": {
+      "item": "minecraft:gold_block"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "P": {
+      "item": "mekanism_complex_industries:engineering_plastic"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:chemical_film_coater"
+  }
+}

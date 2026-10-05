@@ -191,8 +191,12 @@ public class TileEntityPhotolithographyMachine extends TileEntityProgressMachine
     }
 
     public boolean isLaserInputSide(@Nullable Direction side) {
-        // All faces can receive UV laser
-        return true;
+        // Only the designated optical input side (relative right side) can receive UV laser
+        return side == null || side == getDirection().getClockWise();
+    }
+
+    public @Nullable ILaserReceptor getLaserReceptor(@Nullable Direction side) {
+        return isLaserInputSide(side) ? laserReceptor : null;
     }
 
     public ILaserReceptor getLaserReceptor() {

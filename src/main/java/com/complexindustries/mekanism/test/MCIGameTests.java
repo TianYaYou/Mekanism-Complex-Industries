@@ -1517,14 +1517,18 @@ public class MCIGameTests {
         TileEntityPhotolithographyMachine machine = (TileEntityPhotolithographyMachine) helper.getBlockEntity(pos);
         helper.assertTrue(machine != null, "光刻机方块实体应为 TileEntityPhotolithographyMachine");
 
-        // 1. Verify Siding: All sides can accept UV laser
+        // 1. Verify Siding: Only designated optical right face (EAST when facing NORTH) accepts UV laser
         BlockPos absPos = helper.absolutePos(pos);
+        var rightReceptor = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.LASER_RECEPTOR, absPos, Direction.EAST);
+        helper.assertTrue(rightReceptor != null, "光刻机右侧面 (EAST) 应暴露激光受体能力！");
+        helper.assertTrue(!rightReceptor.canLasersDig(), "光刻机激光受体不应被破坏！");
+
         for (Direction side : Direction.values()) {
-            var receptor = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.LASER_RECEPTOR, absPos, side);
-            helper.assertTrue(receptor != null, "光刻机各表面 (" + side + ") 均应暴露激光受体能力！");
-            helper.assertTrue(!receptor.canLasersDig(), "光刻机激光受体不应被破坏！");
+            if (side != Direction.EAST) {
+                var otherReceptor = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.LASER_RECEPTOR, absPos, side);
+                helper.assertTrue(otherReceptor == null, "光刻机非右侧面 (" + side + ") 不应暴露激光受体能力！");
+            }
         }
-        var rightReceptor = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.LASER_RECEPTOR, absPos, Direction.NORTH);
 
         // 2. Tank capacity check
         helper.assertTrue(machine.chemicalTank.getCapacity() == 1000L, "光刻机氮气储罐容量应为 1000 mB！");
@@ -1601,7 +1605,19 @@ public class MCIGameTests {
                 "逻辑掩膜版属于非消耗耐用品，不应被消耗！");
         helper.assertTrue(machine.inputSlot.isEmpty(), "空白硅片原料应被消耗！");
 
-        // 9. Environmental Dissipation
+        // 9. Test no-input idle (no ghost crafting when wafer is missing)
+        machine.outputSlot.setEmpty();
+        machine.inputSlot.setEmpty();
+        machine.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(1000));
+        for (int i = 0; i < 50; i++) {
+            rightReceptor.receiveLaserEnergy(10_000L);
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), machine);
+        }
+        helper.assertTrue(machine.outputSlot.isEmpty(), "无空白硅片时光刻机绝不应自跑进度或产出物品！");
+        helper.assertTrue(machine.getOperatingTicks() == 0, "无原料时光刻机进度应严格为 0！实际: " + machine.getOperatingTicks());
+        helper.assertTrue(!machine.getActive(), "无原料时光刻机应处于闲置状态 (active==false)！");
+
+        // 10. Environmental Dissipation
         long beforeDissipation = machine.chemicalTank.getStored();
         for (int i = 0; i < 20; i++) {
             TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), machine);
@@ -1613,6 +1629,94 @@ public class MCIGameTests {
         FakePlayer fakePlayer = FakePlayerFactory.getMinecraft(helper.getLevel());
         ContainerPhotolithographyMachine container = new ContainerPhotolithographyMachine(1, fakePlayer.getInventory(), machine);
         helper.assertTrue(container.stillValid(fakePlayer), "光刻机容器应处于有效状态！");
+        container.removed(fakePlayer);
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testChemicalFilmCoaterAndChipDurability(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(2, 1, 2);
+        helper.setBlock(pos, MCIBlocks.CHEMICAL_FILM_COATER.get().defaultBlockState()
+                .setValue(com.complexindustries.mekanism.content.coater.BlockChemicalFilmCoater.FACING, Direction.NORTH));
+        helper.assertBlockPresent(MCIBlocks.CHEMICAL_FILM_COATER.get(), pos);
+
+        com.complexindustries.mekanism.content.coater.TileEntityChemicalFilmCoater coater =
+                (com.complexindustries.mekanism.content.coater.TileEntityChemicalFilmCoater) helper.getBlockEntity(pos);
+        helper.assertTrue(coater != null, "方块实体应为 TileEntityChemicalFilmCoater！");
+
+        // Energy supply
+        coater.getEnergyContainer().setEnergy(100_000L);
+
+        // 1. Test 80% Nitrogen lock (<800 mB)
+        coater.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(700));
+        coater.alloySlot.setStack(mekanism.common.registries.MekanismItems.INFUSED_ALLOY.asStack());
+        coater.chipSlot.setStack(new ItemStack(MCIItems.SEMIFINISHED_CALCULATION_CHIP.get()));
+
+        TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), coater);
+        helper.assertTrue(!coater.canFunction(), "氮气不足 80% (800 mB) 时化学覆膜器不应运行！");
+        helper.assertTrue(coater.outputSlot.isEmpty(), "氮气不足时覆膜器不应产生输出！");
+
+        // 2. Supply >= 800 mB Nitrogen and test 5-step durability progression
+        coater.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(1000));
+        helper.assertTrue(coater.canFunction(), "氮气满时化学覆膜器应可正常工作！");
+
+        // Verify chip durability starts at 0
+        ItemStack curChip = coater.chipSlot.getStack();
+        helper.assertTrue(com.complexindustries.mekanism.content.item.SemiFinishedChipItem.getCoatingProgress(curChip) == 0,
+                "初始半成品芯片覆膜进度应为 0 / 5");
+
+        // Run 5 coating steps
+        for (int step = 1; step <= 5; step++) {
+            // Keep nitrogen and energy topped up simulating continuous supply pipe
+            coater.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(1000));
+            coater.getEnergyContainer().setEnergy(100_000L);
+            coater.alloySlot.setStack(mekanism.common.registries.MekanismItems.INFUSED_ALLOY.asStack());
+
+            // Run through the recipe ticks (100 ticks = 5 seconds)
+            for (int t = 0; t < 110; t++) {
+                TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), coater);
+                if (!coater.outputSlot.isEmpty()) {
+                    break;
+                }
+            }
+
+            helper.assertTrue(!coater.outputSlot.isEmpty(), "第 " + step + " 档覆膜应完成并产出物品！");
+            ItemStack produced = coater.outputSlot.getStack();
+
+            if (step < 5) {
+                helper.assertTrue(produced.is(MCIItems.SEMIFINISHED_CALCULATION_CHIP.get()),
+                        "第 " + step + " 档产出仍应为半成品芯片！实际: " + produced);
+                int prog = com.complexindustries.mekanism.content.item.SemiFinishedChipItem.getCoatingProgress(produced);
+                helper.assertTrue(prog == step, "第 " + step + " 档产出进度应为 " + step + " / 5！实际: " + prog);
+
+                // Move output back to chip input for next coating step
+                coater.outputSlot.setEmpty();
+                coater.chipSlot.setStack(produced);
+            } else {
+                // 5th coating completes full durability and transforms into finished chip!
+                helper.assertTrue(produced.is(MCIItems.INFUSED_CALCULATION_CHIP.get()),
+                        "第 5 档覆膜满耐久后应蜕变为灌注计算芯片！实际: " + produced);
+            }
+        }
+
+        // 3. Test no-input idle (no ghost crafting when inputs are empty)
+        coater.outputSlot.setEmpty();
+        coater.chipSlot.setEmpty();
+        coater.alloySlot.setEmpty();
+        coater.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(1000));
+        for (int i = 0; i < 50; i++) {
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), coater);
+        }
+        helper.assertTrue(coater.outputSlot.isEmpty(), "无芯片或合金时化学覆膜器绝不应自跑进度或产出物品！");
+        helper.assertTrue(coater.getOperatingTicks() == 0, "无原料时化学覆膜器进度应严格为 0！实际: " + coater.getOperatingTicks());
+        helper.assertTrue(!coater.getActive(), "无原料时化学覆膜器应处于闲置状态 (active==false)！");
+
+        // 4. Container check
+        FakePlayer fakePlayer = FakePlayerFactory.getMinecraft(helper.getLevel());
+        com.complexindustries.mekanism.content.coater.ContainerChemicalFilmCoater container =
+                new com.complexindustries.mekanism.content.coater.ContainerChemicalFilmCoater(1, fakePlayer.getInventory(), coater);
+        helper.assertTrue(container.stillValid(fakePlayer), "覆膜器容器应对玩家有效！");
         container.removed(fakePlayer);
 
         helper.succeed();

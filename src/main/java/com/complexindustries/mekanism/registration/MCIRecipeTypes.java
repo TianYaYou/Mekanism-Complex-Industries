@@ -38,6 +38,12 @@ public final class MCIRecipeTypes {
                     com.complexindustries.mekanism.recipe.PhotolithographyRecipe::getMaskInput,
                     com.complexindustries.mekanism.recipe.PhotolithographyRecipe::getChemicalInput)));
 
+    public static final RecipeTypeRegistryObject<com.complexindustries.mekanism.recipe.input.ChemicalFilmCoatingRecipeInput, com.complexindustries.mekanism.recipe.ChemicalFilmCoatingRecipe, com.complexindustries.mekanism.recipe.cache.ChemicalFilmCoatingInputCache> CHEMICAL_FILM_COATING =
+            RECIPE_TYPES.registerMek("chemical_film_coating", name -> createRecipeType(name, recipeType -> new com.complexindustries.mekanism.recipe.cache.ChemicalFilmCoatingInputCache(recipeType,
+                    com.complexindustries.mekanism.recipe.ChemicalFilmCoatingRecipe::getAlloyInput,
+                    com.complexindustries.mekanism.recipe.ChemicalFilmCoatingRecipe::getChipInput,
+                    com.complexindustries.mekanism.recipe.ChemicalFilmCoatingRecipe::getChemicalInput)));
+
     @SuppressWarnings("unchecked")
     private static <VANILLA_INPUT extends RecipeInput, RECIPE extends mekanism.api.recipes.MekanismRecipe<VANILLA_INPUT>, INPUT_CACHE extends IInputRecipeCache>
     MekanismRecipeType<VANILLA_INPUT, RECIPE, INPUT_CACHE> createRecipeType(ResourceLocation name, Function<MekanismRecipeType<VANILLA_INPUT, RECIPE, INPUT_CACHE>, INPUT_CACHE> inputCacheCreator) {

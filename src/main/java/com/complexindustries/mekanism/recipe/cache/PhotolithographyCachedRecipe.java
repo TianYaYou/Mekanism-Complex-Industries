@@ -50,12 +50,14 @@ public class PhotolithographyCachedRecipe extends CachedRecipe<PhotolithographyR
         // 1. Nitrogen must be at least 80% (800 mB) full
         if (chemicalTank == null || chemicalTank.getStored() < 800L) {
             tracker.addError(OperationTracker.RecipeError.NOT_ENOUGH_SECONDARY_INPUT);
+            tracker.updateOperations(0);
             return;
         }
 
         // 2. Machine must be receiving UV laser from the right side
         if (machine == null || !machine.hasActiveLaser()) {
             tracker.addError(OperationTracker.RecipeError.NOT_ENOUGH_ENERGY);
+            tracker.updateOperations(0);
             return;
         }
 
@@ -63,29 +65,30 @@ public class PhotolithographyCachedRecipe extends CachedRecipe<PhotolithographyR
         if (tracker.shouldContinueChecking()) {
             recipeItem = itemInputHandler.getRecipeInput(recipe.getItemInput());
             if (recipeItem.isEmpty()) {
-                tracker.addError(OperationTracker.RecipeError.NOT_ENOUGH_INPUT);
-            } else {
-                itemInputHandler.calculateOperationsCanSupport(tracker, recipeItem);
+                tracker.mismatchedRecipe();
+                return;
             }
+            itemInputHandler.calculateOperationsCanSupport(tracker, recipeItem);
         }
 
         // 4. Photomask input (checked, durable, never consumed)
         if (tracker.shouldContinueChecking()) {
             recipeMask = maskInputHandler.getRecipeInput(recipe.getMaskInput());
             if (recipeMask.isEmpty()) {
-                tracker.addError(OperationTracker.RecipeError.NOT_ENOUGH_INPUT);
+                tracker.mismatchedRecipe();
+                return;
             }
         }
 
         // 5. Chemical input (Nitrogen)
         if (tracker.shouldContinueChecking()) {
             ChemicalStack chemStack = chemicalInputHandler.getInput();
-            if (recipe.getChemicalInput().test(chemStack)) {
-                recipeChemical = chemStack.copyWithAmount(recipe.getChemicalInput().getNeededAmount(chemStack));
-                chemicalInputHandler.calculateOperationsCanSupport(tracker, recipeChemical);
-            } else {
-                tracker.addError(OperationTracker.RecipeError.NOT_ENOUGH_SECONDARY_INPUT);
+            if (chemStack.isEmpty() || !recipe.getChemicalInput().test(chemStack)) {
+                tracker.mismatchedRecipe();
+                return;
             }
+            recipeChemical = chemStack.copyWithAmount(recipe.getChemicalInput().getNeededAmount(chemStack));
+            chemicalInputHandler.calculateOperationsCanSupport(tracker, recipeChemical);
         }
 
         // 6. Output space check
@@ -100,15 +103,24 @@ public class PhotolithographyCachedRecipe extends CachedRecipe<PhotolithographyR
         ItemStack item = itemInputHandler.getInput();
         ItemStack mask = maskInputHandler.getInput();
         ChemicalStack chem = chemicalInputHandler.getInput();
-        if (item.isEmpty() || mask.isEmpty()) {
+        if (item.isEmpty() || mask.isEmpty() || chem.isEmpty()) {
             return false;
         }
         return recipe.test(item, mask, chem);
     }
 
     @Override
+    protected void resetCache() {
+        super.resetCache();
+        recipeItem = ItemStack.EMPTY;
+        recipeMask = ItemStack.EMPTY;
+        recipeChemical = ChemicalStack.EMPTY;
+        recipeOutput = ItemStack.EMPTY;
+    }
+
+    @Override
     protected void finishProcessing(int operations) {
-        if (!recipeOutput.isEmpty() && !recipeItem.isEmpty() && !recipeChemical.isEmpty()) {
+        if (!recipeOutput.isEmpty() && !recipeItem.isEmpty() && !recipeMask.isEmpty() && !recipeChemical.isEmpty()) {
             // Wafer and nitrogen are consumed
             itemInputHandler.use(recipeItem, operations);
             chemicalInputHandler.use(recipeChemical, operations);

@@ -1,0 +1,20 @@
+{
+  "type": "mekanism_complex_industries:chemical_film_coating",
+  "alloy_input": {
+    "count": 1,
+    "item": "mekanism:alloy_atomic"
+  },
+  "chip_input": {
+    "count": 1,
+    "item": "mekanism_complex_industries:semifinished_reinforced_logic_chip"
+  },
+  "chemical_input": {
+    "amount": 50,
+    "chemical": "mekanism_complex_industries:nitrogen"
+  },
+  "output": {
+    "count": 1,
+    "id": "mekanism_complex_industries:atomic_logic_chip"
+  },
+  "duration": 100
+}

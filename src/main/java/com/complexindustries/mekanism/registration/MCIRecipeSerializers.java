@@ -27,5 +27,8 @@ public final class MCIRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<com.complexindustries.mekanism.recipe.PhotolithographyRecipe>> PHOTOLITHOGRAPHY =
             RECIPE_SERIALIZERS.register("photolithography", com.complexindustries.mekanism.recipe.PhotolithographyRecipeSerializer::create);
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<com.complexindustries.mekanism.recipe.ChemicalFilmCoatingRecipe>> CHEMICAL_FILM_COATING =
+            RECIPE_SERIALIZERS.register("chemical_film_coating", com.complexindustries.mekanism.recipe.ChemicalFilmCoatingRecipeSerializer::create);
+
     private MCIRecipeSerializers() {}
 }

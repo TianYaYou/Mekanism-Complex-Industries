@@ -1,0 +1,7 @@
+{
+  "parent": "mekanism_complex_industries:block/machine",
+  "textures": {
+    "sides": "mekanism_complex_industries:block/chemical_film_coater_side",
+    "front": "mekanism_complex_industries:block/chemical_film_coater_front_active"
+  }
+}

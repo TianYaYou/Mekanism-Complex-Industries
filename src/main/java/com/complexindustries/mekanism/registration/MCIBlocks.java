@@ -289,5 +289,12 @@ public final class MCIBlocks {
                             .strength(3.5F, 16.0F)
                             .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.BlockPhotolithographyMachine.ACTIVE) ? 8 : 0)));
 
+    public static final DeferredBlock<com.complexindustries.mekanism.content.coater.BlockChemicalFilmCoater> CHEMICAL_FILM_COATER = BLOCKS.register("chemical_film_coater",
+            () -> new com.complexindustries.mekanism.content.coater.BlockChemicalFilmCoater(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.coater.BlockChemicalFilmCoater.ACTIVE) ? 8 : 0)));
+
     private MCIBlocks() {}
 }

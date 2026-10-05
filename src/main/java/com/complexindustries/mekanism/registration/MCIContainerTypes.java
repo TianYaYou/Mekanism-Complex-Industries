@@ -50,5 +50,8 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.lithography.ContainerPhotolithographyMachine> PHOTOLITHOGRAPHY_MACHINE =
             CONTAINER_TYPES.register("photolithography_machine", com.complexindustries.mekanism.content.lithography.TileEntityPhotolithographyMachine.class, com.complexindustries.mekanism.content.lithography.ContainerPhotolithographyMachine::new);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.coater.ContainerChemicalFilmCoater> CHEMICAL_FILM_COATER =
+            CONTAINER_TYPES.register("chemical_film_coater", com.complexindustries.mekanism.content.coater.TileEntityChemicalFilmCoater.class, com.complexindustries.mekanism.content.coater.ContainerChemicalFilmCoater::new);
+
     private MCIContainerTypes() {}
 }

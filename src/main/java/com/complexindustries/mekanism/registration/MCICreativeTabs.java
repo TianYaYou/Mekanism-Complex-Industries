@@ -56,8 +56,21 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.PHOTOLITHOGRAPHY_MACHINE.get());
                         output.accept(MCIItems.CALCULATION_MASK.get());
                         output.accept(MCIItems.LOGIC_MASK.get());
+                        output.accept(MCIItems.POLYPROPYLENE_SHEET.get());
+                        output.accept(MCIItems.REINFORCED_POLYPROPYLENE_SHEET.get());
                         output.accept(MCIItems.SEMIFINISHED_CALCULATION_CHIP.get());
                         output.accept(MCIItems.SEMIFINISHED_LOGIC_CHIP.get());
+                        output.accept(MCIItems.SEMIFINISHED_INFUSED_CALCULATION_CHIP.get());
+                        output.accept(MCIItems.SEMIFINISHED_INFUSED_LOGIC_CHIP.get());
+                        output.accept(MCIItems.SEMIFINISHED_REINFORCED_CALCULATION_CHIP.get());
+                        output.accept(MCIItems.SEMIFINISHED_REINFORCED_LOGIC_CHIP.get());
+                        output.accept(MCIItems.INFUSED_CALCULATION_CHIP.get());
+                        output.accept(MCIItems.INFUSED_LOGIC_CHIP.get());
+                        output.accept(MCIItems.REINFORCED_CALCULATION_CHIP.get());
+                        output.accept(MCIItems.REINFORCED_LOGIC_CHIP.get());
+                        output.accept(MCIItems.ATOMIC_CALCULATION_CHIP.get());
+                        output.accept(MCIItems.ATOMIC_LOGIC_CHIP.get());
+                        output.accept(MCIItems.CHEMICAL_FILM_COATER.get());
                         output.accept(MCIItems.FLOW_REGULATOR.get());
                     })
                     .build());

@@ -77,6 +77,7 @@
     "mekanism_complex_industries:crystal_growth_chamber",
     "mekanism_complex_industries:silicon_slicer",
     "mekanism_complex_industries:filtered_glass",
-    "mekanism_complex_industries:photolithography_machine"
+    "mekanism_complex_industries:photolithography_machine",
+    "mekanism_complex_industries:chemical_film_coater"
   ]
 }

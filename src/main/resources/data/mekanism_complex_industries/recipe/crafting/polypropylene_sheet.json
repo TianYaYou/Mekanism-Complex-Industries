@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PP",
+    "PP"
+  ],
+  "key": {
+    "P": {
+      "item": "mekanism_complex_industries:polypropylene_pellet"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:polypropylene_sheet"
+  }
+}
