@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ACA",
+    "TGT",
+    "PPP"
+  ],
+  "key": {
+    "A": {
+      "item": "mekanism:alloy_infused"
+    },
+    "C": {
+      "item": "mekanism:ultimate_control_circuit"
+    },
+    "T": {
+      "item": "mekanism:basic_chemical_tank"
+    },
+    "G": {
+      "item": "mekanism_complex_industries:filtered_glass"
+    },
+    "P": {
+      "item": "mekanism_complex_industries:engineering_plastic"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:photolithography_machine"
+  }
+}

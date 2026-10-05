@@ -29,6 +29,15 @@ public final class MCIRecipeTypes {
                     com.complexindustries.mekanism.recipe.CrystalGrowthRecipe::getChemicalInputA,
                     com.complexindustries.mekanism.recipe.CrystalGrowthRecipe::getChemicalInputB)));
 
+    public static final RecipeTypeRegistryObject<mekanism.api.recipes.vanilla_input.SingleItemChemicalRecipeInput, com.complexindustries.mekanism.recipe.SiliconSlicingRecipe, mekanism.common.recipe.lookup.cache.InputRecipeCache.ItemChemical<com.complexindustries.mekanism.recipe.SiliconSlicingRecipe>> SILICON_SLICING =
+            RECIPE_TYPES.registerMek("silicon_slicing", name -> createRecipeType(name, recipeType -> new mekanism.common.recipe.lookup.cache.InputRecipeCache.ItemChemical<>(recipeType, com.complexindustries.mekanism.recipe.SiliconSlicingRecipe::getItemInput, com.complexindustries.mekanism.recipe.SiliconSlicingRecipe::getChemicalInput)));
+
+    public static final RecipeTypeRegistryObject<com.complexindustries.mekanism.recipe.input.PhotolithographyRecipeInput, com.complexindustries.mekanism.recipe.PhotolithographyRecipe, com.complexindustries.mekanism.recipe.cache.PhotolithographyInputCache> PHOTOLITHOGRAPHY =
+            RECIPE_TYPES.registerMek("photolithography", name -> createRecipeType(name, recipeType -> new com.complexindustries.mekanism.recipe.cache.PhotolithographyInputCache(recipeType,
+                    com.complexindustries.mekanism.recipe.PhotolithographyRecipe::getItemInput,
+                    com.complexindustries.mekanism.recipe.PhotolithographyRecipe::getMaskInput,
+                    com.complexindustries.mekanism.recipe.PhotolithographyRecipe::getChemicalInput)));
+
     @SuppressWarnings("unchecked")
     private static <VANILLA_INPUT extends RecipeInput, RECIPE extends mekanism.api.recipes.MekanismRecipe<VANILLA_INPUT>, INPUT_CACHE extends IInputRecipeCache>
     MekanismRecipeType<VANILLA_INPUT, RECIPE, INPUT_CACHE> createRecipeType(ResourceLocation name, Function<MekanismRecipeType<VANILLA_INPUT, RECIPE, INPUT_CACHE>, INPUT_CACHE> inputCacheCreator) {

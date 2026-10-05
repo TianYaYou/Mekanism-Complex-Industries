@@ -193,6 +193,37 @@ public class MCIEmiPlugin implements EmiPlugin {
                         java.util.List.of(mekanism.common.registries.MekanismChemicals.HYDROGEN.asStack(100)),
                         new ItemStack(MCIItems.REFINED_SILICON.get())
                 )));
+
+        // 9. Silicon Slicing Recipes
+        registry.addCategory(SILICON_SLICING_CATEGORY);
+        registry.addWorkstation(SILICON_SLICING_CATEGORY, EmiStack.of(MCIBlocks.SILICON_SLICER.get()));
+        registry.addRecipe(new SiliconSlicingEmiRecipe(SILICON_SLICING_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "silicon_slicing/blank_silicon_wafer"),
+                new com.complexindustries.mekanism.client.jei.SiliconSlicingJEIRecipe(
+                        java.util.List.of(new ItemStack(MCIItems.REFINED_SILICON.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(100)),
+                        new ItemStack(MCIItems.BLANK_SILICON_WAFER.get(), 8)
+                )));
+
+        // 10. Photolithography Recipes
+        registry.addCategory(PHOTOLITHOGRAPHY_CATEGORY);
+        registry.addWorkstation(PHOTOLITHOGRAPHY_CATEGORY, EmiStack.of(MCIBlocks.PHOTOLITHOGRAPHY_MACHINE.get()));
+        registry.addRecipe(new PhotolithographyEmiRecipe(PHOTOLITHOGRAPHY_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "photolithography/calculation_chip"),
+                new com.complexindustries.mekanism.client.jei.PhotolithographyJEIRecipe(
+                        java.util.List.of(new ItemStack(MCIItems.BLANK_SILICON_WAFER.get())),
+                        java.util.List.of(new ItemStack(MCIItems.CALCULATION_MASK.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.SEMIFINISHED_CALCULATION_CHIP.get())
+                )));
+        registry.addRecipe(new PhotolithographyEmiRecipe(PHOTOLITHOGRAPHY_CATEGORY,
+                ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "photolithography/logic_chip"),
+                new com.complexindustries.mekanism.client.jei.PhotolithographyJEIRecipe(
+                        java.util.List.of(new ItemStack(MCIItems.BLANK_SILICON_WAFER.get())),
+                        java.util.List.of(new ItemStack(MCIItems.LOGIC_MASK.get())),
+                        java.util.List.of(MCIChemicals.NITROGEN.asStack(50)),
+                        new ItemStack(MCIItems.SEMIFINISHED_LOGIC_CHIP.get())
+                )));
     }
 
     public static final EmiRecipeCategory CHEMICAL_SOAKING_CATEGORY = new EmiRecipeCategory(
@@ -214,6 +245,28 @@ public class MCIEmiPlugin implements EmiPlugin {
         @Override
         public Component getName() {
             return Component.translatable("gui.mekanism_complex_industries.crystal_growth.category");
+        }
+    };
+
+    public static final EmiRecipeCategory SILICON_SLICING_CATEGORY = new EmiRecipeCategory(
+            ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "silicon_slicing"),
+            EmiStack.of(MCIBlocks.SILICON_SLICER.get()),
+            EmiStack.of(MCIBlocks.SILICON_SLICER.get())
+    ) {
+        @Override
+        public Component getName() {
+            return Component.translatable("gui.mekanism_complex_industries.silicon_slicer.category");
+        }
+    };
+
+    public static final EmiRecipeCategory PHOTOLITHOGRAPHY_CATEGORY = new EmiRecipeCategory(
+            ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "photolithography"),
+            EmiStack.of(MCIBlocks.PHOTOLITHOGRAPHY_MACHINE.get()),
+            EmiStack.of(MCIBlocks.PHOTOLITHOGRAPHY_MACHINE.get())
+    ) {
+        @Override
+        public Component getName() {
+            return Component.translatable("gui.mekanism_complex_industries.photolithography.category");
         }
     };
 }

@@ -175,6 +175,18 @@ public final class MCIItems {
 
     public static final DeferredItem<Item> REFINED_SILICON = ITEMS.registerSimpleItem("refined_silicon");
 
+    public static final DeferredItem<Item> BLANK_SILICON_WAFER = ITEMS.registerSimpleItem("blank_silicon_wafer");
+
+    public static final DeferredItem<Item> CALCULATION_MASK = ITEMS.register("calculation_mask",
+            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+
+    public static final DeferredItem<Item> LOGIC_MASK = ITEMS.register("logic_mask",
+            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+
+    public static final DeferredItem<Item> SEMIFINISHED_CALCULATION_CHIP = ITEMS.registerSimpleItem("semifinished_calculation_chip");
+
+    public static final DeferredItem<Item> SEMIFINISHED_LOGIC_CHIP = ITEMS.registerSimpleItem("semifinished_logic_chip");
+
     private static final mekanism.common.attachments.component.AttachedSideConfig CRYSTAL_GROWTH_SIDE_CONFIG = net.minecraft.Util.make(() -> {
         java.util.Map<mekanism.common.lib.transmitter.TransmissionType, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo> configInfo =
                 new java.util.EnumMap<>(mekanism.common.lib.transmitter.TransmissionType.class);
@@ -188,11 +200,51 @@ public final class MCIItems {
         return new mekanism.common.attachments.component.AttachedSideConfig(configInfo);
     });
 
+    private static final mekanism.common.attachments.component.AttachedSideConfig SILICON_SLICER_SIDE_CONFIG = net.minecraft.Util.make(() -> {
+        java.util.Map<mekanism.common.lib.transmitter.TransmissionType, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo> configInfo =
+                new java.util.EnumMap<>(mekanism.common.lib.transmitter.TransmissionType.class);
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.ITEM, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo.MACHINE);
+        java.util.Map<mekanism.api.RelativeSide, mekanism.common.tile.component.config.DataType> chemicalSides =
+                new java.util.EnumMap<>(mekanism.api.RelativeSide.class);
+        chemicalSides.put(mekanism.api.RelativeSide.LEFT, mekanism.common.tile.component.config.DataType.INPUT);
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.CHEMICAL, new mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo(chemicalSides, false));
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.ENERGY, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo.INPUT_ONLY);
+        return new mekanism.common.attachments.component.AttachedSideConfig(configInfo);
+    });
+
     public static final DeferredItem<BlockItem> CRYSTAL_GROWTH_CHAMBER = ITEMS.register("crystal_growth_chamber",
             () -> new MCIBlockItem(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get(), new Item.Properties()
                     .component(mekanism.common.registries.MekanismDataComponents.EJECTOR, mekanism.common.attachments.component.AttachedEjector.DEFAULT)
                     .component(mekanism.common.registries.MekanismDataComponents.SIDE_CONFIG, CRYSTAL_GROWTH_SIDE_CONFIG),
                     "description.mekanism_complex_industries.crystal_growth_chamber", true));
+
+    public static final DeferredItem<BlockItem> SILICON_SLICER = ITEMS.register("silicon_slicer",
+            () -> new MCIBlockItem(MCIBlocks.SILICON_SLICER.get(), new Item.Properties()
+                    .component(mekanism.common.registries.MekanismDataComponents.EJECTOR, mekanism.common.attachments.component.AttachedEjector.DEFAULT)
+                    .component(mekanism.common.registries.MekanismDataComponents.SIDE_CONFIG, SILICON_SLICER_SIDE_CONFIG),
+                    "description.mekanism_complex_industries.silicon_slicer", true));
+
+    public static final DeferredItem<BlockItem> FILTERED_GLASS = ITEMS.register("filtered_glass",
+            () -> new MCIBlockItem(MCIBlocks.FILTERED_GLASS.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.filtered_glass", false));
+
+    private static final mekanism.common.attachments.component.AttachedSideConfig PHOTOLITHOGRAPHY_MACHINE_SIDE_CONFIG = net.minecraft.Util.make(() -> {
+        java.util.Map<mekanism.common.lib.transmitter.TransmissionType, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo> configInfo =
+                new java.util.EnumMap<>(mekanism.common.lib.transmitter.TransmissionType.class);
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.ITEM, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo.MACHINE);
+        java.util.Map<mekanism.api.RelativeSide, mekanism.common.tile.component.config.DataType> chemicalSides =
+                new java.util.EnumMap<>(mekanism.api.RelativeSide.class);
+        chemicalSides.put(mekanism.api.RelativeSide.LEFT, mekanism.common.tile.component.config.DataType.INPUT);
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.CHEMICAL, new mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo(chemicalSides, false));
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.ENERGY, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo.INPUT_ONLY);
+        return new mekanism.common.attachments.component.AttachedSideConfig(configInfo);
+    });
+
+    public static final DeferredItem<BlockItem> PHOTOLITHOGRAPHY_MACHINE = ITEMS.register("photolithography_machine",
+            () -> new MCIBlockItem(MCIBlocks.PHOTOLITHOGRAPHY_MACHINE.get(), new Item.Properties()
+                    .component(mekanism.common.registries.MekanismDataComponents.EJECTOR, mekanism.common.attachments.component.AttachedEjector.DEFAULT)
+                    .component(mekanism.common.registries.MekanismDataComponents.SIDE_CONFIG, PHOTOLITHOGRAPHY_MACHINE_SIDE_CONFIG),
+                    "description.mekanism_complex_industries.photolithography_machine", true));
 
     private MCIItems() {}
 }

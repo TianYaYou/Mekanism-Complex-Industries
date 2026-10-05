@@ -21,5 +21,11 @@ public final class MCIRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<com.complexindustries.mekanism.recipe.CrystalGrowthRecipe>> CRYSTAL_GROWTH =
             RECIPE_SERIALIZERS.register("crystal_growth", com.complexindustries.mekanism.recipe.CrystalGrowthRecipeSerializer::create);
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<com.complexindustries.mekanism.recipe.SiliconSlicingRecipe>> SILICON_SLICING =
+            RECIPE_SERIALIZERS.register("silicon_slicing", () -> mekanism.common.recipe.serializer.MekanismRecipeSerializer.itemChemicalToItem(com.complexindustries.mekanism.recipe.SiliconSlicingRecipe::new));
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<com.complexindustries.mekanism.recipe.PhotolithographyRecipe>> PHOTOLITHOGRAPHY =
+            RECIPE_SERIALIZERS.register("photolithography", com.complexindustries.mekanism.recipe.PhotolithographyRecipeSerializer::create);
+
     private MCIRecipeSerializers() {}
 }

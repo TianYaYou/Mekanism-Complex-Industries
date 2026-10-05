@@ -180,5 +180,28 @@ public final class MCITileEntityTypes {
                     .withSimple(Capabilities.CONFIGURABLE)
                     .build();
 
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.slicer.TileEntitySiliconSlicer> SILICON_SLICER =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.SILICON_SLICER, com.complexindustries.mekanism.content.slicer.TileEntitySiliconSlicer::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .withSimple(Capabilities.CONFIG_CARD)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.glass.TileEntityFilteredGlass> FILTERED_GLASS =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.FILTERED_GLASS, com.complexindustries.mekanism.content.glass.TileEntityFilteredGlass::new)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .with(Capabilities.LASER_RECEPTOR, (tile, side) -> tile.getLaserReceptor(side))
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.lithography.TileEntityPhotolithographyMachine> PHOTOLITHOGRAPHY_MACHINE =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.PHOTOLITHOGRAPHY_MACHINE, com.complexindustries.mekanism.content.lithography.TileEntityPhotolithographyMachine::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .withSimple(Capabilities.CONFIG_CARD)
+                    .with(Capabilities.LASER_RECEPTOR, (tile, side) -> tile.getLaserReceptor())
+                    .build();
+
     private MCITileEntityTypes() {}
 }

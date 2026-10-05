@@ -267,5 +267,27 @@ public final class MCIBlocks {
                             .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.CrystalGrowthChamberBlock.ACTIVE) ? 12 : 0)
                             .noOcclusion()));
 
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.BlockSiliconSlicer> SILICON_SLICER = BLOCKS.register("silicon_slicer",
+            () -> new com.complexindustries.mekanism.content.block.BlockSiliconSlicer(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.BlockSiliconSlicer.ACTIVE) ? 8 : 0)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.FilteredGlassBlock> FILTERED_GLASS = BLOCKS.register("filtered_glass",
+            () -> new com.complexindustries.mekanism.content.block.FilteredGlassBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.0F, 8.0F)
+                            .sound(net.minecraft.world.level.block.SoundType.GLASS)
+                            .noOcclusion()));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.block.BlockPhotolithographyMachine> PHOTOLITHOGRAPHY_MACHINE = BLOCKS.register("photolithography_machine",
+            () -> new com.complexindustries.mekanism.content.block.BlockPhotolithographyMachine(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(3.5F, 16.0F)
+                            .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.BlockPhotolithographyMachine.ACTIVE) ? 8 : 0)));
+
     private MCIBlocks() {}
 }

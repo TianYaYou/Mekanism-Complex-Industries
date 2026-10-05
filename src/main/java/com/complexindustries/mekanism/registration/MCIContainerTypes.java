@@ -44,5 +44,11 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.chamber.ContainerCrystalGrowthChamber> CRYSTAL_GROWTH_CHAMBER =
             CONTAINER_TYPES.register("crystal_growth_chamber", com.complexindustries.mekanism.content.chamber.TileEntityCrystalGrowthChamber.class, com.complexindustries.mekanism.content.chamber.ContainerCrystalGrowthChamber::new);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.slicer.ContainerSiliconSlicer> SILICON_SLICER =
+            CONTAINER_TYPES.register("silicon_slicer", com.complexindustries.mekanism.content.slicer.TileEntitySiliconSlicer.class, com.complexindustries.mekanism.content.slicer.ContainerSiliconSlicer::new);
+
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.lithography.ContainerPhotolithographyMachine> PHOTOLITHOGRAPHY_MACHINE =
+            CONTAINER_TYPES.register("photolithography_machine", com.complexindustries.mekanism.content.lithography.TileEntityPhotolithographyMachine.class, com.complexindustries.mekanism.content.lithography.ContainerPhotolithographyMachine::new);
+
     private MCIContainerTypes() {}
 }

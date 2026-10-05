@@ -35,6 +35,14 @@ public class MCIClientRegistration {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOAKER, com.complexindustries.mekanism.client.gui.GuiChemicalSoaker::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_SOAKING_FACTORY, com.complexindustries.mekanism.client.gui.GuiChemicalSoakingFactory::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CRYSTAL_GROWTH_CHAMBER, com.complexindustries.mekanism.client.gui.GuiCrystalGrowthChamber::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.SILICON_SLICER, com.complexindustries.mekanism.client.gui.GuiSiliconSlicer::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.PHOTOLITHOGRAPHY_MACHINE, com.complexindustries.mekanism.client.gui.GuiPhotolithographyMachine::new);
+    }
+
+    @SubscribeEvent
+    public static void registerParticleFactories(net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(com.complexindustries.mekanism.registration.MCIParticleTypes.ULTRAVIOLET_LASER.get(),
+                com.complexindustries.mekanism.client.particle.UltravioletLaserParticle.Factory::new);
     }
 
     @SubscribeEvent

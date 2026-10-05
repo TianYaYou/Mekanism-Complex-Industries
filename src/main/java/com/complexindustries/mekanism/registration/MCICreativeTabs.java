@@ -50,6 +50,14 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.CRUDE_SILICON.get());
                         output.accept(MCIItems.REFINED_SILICON.get());
                         output.accept(MCIItems.CRYSTAL_GROWTH_CHAMBER.get());
+                        output.accept(MCIItems.BLANK_SILICON_WAFER.get());
+                        output.accept(MCIItems.SILICON_SLICER.get());
+                        output.accept(MCIItems.FILTERED_GLASS.get());
+                        output.accept(MCIItems.PHOTOLITHOGRAPHY_MACHINE.get());
+                        output.accept(MCIItems.CALCULATION_MASK.get());
+                        output.accept(MCIItems.LOGIC_MASK.get());
+                        output.accept(MCIItems.SEMIFINISHED_CALCULATION_CHIP.get());
+                        output.accept(MCIItems.SEMIFINISHED_LOGIC_CHIP.get());
                         output.accept(MCIItems.FLOW_REGULATOR.get());
                     })
                     .build());

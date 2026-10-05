@@ -1,0 +1,16 @@
+{
+  "type": "mekanism_complex_industries:silicon_slicing",
+  "item_input": {
+    "count": 1,
+    "item": "mekanism_complex_industries:refined_silicon"
+  },
+  "chemical_input": {
+    "amount": 100,
+    "chemical": "mekanism_complex_industries:nitrogen"
+  },
+  "output": {
+    "count": 8,
+    "id": "mekanism_complex_industries:blank_silicon_wafer"
+  },
+  "per_tick_usage": false
+}

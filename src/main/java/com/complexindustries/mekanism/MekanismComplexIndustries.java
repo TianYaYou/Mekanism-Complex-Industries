@@ -38,6 +38,7 @@ public class MekanismComplexIndustries {
         MCICreativeTabs.CREATIVE_TABS.register(modEventBus);
         com.complexindustries.mekanism.registration.MCIRecipeTypes.RECIPE_TYPES.register(modEventBus);
         com.complexindustries.mekanism.registration.MCIRecipeSerializers.RECIPE_SERIALIZERS.register(modEventBus);
+        com.complexindustries.mekanism.registration.MCIParticleTypes.PARTICLE_TYPES.register(modEventBus);
 
         // Network Handler
         packetHandler = new MCIPacketHandler(modEventBus, versionNumber);

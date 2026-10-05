@@ -50,6 +50,12 @@ public class MCIJEIPlugin implements IModPlugin {
     public static final RecipeType<CrystalGrowthJEIRecipe> CRYSTAL_GROWTH_JEI_TYPE =
             new RecipeType<>(ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "crystal_growth"), CrystalGrowthJEIRecipe.class);
 
+    public static final RecipeType<SiliconSlicingJEIRecipe> SILICON_SLICING_JEI_TYPE =
+            new RecipeType<>(ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "silicon_slicing"), SiliconSlicingJEIRecipe.class);
+
+    public static final RecipeType<PhotolithographyJEIRecipe> PHOTOLITHOGRAPHY_JEI_TYPE =
+            new RecipeType<>(ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "photolithography"), PhotolithographyJEIRecipe.class);
+
     @NotNull
     @Override
     public ResourceLocation getPluginUid() {
@@ -68,6 +74,8 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeCategories(new ChemicalSolidifierRecipeCategory(guiHelper, CHEMICAL_SOLIDIFIER_JEI_TYPE));
         registry.addRecipeCategories(new ChemicalSoakingRecipeCategory(guiHelper, CHEMICAL_SOAKING_JEI_TYPE));
         registry.addRecipeCategories(new CrystalGrowthRecipeCategory(guiHelper, CRYSTAL_GROWTH_JEI_TYPE));
+        registry.addRecipeCategories(new SiliconSlicingRecipeCategory(guiHelper, SILICON_SLICING_JEI_TYPE));
+        registry.addRecipeCategories(new PhotolithographyRecipeCategory(guiHelper, PHOTOLITHOGRAPHY_JEI_TYPE));
     }
 
     @Override
@@ -170,6 +178,31 @@ public class MCIJEIPlugin implements IModPlugin {
                 new ItemStack(MCIItems.REFINED_SILICON.get())
         ));
         registry.addRecipes(CRYSTAL_GROWTH_JEI_TYPE, crystalGrowthRecipes);
+
+        // 7. Silicon Slicing Recipes
+        List<SiliconSlicingJEIRecipe> siliconSlicingRecipes = new ArrayList<>();
+        siliconSlicingRecipes.add(new SiliconSlicingJEIRecipe(
+                List.of(new ItemStack(MCIItems.REFINED_SILICON.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(100)),
+                new ItemStack(MCIItems.BLANK_SILICON_WAFER.get(), 8)
+        ));
+        registry.addRecipes(SILICON_SLICING_JEI_TYPE, siliconSlicingRecipes);
+
+        // 8. Photolithography Recipes
+        List<PhotolithographyJEIRecipe> lithoRecipes = new ArrayList<>();
+        lithoRecipes.add(new PhotolithographyJEIRecipe(
+                List.of(new ItemStack(MCIItems.BLANK_SILICON_WAFER.get())),
+                List.of(new ItemStack(MCIItems.CALCULATION_MASK.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.SEMIFINISHED_CALCULATION_CHIP.get())
+        ));
+        lithoRecipes.add(new PhotolithographyJEIRecipe(
+                List.of(new ItemStack(MCIItems.BLANK_SILICON_WAFER.get())),
+                List.of(new ItemStack(MCIItems.LOGIC_MASK.get())),
+                List.of(MCIChemicals.NITROGEN.asStack(50)),
+                new ItemStack(MCIItems.SEMIFINISHED_LOGIC_CHIP.get())
+        ));
+        registry.addRecipes(PHOTOLITHOGRAPHY_JEI_TYPE, lithoRecipes);
     }
 
     @Override
@@ -195,6 +228,8 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.ULTIMATE_CHEMICAL_SOAKING_FACTORY.get()), CHEMICAL_SOAKING_JEI_TYPE);
 
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.CRYSTAL_GROWTH_CHAMBER.get()), CRYSTAL_GROWTH_JEI_TYPE);
+        registry.addRecipeCatalyst(new ItemStack(MCIBlocks.SILICON_SLICER.get()), SILICON_SLICING_JEI_TYPE);
+        registry.addRecipeCatalyst(new ItemStack(MCIBlocks.PHOTOLITHOGRAPHY_MACHINE.get()), PHOTOLITHOGRAPHY_JEI_TYPE);
 
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_CONTROLLER.get()), REFINERY_JEI_TYPE);
         registry.addRecipeCatalyst(new ItemStack(MCIBlocks.REFINERY_CASING.get()), REFINERY_JEI_TYPE);
@@ -212,5 +247,7 @@ public class MCIJEIPlugin implements IModPlugin {
         registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiChemicalSolidifier.class, 68, 40, 32, 10, CHEMICAL_SOLIDIFIER_JEI_TYPE);
         registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiChemicalSoaker.class, 86, 38, 20, 10, CHEMICAL_SOAKING_JEI_TYPE);
         registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiCrystalGrowthChamber.class, 75, 39, 20, 10, CRYSTAL_GROWTH_JEI_TYPE);
+        registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiSiliconSlicer.class, 79, 43, 24, 16, SILICON_SLICING_JEI_TYPE);
+        registry.addRecipeClickArea(com.complexindustries.mekanism.client.gui.GuiPhotolithographyMachine.class, 79, 42, 24, 16, PHOTOLITHOGRAPHY_JEI_TYPE);
     }
 }

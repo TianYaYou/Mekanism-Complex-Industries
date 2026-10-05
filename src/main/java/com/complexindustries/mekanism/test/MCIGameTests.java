@@ -21,6 +21,14 @@ import mekanism.common.registries.MekanismChemicals;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.chemical.BasicChemicalTank;
+import com.complexindustries.mekanism.content.slicer.TileEntitySiliconSlicer;
+import com.complexindustries.mekanism.content.slicer.ContainerSiliconSlicer;
+import com.complexindustries.mekanism.content.glass.TileEntityFilteredGlass;
+import com.complexindustries.mekanism.content.block.FilteredGlassBlock;
+import com.complexindustries.mekanism.content.lithography.TileEntityPhotolithographyMachine;
+import com.complexindustries.mekanism.content.lithography.ContainerPhotolithographyMachine;
+import com.complexindustries.mekanism.content.block.BlockPhotolithographyMachine;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import com.complexindustries.mekanism.content.refinery.RefineryMultiblockCache;
@@ -1325,6 +1333,287 @@ public class MCIGameTests {
         helper.assertTrue(chamber.chemicalTankA.getStored() == 400L, "稀有气体消耗量应为 100 mB！剩余: " + chamber.chemicalTankA.getStored());
         helper.assertTrue(chamber.chemicalTankB.getStored() == 400L, "氢气消耗量应为 100 mB！剩余: " + chamber.chemicalTankB.getStored());
         helper.assertTrue(chamber.inputSlot.isEmpty(), "粗制硅输入槽应被消耗完毕！");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testSiliconSlicer(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(2, 2, 2);
+        helper.setBlock(pos, MCIBlocks.SILICON_SLICER.get());
+        helper.assertBlockPresent(MCIBlocks.SILICON_SLICER.get(), pos);
+
+        TileEntitySiliconSlicer slicer = (TileEntitySiliconSlicer) helper.getBlockEntity(pos);
+        helper.assertTrue(slicer != null, "硅切片机方块实体应为 TileEntitySiliconSlicer");
+
+        // 1. Verify tank capacity is 1000 mB
+        helper.assertTrue(slicer.chemicalTank.getCapacity() == 1000L, "硅切片机化学品槽容量应为 1000 mB！");
+
+        // 2. Setup power and upgrades
+        slicer.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.SPEED, 8);
+        slicer.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.ENERGY, 8);
+        slicer.getEnergyContainer().insert(1_000_000L, Action.EXECUTE, AutomationType.INTERNAL);
+
+        // 3. Test 80% nitrogen lock: Insert 700 mB Nitrogen (< 800 mB)
+        slicer.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(700));
+        slicer.inputSlot.setStack(new ItemStack(MCIItems.REFINED_SILICON.get(), 1));
+
+        helper.assertTrue(!slicer.canFunction(), "氮气不足 80% (800 mB) 时硅切片机不应运行！");
+
+        // Tick several times to verify machine does not process
+        for (int i = 0; i < 10; i++) {
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), slicer);
+        }
+        helper.assertTrue(slicer.outputSlot.isEmpty(), "氮气不足 80% 时不应产出空白硅片！");
+        helper.assertTrue(slicer.inputSlot.getCount() == 1, "精制硅不应被消耗！");
+
+        // 4. Increase Nitrogen to >= 800 mB (e.g. 950 mB to account for dissipation during processing)
+        slicer.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(950));
+        helper.assertTrue(slicer.canFunction(), "氮气达到 80% 以上时硅切片机应恢复工作！");
+
+        // Tick until slicing finishes
+        for (int i = 0; i < 60; i++) {
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), slicer);
+            if (!slicer.outputSlot.isEmpty()) {
+                break;
+            }
+        }
+
+        helper.assertTrue(!slicer.outputSlot.isEmpty(), "硅切片机应完成切片并产出物品！");
+        helper.assertTrue(slicer.outputSlot.getStack().is(MCIItems.BLANK_SILICON_WAFER.get()), "产物应为空白硅片！");
+        helper.assertTrue(slicer.outputSlot.getStack().getCount() == 8, "每次切片应产出 8 个空白硅片！当前数量: " + slicer.outputSlot.getStack().getCount());
+        helper.assertTrue(slicer.inputSlot.isEmpty(), "原料精制硅应被消耗完毕！");
+
+        // 5. Test Environmental Dissipation (0.1%/tick)
+        slicer.inputSlot.setEmpty();
+        long beforeDissipation = slicer.chemicalTank.getStored();
+        for (int i = 0; i < 20; i++) {
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), slicer);
+        }
+        long afterDissipation = slicer.chemicalTank.getStored();
+        helper.assertTrue(afterDissipation < beforeDissipation, "氮气在储罐中应自然发生逸散！之前: " + beforeDissipation + ", 之后: " + afterDissipation);
+
+        // 6. Test Container
+        FakePlayer fakePlayer = FakePlayerFactory.getMinecraft(helper.getLevel());
+        ContainerSiliconSlicer container = new ContainerSiliconSlicer(1, fakePlayer.getInventory(), slicer);
+        helper.assertTrue(container.stillValid(fakePlayer), "硅切片机容器应处于有效状态！");
+        container.removed(fakePlayer);
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testFilteredGlass(GameTestHelper helper) {
+        BlockPos pos1 = new BlockPos(2, 2, 2);
+        BlockPos pos2 = new BlockPos(2, 2, 3);
+
+        helper.setBlock(pos1, MCIBlocks.FILTERED_GLASS.get());
+        helper.setBlock(pos2, MCIBlocks.FILTERED_GLASS.get());
+
+        helper.assertBlockPresent(MCIBlocks.FILTERED_GLASS.get(), pos1);
+        helper.assertBlockPresent(MCIBlocks.FILTERED_GLASS.get(), pos2);
+
+        TileEntityFilteredGlass glass1 = (TileEntityFilteredGlass) helper.getBlockEntity(pos1);
+        TileEntityFilteredGlass glass2 = (TileEntityFilteredGlass) helper.getBlockEntity(pos2);
+        helper.assertTrue(glass1 != null && glass2 != null, "过滤玻璃方块实体应为 TileEntityFilteredGlass");
+
+        BlockPos absPos1 = helper.absolutePos(pos1);
+        var receptor1 = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.LASER_RECEPTOR, absPos1, Direction.NORTH);
+        helper.assertTrue(receptor1 != null, "过滤玻璃北侧应暴露激光受体能力！");
+        helper.assertTrue(!receptor1.canLasersDig(), "过滤玻璃拦截激光时不应被破坏 (canLasersDig == false)！");
+
+        // 1. Test Laser Absorption & UV Transmission
+        // Incoming: 100,000 laser energy into NORTH face of pos1.
+        // pos1 absorbs 90% (90,000) as heat, transmits 10% (10,000) SOUTH into pos2.
+        // pos2 absorbs 90% of 10,000 = 9,000 as heat.
+        receptor1.receiveLaserEnergy(100_000L);
+
+        helper.assertTrue(glass1.getTemperature() > 300.0, "过滤玻璃 1 吸收激光后温度应显著上升！当前温度: " + glass1.getTemperature());
+        helper.assertTrue(glass2.getTemperature() > 300.0, "过滤玻璃 2 接收穿透的紫外激光后温度应上升！当前温度: " + glass2.getTemperature());
+
+        // 2. Test High Temperature StepOn Hazard (T > 373.15 K)
+        glass1.getHeatCapacitor().handleHeat(100_000.0);
+        glass1.getHeatCapacitor().update();
+        helper.assertTrue(glass1.getTemperature() > 373.15, "过滤玻璃 1 温度应超过 373.15 K！当前温度: " + glass1.getTemperature());
+
+        Zombie zombie = new Zombie(helper.getLevel());
+        zombie.setPos(absPos1.getX() + 0.5, absPos1.getY() + 1.0, absPos1.getZ() + 0.5);
+        FilteredGlassBlock glassBlock = (FilteredGlassBlock) helper.getBlockState(pos1).getBlock();
+        glassBlock.stepOn(helper.getLevel(), absPos1, helper.getBlockState(pos1), zombie);
+        helper.assertTrue(zombie.getRemainingFireTicks() > 0, "实体踩在高温过滤玻璃上应被点燃！当前着火 tick: " + zombie.getRemainingFireTicks());
+        zombie.discard();
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_15x25x15")
+    public static void testUltravioletLaserHarmlessAndAttenuation(GameTestHelper helper) {
+        BlockPos glassPos1 = new BlockPos(2, 2, 1);
+        BlockPos targetPosNear = new BlockPos(2, 2, 4);
+
+        helper.setBlock(glassPos1, MCIBlocks.FILTERED_GLASS.get());
+        helper.setBlock(targetPosNear, MCIBlocks.FILTERED_GLASS.get());
+
+        TileEntityFilteredGlass glass1 = (TileEntityFilteredGlass) helper.getBlockEntity(glassPos1);
+        TileEntityFilteredGlass glassNear = (TileEntityFilteredGlass) helper.getBlockEntity(targetPosNear);
+
+        BlockPos absGlassPos1 = helper.absolutePos(glassPos1);
+        var receptor1 = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.LASER_RECEPTOR, absGlassPos1, Direction.NORTH);
+        helper.assertTrue(receptor1 != null, "过滤玻璃 1 北侧应暴露激光受体能力！");
+
+        // Spawn dropped item directly in the beam line (at Z = 2)
+        BlockPos itemPos = helper.absolutePos(new BlockPos(2, 2, 2));
+        ItemEntity itemEntity = new ItemEntity(helper.getLevel(), itemPos.getX() + 0.5, itemPos.getY() + 0.5, itemPos.getZ() + 0.5, new ItemStack(MCIItems.BLANK_SILICON_WAFER.get(), 1));
+        helper.getLevel().addFreshEntity(itemEntity);
+
+        // Spawn mob directly in the beam line (at Z = 3)
+        BlockPos mobPos = helper.absolutePos(new BlockPos(2, 2, 3));
+        Zombie zombie = new Zombie(helper.getLevel());
+        zombie.setPos(mobPos.getX() + 0.5, mobPos.getY(), mobPos.getZ() + 0.5);
+        helper.getLevel().addFreshEntity(zombie);
+
+        // Fire laser into North of glass1 -> emits UV laser South
+        receptor1.receiveLaserEnergy(100_000L);
+
+        // Verify UV Laser is completely harmless to entities and items
+        helper.assertTrue(itemEntity.isAlive(), "紫外激光不应破坏掉落物！");
+        helper.assertTrue(itemEntity.getItem().getCount() == 1, "掉落物数量不应减少！");
+        helper.assertTrue(zombie.isAlive(), "紫外激光不应对生物造成伤害！");
+        helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "生物血量不应被扣除！");
+        helper.assertTrue(zombie.getRemainingFireTicks() <= 0, "紫外激光不应点燃生物！");
+
+        // Verify beam reached near target (distance ~ 3m < 10m) and heated it
+        helper.assertTrue(glassNear.getTemperature() > 300.0, "近距离 (3m) 过滤玻璃应接收到紫外激光并升温！当前温度: " + glassNear.getTemperature());
+
+        // Discard entities
+        itemEntity.discard();
+        zombie.discard();
+
+        // Remove near target so beam path extends to far target
+        helper.setBlock(targetPosNear, Blocks.AIR);
+
+        // Test Range Cap: Target placed at distance 12m (> 10m MAX_UV_RANGE)
+        BlockPos targetPosFar = new BlockPos(2, 2, 13);
+        helper.setBlock(targetPosFar, MCIBlocks.FILTERED_GLASS.get());
+        TileEntityFilteredGlass glassFar = (TileEntityFilteredGlass) helper.getBlockEntity(targetPosFar);
+        double farTempBefore = glassFar.getTemperature();
+
+        // Fire laser again
+        receptor1.receiveLaserEnergy(100_000L);
+
+        // Verify far target did NOT receive any laser because range is capped at 10m
+        double farTempAfter = glassFar.getTemperature();
+        helper.assertTrue(farTempAfter == farTempBefore, "超过 10m (12m) 的目标不应接收到任何紫外激光！之前: " + farTempBefore + ", 之后: " + farTempAfter);
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testPhotolithographyMachine(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(2, 2, 2);
+        helper.setBlock(pos, MCIBlocks.PHOTOLITHOGRAPHY_MACHINE.get().defaultBlockState().setValue(BlockPhotolithographyMachine.FACING, Direction.NORTH));
+        helper.assertBlockPresent(MCIBlocks.PHOTOLITHOGRAPHY_MACHINE.get(), pos);
+
+        TileEntityPhotolithographyMachine machine = (TileEntityPhotolithographyMachine) helper.getBlockEntity(pos);
+        helper.assertTrue(machine != null, "光刻机方块实体应为 TileEntityPhotolithographyMachine");
+
+        // 1. Verify Siding: All sides can accept UV laser
+        BlockPos absPos = helper.absolutePos(pos);
+        for (Direction side : Direction.values()) {
+            var receptor = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.LASER_RECEPTOR, absPos, side);
+            helper.assertTrue(receptor != null, "光刻机各表面 (" + side + ") 均应暴露激光受体能力！");
+            helper.assertTrue(!receptor.canLasersDig(), "光刻机激光受体不应被破坏！");
+        }
+        var rightReceptor = helper.getLevel().getCapability(mekanism.common.capabilities.Capabilities.LASER_RECEPTOR, absPos, Direction.NORTH);
+
+        // 2. Tank capacity check
+        helper.assertTrue(machine.chemicalTank.getCapacity() == 1000L, "光刻机氮气储罐容量应为 1000 mB！");
+
+        // 3. Power and upgrades
+        machine.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.SPEED, 8);
+        machine.getUpgradeComponent().addUpgrades(mekanism.api.Upgrade.ENERGY, 8);
+        machine.getEnergyContainer().insert(1_000_000L, Action.EXECUTE, AutomationType.INTERNAL);
+
+        // 4. Test Exposure duration scaling by laser energy
+        // 100 J laser
+        rightReceptor.receiveLaserEnergy(100L);
+        TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), machine);
+        helper.assertTrue(machine.ticksRequired == 1100, "100 J 激光照射时光刻耗时应为 1100 ticks (55s)！实际: " + machine.ticksRequired);
+
+        // 10,000 J laser
+        rightReceptor.receiveLaserEnergy(10_000L);
+        TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), machine);
+        helper.assertTrue(machine.ticksRequired == 100, "10,000 J 激光照射时光刻耗时应为 100 ticks (5s)！实际: " + machine.ticksRequired);
+
+        // 5. Test 80% Nitrogen lock
+        machine.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(700));
+        machine.inputSlot.setStack(new ItemStack(MCIItems.BLANK_SILICON_WAFER.get(), 1));
+        machine.maskSlot.setStack(new ItemStack(MCIItems.CALCULATION_MASK.get(), 1));
+
+        rightReceptor.receiveLaserEnergy(10_000L);
+        TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), machine);
+        helper.assertTrue(!machine.canFunction(), "氮气不足 80% (800 mB) 时光刻机不应运行！");
+        helper.assertTrue(machine.outputSlot.isEmpty(), "氮气不足 80% 时不应产出芯片！");
+
+        // 6. Test Laser offline pause
+        machine.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(950));
+        for (int i = 0; i < 6; i++) {
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), machine);
+        }
+        helper.assertTrue(!machine.hasActiveLaser(), "无激光输入时光刻机激光状态应为离线！");
+        helper.assertTrue(!machine.canFunction(), "无紫外激光照射时光刻机应暂停工作！");
+
+        // 7. Full Exposure test with Calculation Mask
+        machine.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(1000));
+        for (int i = 0; i < 120; i++) {
+            rightReceptor.receiveLaserEnergy(10_000L);
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), machine);
+            if (!machine.outputSlot.isEmpty()) {
+                break;
+            }
+        }
+
+        helper.assertTrue(!machine.outputSlot.isEmpty(), "光刻机应完成曝光产出半成品芯片！");
+        helper.assertTrue(machine.outputSlot.getStack().is(MCIItems.SEMIFINISHED_CALCULATION_CHIP.get()),
+                "使用计算掩膜时产物应为半成品计算芯片！实际: " + machine.outputSlot.getStack());
+        helper.assertTrue(!machine.maskSlot.isEmpty() && machine.maskSlot.getStack().is(MCIItems.CALCULATION_MASK.get()) && machine.maskSlot.getCount() == 1,
+                "计算掩膜版属于非消耗耐用品，不应被消耗！");
+        helper.assertTrue(machine.inputSlot.isEmpty(), "空白硅片原料应被消耗！");
+
+        // 8. Full Exposure test with Logic Mask
+        machine.outputSlot.setEmpty();
+        machine.inputSlot.setStack(new ItemStack(MCIItems.BLANK_SILICON_WAFER.get(), 1));
+        machine.maskSlot.setStack(new ItemStack(MCIItems.LOGIC_MASK.get(), 1));
+        machine.chemicalTank.setStack(MCIChemicals.NITROGEN.asStack(1000));
+
+        for (int i = 0; i < 120; i++) {
+            rightReceptor.receiveLaserEnergy(10_000L);
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), machine);
+            if (!machine.outputSlot.isEmpty()) {
+                break;
+            }
+        }
+
+        helper.assertTrue(!machine.outputSlot.isEmpty(), "光刻机应完成逻辑芯片曝光！");
+        helper.assertTrue(machine.outputSlot.getStack().is(MCIItems.SEMIFINISHED_LOGIC_CHIP.get()),
+                "使用逻辑掩膜时产物应为半成品逻辑芯片！实际: " + machine.outputSlot.getStack());
+        helper.assertTrue(!machine.maskSlot.isEmpty() && machine.maskSlot.getStack().is(MCIItems.LOGIC_MASK.get()) && machine.maskSlot.getCount() == 1,
+                "逻辑掩膜版属于非消耗耐用品，不应被消耗！");
+        helper.assertTrue(machine.inputSlot.isEmpty(), "空白硅片原料应被消耗！");
+
+        // 9. Environmental Dissipation
+        long beforeDissipation = machine.chemicalTank.getStored();
+        for (int i = 0; i < 20; i++) {
+            TileEntityMekanism.tickServer(helper.getLevel(), pos, helper.getBlockState(pos), machine);
+        }
+        long afterDissipation = machine.chemicalTank.getStored();
+        helper.assertTrue(afterDissipation < beforeDissipation, "氮气在光刻机储罐中应自然发生逸散！之前: " + beforeDissipation + ", 之后: " + afterDissipation);
+
+        // 10. Container check
+        FakePlayer fakePlayer = FakePlayerFactory.getMinecraft(helper.getLevel());
+        ContainerPhotolithographyMachine container = new ContainerPhotolithographyMachine(1, fakePlayer.getInventory(), machine);
+        helper.assertTrue(container.stillValid(fakePlayer), "光刻机容器应处于有效状态！");
+        container.removed(fakePlayer);
 
         helper.succeed();
     }

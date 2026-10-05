@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "mekanism_complex_industries:block/photolithography_machine_side",
+    "north": "mekanism_complex_industries:block/photolithography_machine_front",
+    "south": "mekanism_complex_industries:block/photolithography_machine_side",
+    "east": "mekanism_complex_industries:block/photolithography_machine_right",
+    "west": "mekanism_complex_industries:block/photolithography_machine_side",
+    "up": "mekanism_complex_industries:block/photolithography_machine_top",
+    "down": "mekanism_complex_industries:block/photolithography_machine_side"
+  }
+}
