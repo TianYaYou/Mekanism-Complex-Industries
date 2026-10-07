@@ -38,6 +38,9 @@ public class MCIClientRegistration {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.SILICON_SLICER, com.complexindustries.mekanism.client.gui.GuiSiliconSlicer::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.PHOTOLITHOGRAPHY_MACHINE, com.complexindustries.mekanism.client.gui.GuiPhotolithographyMachine::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.CHEMICAL_FILM_COATER, com.complexindustries.mekanism.client.gui.GuiChemicalFilmCoater::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.INPUT_INTERFACE, com.complexindustries.mekanism.content.pipe.client.GuiInputInterface::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.OUTPUT_INTERFACE, com.complexindustries.mekanism.content.pipe.client.GuiOutputInterface::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.POWER_INTERFACE, com.complexindustries.mekanism.content.pipe.client.GuiPowerInterface::new);
     }
 
     @SubscribeEvent
@@ -73,6 +76,8 @@ public class MCIClientRegistration {
     public static void registerRenderers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(com.complexindustries.mekanism.registration.MCITileEntityTypes.CRYSTAL_GROWTH_CHAMBER.get(),
                 com.complexindustries.mekanism.client.render.CrystalGrowthChamberRenderer::new);
+        event.registerBlockEntityRenderer(com.complexindustries.mekanism.registration.MCITileEntityTypes.INDUSTRIAL_PIPE.get(),
+                com.complexindustries.mekanism.client.render.IndustrialPipeRenderer::new);
     }
 }
 

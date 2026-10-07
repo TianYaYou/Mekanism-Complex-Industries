@@ -211,5 +211,35 @@ public final class MCITileEntityTypes {
                     .withSimple(Capabilities.CONFIG_CARD)
                     .build();
 
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe> INDUSTRIAL_PIPE =
+            TILE_ENTITY_TYPES.builder(MCIBlocks.INDUSTRIAL_PIPE, com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe::new)
+                    .with(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, (tile, side) -> tile.getItemHandler(side))
+                    .with(net.neoforged.neoforge.capabilities.Capabilities.FluidHandler.BLOCK, (tile, side) -> tile.getFluidHandler(side))
+                    .with(Capabilities.CHEMICAL.block(), (tile, side) -> tile.getChemicalHandler(side))
+                    .with(net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage.BLOCK, (tile, side) -> tile.getEnergyHandler(side))
+                    .with(Capabilities.STRICT_ENERGY.block(), (tile, side) -> tile.getStrictEnergyHandler(side))
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.pipe.TileEntityInputInterface> INPUT_INTERFACE =
+            TILE_ENTITY_TYPES.builder(MCIBlocks.INPUT_INTERFACE, com.complexindustries.mekanism.content.pipe.TileEntityInputInterface::new)
+                    .with(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, (tile, side) -> tile.getItemHandler(side))
+                    .with(net.neoforged.neoforge.capabilities.Capabilities.FluidHandler.BLOCK, (tile, side) -> tile.getFluidHandler(side))
+                    .with(Capabilities.CHEMICAL.block(), (tile, side) -> tile.getChemicalHandler(side))
+                    .with(net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage.BLOCK, (tile, side) -> tile.getEnergyHandler(side))
+                    .with(Capabilities.STRICT_ENERGY.block(), (tile, side) -> tile.getStrictEnergyHandler(side))
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.pipe.TileEntityOutputInterface> OUTPUT_INTERFACE =
+            TILE_ENTITY_TYPES.builder(MCIBlocks.OUTPUT_INTERFACE, com.complexindustries.mekanism.content.pipe.TileEntityOutputInterface::new)
+                    .with(net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage.BLOCK, (tile, side) -> tile.getEnergyHandler(side))
+                    .with(Capabilities.STRICT_ENERGY.block(), (tile, side) -> tile.getStrictEnergyHandler(side))
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.pipe.TileEntityPowerInterface> POWER_INTERFACE =
+            TILE_ENTITY_TYPES.builder(MCIBlocks.POWER_INTERFACE, com.complexindustries.mekanism.content.pipe.TileEntityPowerInterface::new)
+                    .with(net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage.BLOCK, (tile, side) -> tile.getEnergyHandler(side))
+                    .with(Capabilities.STRICT_ENERGY.block(), (tile, side) -> tile.getStrictEnergyHandler(side))
+                    .build();
+
     private MCITileEntityTypes() {}
 }

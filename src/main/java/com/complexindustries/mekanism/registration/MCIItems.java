@@ -292,5 +292,30 @@ public final class MCIItems {
                     .component(mekanism.common.registries.MekanismDataComponents.SIDE_CONFIG, SILICON_SLICER_SIDE_CONFIG),
                     "description.mekanism_complex_industries.chemical_film_coater", true));
 
+    public static final DeferredItem<BlockItem> INDUSTRIAL_PIPE = ITEMS.register("industrial_pipe",
+            () -> new MCIBlockItem(MCIBlocks.INDUSTRIAL_PIPE.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.industrial_pipe", false));
+
+    public static final DeferredItem<BlockItem> INPUT_INTERFACE = ITEMS.register("input_interface",
+            () -> new MCIBlockItem(MCIBlocks.INPUT_INTERFACE.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.input_interface", true));
+
+    public static final DeferredItem<BlockItem> OUTPUT_INTERFACE = ITEMS.register("output_interface",
+            () -> new MCIBlockItem(MCIBlocks.OUTPUT_INTERFACE.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.output_interface", true));
+
+    public static final DeferredItem<BlockItem> POWER_INTERFACE = ITEMS.register("power_interface",
+            () -> new MCIBlockItem(MCIBlocks.POWER_INTERFACE.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.power_interface", true));
+
+    public static final DeferredItem<com.complexindustries.mekanism.content.pipe.item.ItemInterfacePart> INPUT_INTERFACE_PART = ITEMS.register("input_interface_part",
+            () -> new com.complexindustries.mekanism.content.pipe.item.ItemInterfacePart(new Item.Properties(), com.complexindustries.mekanism.content.pipe.attachment.AttachmentType.INPUT));
+
+    public static final DeferredItem<com.complexindustries.mekanism.content.pipe.item.ItemInterfacePart> OUTPUT_INTERFACE_PART = ITEMS.register("output_interface_part",
+            () -> new com.complexindustries.mekanism.content.pipe.item.ItemInterfacePart(new Item.Properties(), com.complexindustries.mekanism.content.pipe.attachment.AttachmentType.OUTPUT));
+
+    public static final DeferredItem<com.complexindustries.mekanism.content.pipe.item.ItemInterfacePart> POWER_INTERFACE_PART = ITEMS.register("power_interface_part",
+            () -> new com.complexindustries.mekanism.content.pipe.item.ItemInterfacePart(new Item.Properties(), com.complexindustries.mekanism.content.pipe.attachment.AttachmentType.POWER));
+
     private MCIItems() {}
 }

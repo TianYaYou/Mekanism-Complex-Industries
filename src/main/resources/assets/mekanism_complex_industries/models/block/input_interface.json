@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "mekanism_complex_industries:block/input_interface_top",
+    "side": "mekanism_complex_industries:block/input_interface_front"
+  }
+}

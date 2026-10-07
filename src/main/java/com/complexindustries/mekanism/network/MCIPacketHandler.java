@@ -17,6 +17,8 @@ public class MCIPacketHandler extends BasePacketHandler {
         registrar.play(PacketSetCoolerEnergy.TYPE, PacketSetCoolerEnergy.STREAM_CODEC);
         registrar.play(PacketToggleFactorySorting.TYPE, PacketToggleFactorySorting.STREAM_CODEC);
         registrar.play(PacketSetFlowRate.TYPE, PacketSetFlowRate.STREAM_CODEC);
+        registrar.play(PacketSetInterfacePriority.TYPE, PacketSetInterfacePriority.STREAM_CODEC);
+        registrar.play(PacketSetOutputFilter.TYPE, PacketSetOutputFilter.STREAM_CODEC);
     }
 
     @Override

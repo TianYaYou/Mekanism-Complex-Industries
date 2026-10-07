@@ -1721,4 +1721,153 @@ public class MCIGameTests {
 
         helper.succeed();
     }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testPipeNetworkFormation(GameTestHelper helper) {
+        BlockPos p1 = new BlockPos(1, 1, 1);
+        BlockPos p2 = new BlockPos(1, 1, 2);
+        BlockPos inPos = new BlockPos(1, 1, 0);
+        BlockPos outPos = new BlockPos(1, 1, 3);
+
+        helper.setBlock(p1, MCIBlocks.INDUSTRIAL_PIPE.get().defaultBlockState());
+        helper.setBlock(p2, MCIBlocks.INDUSTRIAL_PIPE.get().defaultBlockState());
+        helper.setBlock(inPos, MCIBlocks.INPUT_INTERFACE.get().defaultBlockState());
+        helper.setBlock(outPos, MCIBlocks.OUTPUT_INTERFACE.get().defaultBlockState());
+
+        var pipe1 = (com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe) helper.getBlockEntity(p1);
+        var pipe2 = (com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe) helper.getBlockEntity(p2);
+        var inputTile = (com.complexindustries.mekanism.content.pipe.TileEntityInputInterface) helper.getBlockEntity(inPos);
+        var outputTile = (com.complexindustries.mekanism.content.pipe.TileEntityOutputInterface) helper.getBlockEntity(outPos);
+
+        helper.assertTrue(pipe1 != null && pipe2 != null && inputTile != null && outputTile != null, "方块实体应成功生成！");
+
+        var net1 = pipe1.getPipeNetwork();
+        var net2 = pipe2.getPipeNetwork();
+        var netIn = inputTile.getPipeNetwork();
+        var netOut = outputTile.getPipeNetwork();
+
+        helper.assertTrue(net1 != null, "管道1必须成功加入管道网络！");
+        helper.assertTrue(net1 == net2, "相邻管道应处于同一个管道网络！");
+        helper.assertTrue(net1 == netIn, "输入接口方块应处于同一个管道网络！");
+        helper.assertTrue(net1 == netOut, "输出接口方块应处于同一个管道网络！");
+        helper.assertTrue(net1.getInputInterfaces().contains(inputTile), "网络必须注册输入接口！");
+        helper.assertTrue(net1.getOutputInterfaces().contains(outputTile), "网络必须注册输出接口！");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testZeroBufferRoutingAndBackpressure(GameTestHelper helper) {
+        BlockPos inPos = new BlockPos(1, 1, 1);
+        BlockPos pipePos = new BlockPos(2, 1, 1);
+        BlockPos outPos = new BlockPos(3, 1, 1);
+        BlockPos chestPos = new BlockPos(4, 1, 1);
+
+        helper.setBlock(inPos, MCIBlocks.INPUT_INTERFACE.get().defaultBlockState());
+        helper.setBlock(pipePos, MCIBlocks.INDUSTRIAL_PIPE.get().defaultBlockState());
+        helper.setBlock(outPos, MCIBlocks.OUTPUT_INTERFACE.get().defaultBlockState());
+        helper.setBlock(chestPos, Blocks.CHEST.defaultBlockState());
+
+        var inputTile = (com.complexindustries.mekanism.content.pipe.TileEntityInputInterface) helper.getBlockEntity(inPos);
+        var outputTile = (com.complexindustries.mekanism.content.pipe.TileEntityOutputInterface) helper.getBlockEntity(outPos);
+        var chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) helper.getBlockEntity(chestPos);
+
+        helper.assertTrue(inputTile != null && outputTile != null && chest != null, "组件必须初始化！");
+        var inHandler = inputTile.getItemHandler(Direction.WEST);
+        helper.assertTrue(inHandler != null, "输入接口必须暴露物品输入 Capability！");
+
+        // 1. 严格白名单与反压：未设置过滤时，尝试推入铁锭必须被 100% 拒绝！
+        ItemStack pushIron = new ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 5);
+        ItemStack remainder1 = inHandler.insertItem(0, pushIron, false);
+        helper.assertTrue(remainder1.getCount() == 5, "未配置过滤白名单时必须拒绝接收（阻塞弹出），实际返回: " + remainder1.getCount());
+        helper.assertTrue(chest.isEmpty(), "被拒绝的物品绝不能进入箱子！");
+
+        // 2. 配置错误白名单（金锭）：推入铁锭依然被 100% 拒绝！
+        outputTile.setFilter(0, new ItemStack(net.minecraft.world.item.Items.GOLD_INGOT));
+        ItemStack remainder2 = inHandler.insertItem(0, pushIron, false);
+        helper.assertTrue(remainder2.getCount() == 5, "未匹配白名单时必须拒绝接收，实际返回: " + remainder2.getCount());
+        helper.assertTrue(chest.isEmpty(), "未匹配的物品绝不能进入箱子！");
+
+        // 3. 配置正确白名单（铁锭）：推入铁锭应 100% 即时穿透到达箱子！
+        outputTile.setFilter(0, new ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
+        ItemStack remainder3 = inHandler.insertItem(0, pushIron, false);
+        helper.assertTrue(remainder3.isEmpty(), "匹配白名单时物资必须即时透传，剩余应为空！实际: " + remainder3.getCount());
+        helper.assertTrue(chest.getItem(0).is(net.minecraft.world.item.Items.IRON_INGOT) && chest.getItem(0).getCount() == 5,
+                "箱子内必须准确收到透传的 5 个铁锭！");
+
+        // 4. 箱子满载时反压阻断：填满箱子后再次推入，必须被反压拒绝！
+        for (int i = 0; i < chest.getContainerSize(); i++) {
+            chest.setItem(i, new ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 64));
+        }
+        ItemStack remainder4 = inHandler.insertItem(0, new ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 8), false);
+        helper.assertTrue(remainder4.getCount() == 8, "下游已满时输入接口必须阻挡弹出！实际返回: " + remainder4.getCount());
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testOutputInterfacePriorityRouting(GameTestHelper helper) {
+        BlockPos inPos = new BlockPos(2, 1, 2);
+        BlockPos pipePos = new BlockPos(2, 1, 3);
+        BlockPos outPosA = new BlockPos(1, 1, 3);
+        BlockPos chestPosA = new BlockPos(0, 1, 3);
+        BlockPos outPosB = new BlockPos(3, 1, 3);
+        BlockPos chestPosB = new BlockPos(4, 1, 3);
+
+        helper.setBlock(inPos, MCIBlocks.INPUT_INTERFACE.get().defaultBlockState());
+        helper.setBlock(pipePos, MCIBlocks.INDUSTRIAL_PIPE.get().defaultBlockState());
+        helper.setBlock(outPosA, MCIBlocks.OUTPUT_INTERFACE.get().defaultBlockState());
+        helper.setBlock(chestPosA, Blocks.CHEST.defaultBlockState());
+        helper.setBlock(outPosB, MCIBlocks.OUTPUT_INTERFACE.get().defaultBlockState());
+        helper.setBlock(chestPosB, Blocks.CHEST.defaultBlockState());
+
+        var inTile = (com.complexindustries.mekanism.content.pipe.TileEntityInputInterface) helper.getBlockEntity(inPos);
+        var outTileA = (com.complexindustries.mekanism.content.pipe.TileEntityOutputInterface) helper.getBlockEntity(outPosA);
+        var outTileB = (com.complexindustries.mekanism.content.pipe.TileEntityOutputInterface) helper.getBlockEntity(outPosB);
+        var chestA = (net.minecraft.world.level.block.entity.ChestBlockEntity) helper.getBlockEntity(chestPosA);
+        var chestB = (net.minecraft.world.level.block.entity.ChestBlockEntity) helper.getBlockEntity(chestPosB);
+
+        // 设置白名单过滤均为铁锭
+        outTileA.setFilter(0, new ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
+        outTileB.setFilter(0, new ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
+
+        // 设置优先级：A 为 10，B 为 0
+        outTileA.setPriority(10);
+        outTileB.setPriority(0);
+
+        var inHandler = inTile.getItemHandler(Direction.UP);
+        ItemStack push = new ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 10);
+        ItemStack rem = inHandler.insertItem(0, push, false);
+
+        helper.assertTrue(rem.isEmpty(), "推入的 10 个铁锭必须全额接收！");
+        helper.assertTrue(chestA.getItem(0).getCount() == 10, "高优先级输出接口 A 必须优先获取全部物资！实际: " + chestA.getItem(0).getCount());
+        helper.assertTrue(chestB.isEmpty(), "低优先级输出接口 B 在高优先级未满时不应分流！实际: " + chestB.getItem(0).getCount());
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testPipeAttachmentPlacementAndCapabilities(GameTestHelper helper) {
+        BlockPos pipePos = new BlockPos(1, 1, 1);
+        helper.setBlock(pipePos, MCIBlocks.INDUSTRIAL_PIPE.get().defaultBlockState());
+        var pipe = (com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe) helper.getBlockEntity(pipePos);
+        helper.assertTrue(pipe != null, "管道必须生成！");
+
+        // 附着输入面板于 NORTH
+        var inAtt = new com.complexindustries.mekanism.content.pipe.attachment.InputInterfaceAttachment(pipe, Direction.NORTH);
+        pipe.addAttachment(Direction.NORTH, inAtt);
+
+        // 附着输出面板于 SOUTH
+        var outAtt = new com.complexindustries.mekanism.content.pipe.attachment.OutputInterfaceAttachment(pipe, Direction.SOUTH);
+        pipe.addAttachment(Direction.SOUTH, outAtt);
+
+        helper.assertTrue(pipe.getAttachment(Direction.NORTH) == inAtt, "NORTH 必须成功挂载输入面板！");
+        helper.assertTrue(pipe.getAttachment(Direction.SOUTH) == outAtt, "SOUTH 必须成功挂载输出面板！");
+
+        // 验证 Capability 透传
+        helper.assertTrue(pipe.getItemHandler(Direction.NORTH) != null, "NORTH 面必须暴露输入物品能力！");
+        helper.assertTrue(pipe.getItemHandler(Direction.EAST) == null, "未挂载附件的 EAST 面绝不暴露物品能力！");
+
+        helper.succeed();
+    }
 }

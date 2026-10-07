@@ -72,6 +72,13 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.ATOMIC_LOGIC_CHIP.get());
                         output.accept(MCIItems.CHEMICAL_FILM_COATER.get());
                         output.accept(MCIItems.FLOW_REGULATOR.get());
+                        output.accept(MCIItems.INDUSTRIAL_PIPE.get());
+                        output.accept(MCIItems.INPUT_INTERFACE.get());
+                        output.accept(MCIItems.OUTPUT_INTERFACE.get());
+                        output.accept(MCIItems.POWER_INTERFACE.get());
+                        output.accept(MCIItems.INPUT_INTERFACE_PART.get());
+                        output.accept(MCIItems.OUTPUT_INTERFACE_PART.get());
+                        output.accept(MCIItems.POWER_INTERFACE_PART.get());
                     })
                     .build());
 

@@ -53,5 +53,14 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.coater.ContainerChemicalFilmCoater> CHEMICAL_FILM_COATER =
             CONTAINER_TYPES.register("chemical_film_coater", com.complexindustries.mekanism.content.coater.TileEntityChemicalFilmCoater.class, com.complexindustries.mekanism.content.coater.ContainerChemicalFilmCoater::new);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.pipe.container.ContainerInputInterface> INPUT_INTERFACE =
+            CONTAINER_TYPES.register("input_interface", (net.neoforged.neoforge.network.IContainerFactory<com.complexindustries.mekanism.content.pipe.container.ContainerInputInterface>) com.complexindustries.mekanism.content.pipe.container.ContainerInputInterface::create);
+
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.pipe.container.ContainerOutputInterface> OUTPUT_INTERFACE =
+            CONTAINER_TYPES.register("output_interface", (net.neoforged.neoforge.network.IContainerFactory<com.complexindustries.mekanism.content.pipe.container.ContainerOutputInterface>) com.complexindustries.mekanism.content.pipe.container.ContainerOutputInterface::create);
+
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.pipe.container.ContainerPowerInterface> POWER_INTERFACE =
+            CONTAINER_TYPES.register("power_interface", (net.neoforged.neoforge.network.IContainerFactory<com.complexindustries.mekanism.content.pipe.container.ContainerPowerInterface>) com.complexindustries.mekanism.content.pipe.container.ContainerPowerInterface::create);
+
     private MCIContainerTypes() {}
 }

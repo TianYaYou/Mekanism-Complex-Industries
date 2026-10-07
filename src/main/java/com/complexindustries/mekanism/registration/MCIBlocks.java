@@ -296,5 +296,26 @@ public final class MCIBlocks {
                             .strength(3.5F, 16.0F)
                             .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.coater.BlockChemicalFilmCoater.ACTIVE) ? 8 : 0)));
 
+    public static final DeferredBlock<com.complexindustries.mekanism.content.pipe.IndustrialPipeBlock> INDUSTRIAL_PIPE = BLOCKS.register("industrial_pipe",
+            () -> new com.complexindustries.mekanism.content.pipe.IndustrialPipeBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .noOcclusion()
+                            .strength(1.5F, 6.0F)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.pipe.BlockInputInterface> INPUT_INTERFACE = BLOCKS.register("input_interface",
+            () -> new com.complexindustries.mekanism.content.pipe.BlockInputInterface(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .strength(3.0F, 8.0F)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.pipe.BlockOutputInterface> OUTPUT_INTERFACE = BLOCKS.register("output_interface",
+            () -> new com.complexindustries.mekanism.content.pipe.BlockOutputInterface(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .strength(3.0F, 8.0F)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.pipe.BlockPowerInterface> POWER_INTERFACE = BLOCKS.register("power_interface",
+            () -> new com.complexindustries.mekanism.content.pipe.BlockPowerInterface(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .strength(3.0F, 8.0F)));
+
     private MCIBlocks() {}
 }
