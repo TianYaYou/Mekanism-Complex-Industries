@@ -149,7 +149,7 @@ public class IndustrialPipeNetwork {
     // =========================================================================
 
     public ItemStack routeItem(IInputInterface fromInput, ItemStack stack, boolean simulate) {
-        if (stack.isEmpty()) {
+        if (stack.isEmpty() || (fromInput != null && !fromInput.canOperate())) {
             return stack;
         }
 
@@ -161,9 +161,9 @@ public class IndustrialPipeNetwork {
             snapshot = new ArrayList<>(outputInterfaces);
         }
 
-        // Strict whitelist: must match output filter
+        // Strict whitelist: must match output filter and be enabled by redstone
         List<IOutputInterface> matching = snapshot.stream()
-                .filter(out -> out.matchesItem(stack))
+                .filter(out -> out.canOperate() && out.matchesItem(stack))
                 .sorted(Comparator.comparingInt(IOutputInterface::getPriority).reversed())
                 .toList();
 
@@ -202,7 +202,7 @@ public class IndustrialPipeNetwork {
     }
 
     public FluidStack routeFluid(IInputInterface fromInput, FluidStack stack, boolean simulate) {
-        if (stack.isEmpty()) {
+        if (stack.isEmpty() || (fromInput != null && !fromInput.canOperate())) {
             return stack;
         }
 
@@ -215,7 +215,7 @@ public class IndustrialPipeNetwork {
         }
 
         List<IOutputInterface> matching = snapshot.stream()
-                .filter(out -> out.matchesFluid(stack))
+                .filter(out -> out.canOperate() && out.matchesFluid(stack))
                 .sorted(Comparator.comparingInt(IOutputInterface::getPriority).reversed())
                 .toList();
 
@@ -252,7 +252,7 @@ public class IndustrialPipeNetwork {
     }
 
     public ChemicalStack routeChemical(IInputInterface fromInput, ChemicalStack stack, boolean simulate) {
-        if (stack.isEmpty()) {
+        if (stack.isEmpty() || (fromInput != null && !fromInput.canOperate())) {
             return stack;
         }
 
@@ -265,7 +265,7 @@ public class IndustrialPipeNetwork {
         }
 
         List<IOutputInterface> matching = snapshot.stream()
-                .filter(out -> out.matchesChemical(stack))
+                .filter(out -> out.canOperate() && out.matchesChemical(stack))
                 .sorted(Comparator.comparingInt(IOutputInterface::getPriority).reversed())
                 .toList();
 
@@ -325,6 +325,9 @@ public class IndustrialPipeNetwork {
         int needed = maxAmount;
 
         for (IPowerInterface pwr : snapshot) {
+            if (!pwr.canOperate()) {
+                continue;
+            }
             int extracted = pwr.extractEnergyFromExternal(needed, simulate);
             totalExtracted += extracted;
             needed -= extracted;
@@ -362,13 +365,19 @@ public class IndustrialPipeNetwork {
             outputSnapshot = new ArrayList<>(outputInterfaces);
         }
 
-        // Gather all consumers from Input and Output interfaces
+        // Gather all consumers from Input and Output interfaces (enabled by redstone)
         List<EnergyConsumer> consumers = new ArrayList<>();
 
         for (IInputInterface in : inputSnapshot) {
+            if (!in.canOperate()) {
+                continue;
+            }
             collectConsumers(level, in.getInterfacePos(), in.getAttachedFace(), in.getPriority(), consumers);
         }
         for (IOutputInterface out : outputSnapshot) {
+            if (!out.canOperate()) {
+                continue;
+            }
             collectConsumers(level, out.getInterfacePos(), out.getAttachedFace(), out.getPriority(), consumers);
         }
 

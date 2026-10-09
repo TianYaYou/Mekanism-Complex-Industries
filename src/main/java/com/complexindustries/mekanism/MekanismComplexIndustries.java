@@ -50,6 +50,7 @@ public class MekanismComplexIndustries {
         // Ensure multiblock managers are classloaded and registered with Mekanism before world load
         com.complexindustries.mekanism.content.freezer.MCIFreezerMultiblock.FREEZER_MANAGER.getName();
         com.complexindustries.mekanism.content.refinery.MCIRefineryMultiblock.REFINERY_MANAGER.getName();
+        com.complexindustries.mekanism.content.extractor.MCIFluidExtractorMultiblock.EXTRACTOR_MANAGER.getName();
 
         MCIConstants.LOGGER.info("Initializing {} [Petroleum Harvesting & Chemical Ecology]...", MCIConstants.MOD_NAME);
     }
@@ -74,7 +75,8 @@ public class MekanismComplexIndustries {
         event.enqueueWork(() -> {
             String freezer = com.complexindustries.mekanism.content.freezer.MCIFreezerMultiblock.FREEZER_MANAGER.getName();
             String refinery = com.complexindustries.mekanism.content.refinery.MCIRefineryMultiblock.REFINERY_MANAGER.getName();
-            MCIConstants.LOGGER.info("{} common setup completed (registered multiblocks: {}, {}).", MCIConstants.MOD_NAME, freezer, refinery);
+            String extractor = com.complexindustries.mekanism.content.extractor.MCIFluidExtractorMultiblock.EXTRACTOR_MANAGER.getName();
+            MCIConstants.LOGGER.info("{} common setup completed (registered multiblocks: {}, {}, {}).", MCIConstants.MOD_NAME, freezer, refinery, extractor);
         });
     }
 }

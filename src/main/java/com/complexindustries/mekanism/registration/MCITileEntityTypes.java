@@ -241,5 +241,26 @@ public final class MCITileEntityTypes {
                     .with(Capabilities.STRICT_ENERGY.block(), (tile, side) -> tile.getStrictEnergyHandler(side))
                     .build();
 
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorCasing> FLUID_EXTRACTOR_CASING =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.FLUID_EXTRACTOR_CASING, com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorCasing::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorPort> FLUID_EXTRACTOR_PORT =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.FLUID_EXTRACTOR_PORT, com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorPort::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.extractor.TileEntityPoweredPump> POWERED_PUMP =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.POWERED_PUMP, com.complexindustries.mekanism.content.extractor.TileEntityPoweredPump::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
     private MCITileEntityTypes() {}
 }

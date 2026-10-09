@@ -6,7 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-public interface IPowerInterface {
+public interface IPowerInterface extends IRedstoneControllable {
 
     @Nullable
     IndustrialPipeNetwork getPipeNetwork();

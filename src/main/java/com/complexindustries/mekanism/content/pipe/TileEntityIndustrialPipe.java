@@ -116,6 +116,10 @@ public class TileEntityIndustrialPipe extends BlockEntity implements IPipeNode {
         }
         setChanged();
         if (level != null) {
+            net.minecraft.world.level.block.state.BlockState current = getBlockState();
+            if (current.getBlock() instanceof IndustrialPipeBlock pipeBlock) {
+                level.setBlock(worldPosition, pipeBlock.updateConnections(current, level, worldPosition), 3);
+            }
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
@@ -129,6 +133,10 @@ public class TileEntityIndustrialPipe extends BlockEntity implements IPipeNode {
             attachments[face.ordinal()] = null;
             setChanged();
             if (level != null) {
+                net.minecraft.world.level.block.state.BlockState current = getBlockState();
+                if (current.getBlock() instanceof IndustrialPipeBlock pipeBlock) {
+                    level.setBlock(worldPosition, pipeBlock.updateConnections(current, level, worldPosition), 3);
+                }
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
         }

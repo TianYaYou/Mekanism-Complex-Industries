@@ -41,6 +41,7 @@ public class MCIClientRegistration {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.INPUT_INTERFACE, com.complexindustries.mekanism.content.pipe.client.GuiInputInterface::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.OUTPUT_INTERFACE, com.complexindustries.mekanism.content.pipe.client.GuiOutputInterface::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.POWER_INTERFACE, com.complexindustries.mekanism.content.pipe.client.GuiPowerInterface::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.FLUID_EXTRACTOR, com.complexindustries.mekanism.content.extractor.GuiFluidExtractor::new);
     }
 
     @SubscribeEvent
@@ -78,6 +79,10 @@ public class MCIClientRegistration {
                 com.complexindustries.mekanism.client.render.CrystalGrowthChamberRenderer::new);
         event.registerBlockEntityRenderer(com.complexindustries.mekanism.registration.MCITileEntityTypes.INDUSTRIAL_PIPE.get(),
                 com.complexindustries.mekanism.client.render.IndustrialPipeRenderer::new);
+        ClientRegistrationUtil.bindTileEntityRenderer(event, com.complexindustries.mekanism.client.render.RenderFluidExtractor::new,
+                com.complexindustries.mekanism.registration.MCITileEntityTypes.FLUID_EXTRACTOR_CASING,
+                com.complexindustries.mekanism.registration.MCITileEntityTypes.FLUID_EXTRACTOR_PORT,
+                com.complexindustries.mekanism.registration.MCITileEntityTypes.POWERED_PUMP);
     }
 }
 

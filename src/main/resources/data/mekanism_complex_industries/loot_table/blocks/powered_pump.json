@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "mekanism_complex_industries:powered_pump"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "mekanism_complex_industries:blocks/powered_pump"
+}

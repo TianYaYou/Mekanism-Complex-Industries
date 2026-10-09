@@ -26,9 +26,6 @@ public class IndustrialPipeRenderer implements BlockEntityRenderer<TileEntityInd
     private static final ResourceLocation POWER_FRONT = ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "textures/block/power_interface_front.png");
     private static final ResourceLocation POWER_SIDE = ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "textures/block/power_interface_side.png");
 
-    private static final ResourceLocation PIPE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "textures/block/industrial_pipe.png");
-    private static final ResourceLocation PIPE_ARM = ResourceLocation.fromNamespaceAndPath(MCIConstants.MODID, "textures/block/industrial_pipe_arm.png");
-
     public IndustrialPipeRenderer(BlockEntityRendererProvider.Context context) {
     }
 
@@ -68,49 +65,26 @@ public class IndustrialPipeRenderer implements BlockEntityRenderer<TileEntityInd
             matrix.mulPose(dir.getRotation());
             Matrix4f pose = matrix.last().pose();
 
-            // 1. Pipe Arm Neck connecting from pipe center (Y = 0.1875) to base of plate (Y = 0.38)
-            VertexConsumer armConsumer = bufferSource.getBuffer(RenderType.entitySolid(PIPE_ARM));
-            renderBoxSides(armConsumer, pose, -0.1875f, 0.1875f, 0.1875f, 0.38f, -0.1875f, 0.1875f, combinedLight);
-
-            // 2. Mounting Collar Ring (Y = 0.35 to 0.40, slightly wider)
-            VertexConsumer pipeConsumer = bufferSource.getBuffer(RenderType.entitySolid(PIPE_TEXTURE));
-            renderBox(pipeConsumer, pose, -0.25f, 0.25f, 0.35f, 0.40f, -0.25f, 0.25f, combinedLight);
-
-            // 3. Interface Plate Body (Y = 0.40 to 0.498, 12x12 width)
+            // 1. Interface Plate Body (Y = 0.375 to 0.500, 12x12 width)
             VertexConsumer sideConsumer = bufferSource.getBuffer(RenderType.entitySolid(sideTex));
-            renderBox(sideConsumer, pose, -0.375f, 0.375f, 0.40f, 0.498f, -0.375f, 0.375f, combinedLight);
+            renderPlateSidesAndBottom(sideConsumer, pose, -0.375f, 0.375f, 0.375f, 0.500f, -0.375f, 0.375f, combinedLight);
 
-            // 4. Interface Front Face Plate (Y = 0.499, facing outward)
+            // 2. Interface Front Face Plate (Y = 0.500, facing outward)
             VertexConsumer frontConsumer = bufferSource.getBuffer(RenderType.entitySolid(frontTex));
             renderFace(frontConsumer, pose,
-                    -0.375f, 0.499f, 0.375f, 0.0f, 1.0f,
-                    0.375f, 0.499f, 0.375f, 1.0f, 1.0f,
-                    0.375f, 0.499f, -0.375f, 1.0f, 0.0f,
-                    -0.375f, 0.499f, -0.375f, 0.0f, 0.0f,
+                    -0.375f, 0.500f, 0.375f, 0.0f, 1.0f,
+                    0.375f, 0.500f, 0.375f, 1.0f, 1.0f,
+                    0.375f, 0.500f, -0.375f, 1.0f, 0.0f,
+                    -0.375f, 0.500f, -0.375f, 0.0f, 0.0f,
                     combinedLight, 0, 1, 0);
-
-            // 5. Status indicator LED (Y = 0.500, full bright emerald glow in top-right corner)
-            renderFace(frontConsumer, pose,
-                    0.22f, 0.500f, -0.22f, 0.0f, 1.0f,
-                    0.32f, 0.500f, -0.22f, 1.0f, 1.0f,
-                    0.32f, 0.500f, -0.32f, 1.0f, 0.0f,
-                    0.22f, 0.500f, -0.32f, 0.0f, 0.0f,
-                    LightTexture.FULL_BRIGHT, 0, 1, 0);
 
             matrix.popPose();
         }
     }
 
-    private void renderBox(VertexConsumer consumer, Matrix4f pose,
-                           float minX, float maxX, float minY, float maxY, float minZ, float maxZ, int light) {
-        // Top (+Y)
-        renderFace(consumer, pose,
-                minX, maxY, maxZ, 0, 1,
-                maxX, maxY, maxZ, 1, 1,
-                maxX, maxY, minZ, 1, 0,
-                minX, maxY, minZ, 0, 0,
-                light, 0, 1, 0);
-        // Bottom (-Y)
+    private void renderPlateSidesAndBottom(VertexConsumer consumer, Matrix4f pose,
+                                           float minX, float maxX, float minY, float maxY, float minZ, float maxZ, int light) {
+        // Bottom (-Y) facing pipe core
         renderFace(consumer, pose,
                 minX, minY, minZ, 0, 1,
                 maxX, minY, minZ, 1, 1,
@@ -147,37 +121,6 @@ public class IndustrialPipeRenderer implements BlockEntityRenderer<TileEntityInd
                 light, 1, 0, 0);
     }
 
-    private void renderBoxSides(VertexConsumer consumer, Matrix4f pose,
-                                float minX, float maxX, float minY, float maxY, float minZ, float maxZ, int light) {
-        // North (-Z)
-        renderFace(consumer, pose,
-                maxX, minY, minZ, 0, 1,
-                minX, minY, minZ, 1, 1,
-                minX, maxY, minZ, 1, 0,
-                maxX, maxY, minZ, 0, 0,
-                light, 0, 0, -1);
-        // South (+Z)
-        renderFace(consumer, pose,
-                minX, minY, maxZ, 0, 1,
-                maxX, minY, maxZ, 1, 1,
-                maxX, maxY, maxZ, 1, 0,
-                minX, maxY, maxZ, 0, 0,
-                light, 0, 0, 1);
-        // West (-X)
-        renderFace(consumer, pose,
-                minX, minY, minZ, 0, 1,
-                minX, minY, maxZ, 1, 1,
-                minX, maxY, maxZ, 1, 0,
-                minX, maxY, minZ, 0, 0,
-                light, -1, 0, 0);
-        // East (+X)
-        renderFace(consumer, pose,
-                maxX, minY, maxZ, 0, 1,
-                maxX, minY, minZ, 1, 1,
-                maxX, maxY, minZ, 1, 0,
-                maxX, maxY, maxZ, 0, 0,
-                light, 1, 0, 0);
-    }
 
     private void renderFace(VertexConsumer consumer, Matrix4f pose,
                             float x1, float y1, float z1, float u1, float v1,

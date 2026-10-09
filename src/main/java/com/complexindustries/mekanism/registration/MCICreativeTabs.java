@@ -79,6 +79,10 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.INPUT_INTERFACE_PART.get());
                         output.accept(MCIItems.OUTPUT_INTERFACE_PART.get());
                         output.accept(MCIItems.POWER_INTERFACE_PART.get());
+                        output.accept(MCIItems.FLUID_EXTRACTOR_CASING.get());
+                        output.accept(MCIItems.FLUID_EXTRACTOR_PORT.get());
+                        output.accept(MCIItems.POWERED_PUMP.get());
+                        output.accept(MCIItems.LIQUID_AIR_BUCKET.get());
                     })
                     .build());
 

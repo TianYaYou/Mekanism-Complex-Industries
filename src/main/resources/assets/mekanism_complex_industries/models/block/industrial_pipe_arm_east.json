@@ -1,0 +1,21 @@
+{
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "mekanism_complex_industries:block/industrial_pipe",
+    "pipe": "mekanism_complex_industries:block/industrial_pipe",
+    "arm": "mekanism_complex_industries:block/industrial_pipe_arm"
+  },
+  "elements": [
+    {
+      "name": "arm_east",
+      "from": [11, 5, 5],
+      "to": [16, 11, 11],
+      "faces": {
+        "down":  { "texture": "#arm", "uv": [0, 0, 16, 16], "rotation": 90 },
+        "up":    { "texture": "#arm", "uv": [0, 0, 16, 16], "rotation": 90 },
+        "north": { "texture": "#arm", "uv": [0, 0, 16, 16], "rotation": 90 },
+        "south": { "texture": "#arm", "uv": [0, 0, 16, 16], "rotation": 90 }
+      }
+    }
+  ]
+}

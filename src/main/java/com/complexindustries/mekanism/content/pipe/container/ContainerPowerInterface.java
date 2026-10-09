@@ -12,6 +12,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -63,6 +64,29 @@ public class ContainerPowerInterface extends AbstractContainerMenu {
         this.isAttachment = isAttachment;
         this.attachedFace = attachedFace;
 
+        ContainerData data = new ContainerData() {
+            @Override
+            public int get(int index) {
+                if (index == 0) {
+                    return interfaceInstance != null ? interfaceInstance.getRedstoneMode().ordinal() : 0;
+                }
+                return 0;
+            }
+
+            @Override
+            public void set(int index, int value) {
+                if (interfaceInstance != null && index == 0) {
+                    interfaceInstance.setRedstoneMode(com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(value));
+                }
+            }
+
+            @Override
+            public int getCount() {
+                return 1;
+            }
+        };
+        addDataSlots(data);
+
         // Player inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
@@ -72,6 +96,10 @@ public class ContainerPowerInterface extends AbstractContainerMenu {
         for (int col = 0; col < 9; col++) {
             addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
         }
+    }
+
+    public mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl getRedstoneMode() {
+        return interfaceInstance != null ? interfaceInstance.getRedstoneMode() : mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
     }
 
     public IPowerInterface getInterfaceInstance() {

@@ -29,6 +29,7 @@ public class PowerInterfaceAttachment implements IPipeAttachment, IPowerInterfac
 
     private final TileEntityIndustrialPipe pipe;
     private final Direction face;
+    private mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl redstoneMode = mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
 
     private final IEnergyStorage energyStorage;
     private final IStrictEnergyHandler strictEnergyHandler;
@@ -146,7 +147,28 @@ public class PowerInterfaceAttachment implements IPipeAttachment, IPowerInterfac
     }
 
     @Override
+    public mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl getRedstoneMode() {
+        return redstoneMode;
+    }
+
+    @Override
+    public void setRedstoneMode(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl mode) {
+        this.redstoneMode = mode != null ? mode : mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
+        pipe.setChanged();
+    }
+
+    @Override
+    public boolean isRedstonePowered() {
+        Level level = pipe.getLevel();
+        BlockPos pos = pipe.getBlockPos();
+        return level != null && (level.hasNeighborSignal(pos) || level.hasSignal(pos.relative(face), face));
+    }
+
+    @Override
     public int extractEnergyFromExternal(int maxAmount, boolean simulate) {
+        if (!canOperate()) {
+            return 0;
+        }
         Level level = pipe.getLevel();
         if (level == null || maxAmount <= 0) {
             return 0;
@@ -175,6 +197,9 @@ public class PowerInterfaceAttachment implements IPipeAttachment, IPowerInterfac
 
     @Override
     public int receiveEnergyFromExternal(int amount, boolean simulate) {
+        if (!canOperate()) {
+            return 0;
+        }
         return 0;
     }
 
@@ -190,11 +215,16 @@ public class PowerInterfaceAttachment implements IPipeAttachment, IPowerInterfac
 
     @Override
     public CompoundTag save(HolderLookup.Provider registries) {
-        return new CompoundTag();
+        CompoundTag tag = new CompoundTag();
+        tag.putByte("RedstoneMode", (byte) redstoneMode.ordinal());
+        return tag;
     }
 
     @Override
     public void load(CompoundTag tag, HolderLookup.Provider registries) {
+        if (tag.contains("RedstoneMode")) {
+            redstoneMode = com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(tag.getByte("RedstoneMode") & 255);
+        }
     }
 
     @Override

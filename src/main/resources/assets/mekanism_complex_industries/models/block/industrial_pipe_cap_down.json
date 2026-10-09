@@ -1,0 +1,17 @@
+{
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "pipe": "mekanism_complex_industries:block/industrial_pipe"
+  },
+  "elements": [
+    {
+      "name": "cap_down",
+      "from": [5, 5, 5],
+      "to": [11, 5.001, 11],
+      "faces": {
+        "down": { "texture": "#pipe", "uv": [0, 0, 16, 16] },
+        "up":   { "texture": "#pipe", "uv": [0, 0, 16, 16] }
+      }
+    }
+  ]
+}

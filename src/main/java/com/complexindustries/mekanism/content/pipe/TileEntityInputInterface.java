@@ -375,10 +375,53 @@ public class TileEntityInputInterface extends BlockEntity implements IPipeNode, 
         return strictEnergyHandler;
     }
 
+    private mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl redstoneMode = mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
+
+    @Override
+    public mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl getRedstoneMode() {
+        return redstoneMode;
+    }
+
+    @Override
+    public void setRedstoneMode(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl mode) {
+        this.redstoneMode = mode != null ? mode : mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
+        setChanged();
+    }
+
+    @Override
+    public boolean isRedstonePowered() {
+        return level != null && level.hasNeighborSignal(worldPosition);
+    }
+
+    @Override
+    public ItemStack routeItem(ItemStack stack, boolean simulate) {
+        if (!canOperate()) {
+            return stack;
+        }
+        return IInputInterface.super.routeItem(stack, simulate);
+    }
+
+    @Override
+    public FluidStack routeFluid(FluidStack stack, boolean simulate) {
+        if (!canOperate()) {
+            return stack;
+        }
+        return IInputInterface.super.routeFluid(stack, simulate);
+    }
+
+    @Override
+    public ChemicalStack routeChemical(ChemicalStack stack, boolean simulate) {
+        if (!canOperate()) {
+            return stack;
+        }
+        return IInputInterface.super.routeChemical(stack, simulate);
+    }
+
     @Override
     protected void saveAdditional(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putInt("Priority", priority);
+        tag.putByte("RedstoneMode", (byte) redstoneMode.ordinal());
     }
 
     @Override
@@ -386,6 +429,9 @@ public class TileEntityInputInterface extends BlockEntity implements IPipeNode, 
         super.loadAdditional(tag, registries);
         if (tag.contains("Priority")) {
             priority = tag.getInt("Priority");
+        }
+        if (tag.contains("RedstoneMode")) {
+            redstoneMode = com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(tag.getByte("RedstoneMode") & 255);
         }
     }
 }

@@ -292,10 +292,55 @@ public class InputInterfaceAttachment implements IPipeAttachment, IInputInterfac
         network.removeInputInterface(this);
     }
 
+    private mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl redstoneMode = mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
+
+    @Override
+    public mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl getRedstoneMode() {
+        return redstoneMode;
+    }
+
+    @Override
+    public void setRedstoneMode(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl mode) {
+        this.redstoneMode = mode != null ? mode : mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
+        pipe.setChanged();
+    }
+
+    @Override
+    public boolean isRedstonePowered() {
+        Level level = pipe.getLevel();
+        BlockPos pos = pipe.getBlockPos();
+        return level != null && (level.hasNeighborSignal(pos) || level.hasSignal(pos.relative(face), face));
+    }
+
+    @Override
+    public ItemStack routeItem(ItemStack stack, boolean simulate) {
+        if (!canOperate()) {
+            return stack;
+        }
+        return IInputInterface.super.routeItem(stack, simulate);
+    }
+
+    @Override
+    public FluidStack routeFluid(FluidStack stack, boolean simulate) {
+        if (!canOperate()) {
+            return stack;
+        }
+        return IInputInterface.super.routeFluid(stack, simulate);
+    }
+
+    @Override
+    public ChemicalStack routeChemical(ChemicalStack stack, boolean simulate) {
+        if (!canOperate()) {
+            return stack;
+        }
+        return IInputInterface.super.routeChemical(stack, simulate);
+    }
+
     @Override
     public CompoundTag save(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.putInt("Priority", priority);
+        tag.putByte("RedstoneMode", (byte) redstoneMode.ordinal());
         return tag;
     }
 
@@ -303,6 +348,9 @@ public class InputInterfaceAttachment implements IPipeAttachment, IInputInterfac
     public void load(CompoundTag tag, HolderLookup.Provider registries) {
         if (tag.contains("Priority")) {
             priority = tag.getInt("Priority");
+        }
+        if (tag.contains("RedstoneMode")) {
+            redstoneMode = com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(tag.getByte("RedstoneMode") & 255);
         }
     }
 

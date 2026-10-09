@@ -1,0 +1,17 @@
+{
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "pipe": "mekanism_complex_industries:block/industrial_pipe"
+  },
+  "elements": [
+    {
+      "name": "cap_west",
+      "from": [5, 5, 5],
+      "to": [5.001, 11, 11],
+      "faces": {
+        "west": { "texture": "#pipe", "uv": [0, 0, 16, 16] },
+        "east": { "texture": "#pipe", "uv": [0, 0, 16, 16] }
+      }
+    }
+  ]
+}

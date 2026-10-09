@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CPC",
+    "PAP",
+    "CPC"
+  ],
+  "key": {
+    "C": {
+      "item": "mekanism_complex_industries:fluid_extractor_casing"
+    },
+    "P": {
+      "item": "mekanism:electric_pump"
+    },
+    "A": {
+      "item": "mekanism:alloy_reinforced"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:powered_pump"
+  }
+}

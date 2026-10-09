@@ -15,6 +15,7 @@ public class GuiPowerInterface extends GuiMekanism<ContainerPowerInterface> {
 
     public GuiPowerInterface(ContainerPowerInterface container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
+        this.imageHeight = 176;
         this.dynamicSlots = true;
         this.titleLabelY = 5;
         this.inventoryLabelY = 73;
@@ -28,9 +29,21 @@ public class GuiPowerInterface extends GuiMekanism<ContainerPowerInterface> {
         addRenderableWidget(new GuiInnerScreen(this, 16, 17, 144, 48, () -> List.of(
                 Component.literal("模式: 外部电力注入 (按需提取)").withStyle(ChatFormatting.YELLOW),
                 Component.literal("网络内部电力缓冲: 0 J / 0 FE").withStyle(ChatFormatting.GREEN),
-                Component.literal("特性: 零储能无损即时透传中继").withStyle(ChatFormatting.GRAY),
+                Component.literal("红石控制: ").withStyle(ChatFormatting.GRAY)
+                        .append(menu.getRedstoneMode().getTextComponent()),
                 Component.literal("状态: 运行就绪 (Standby)").withStyle(ChatFormatting.AQUA)
         )).spacing(2));
+
+        // 2. Right-side Redstone Tab at y = 6
+        addRenderableWidget(new GuiInterfaceRedstoneTab(this,
+                menu.getTargetPos(), menu.isAttachment(), menu.getAttachedFace(),
+                menu::getRedstoneMode,
+                mode -> {
+                    if (menu.getInterfaceInstance() != null) {
+                        menu.getInterfaceInstance().setRedstoneMode(mode);
+                    }
+                }
+        ));
     }
 
     @Override

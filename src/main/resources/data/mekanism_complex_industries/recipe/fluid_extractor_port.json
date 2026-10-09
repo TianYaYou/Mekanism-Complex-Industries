@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PCP",
+    "CBC",
+    "PCP"
+  ],
+  "key": {
+    "P": {
+      "item": "mekanism:basic_mechanical_pipe"
+    },
+    "C": {
+      "item": "mekanism_complex_industries:fluid_extractor_casing"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    }
+  },
+  "result": {
+    "count": 2,
+    "id": "mekanism_complex_industries:fluid_extractor_port"
+  }
+}

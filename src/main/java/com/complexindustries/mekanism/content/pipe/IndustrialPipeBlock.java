@@ -110,6 +110,7 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
             boolean hasAtt = pipe != null && pipe.getAttachment(dir) != null;
             if (hasAtt) {
                 shape = Shapes.or(shape, PLATE_SHAPES.get(dir));
+                shape = Shapes.or(shape, ARM_SHAPES.get(dir));
             } else if (state.getValue(PROPERTY_BY_DIRECTION.get(dir))) {
                 shape = Shapes.or(shape, ARM_SHAPES.get(dir));
             }
@@ -138,8 +139,8 @@ public class IndustrialPipeBlock extends Block implements EntityBlock {
         for (Direction dir : Direction.values()) {
             boolean connects = false;
             if (pipe != null && pipe.getAttachment(dir) != null) {
-                // If attachment is present, arm connection is suppressed in favor of attachment plate
-                connects = false;
+                // If attachment is present, arm connection connects to the attachment plate
+                connects = true;
             } else {
                 BlockPos neighborPos = pos.relative(dir);
                 if (WorldUtils.isBlockLoaded(level, neighborPos)) {

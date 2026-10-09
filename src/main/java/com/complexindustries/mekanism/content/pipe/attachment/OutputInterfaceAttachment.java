@@ -38,6 +38,7 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
     private final TileEntityIndustrialPipe pipe;
     private final Direction face;
     private int priority = 0;
+    private mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl redstoneMode = mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
     private final OutputInterfaceFilter filter = new OutputInterfaceFilter();
 
     private final IEnergyStorage energyStorage;
@@ -187,6 +188,12 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
     }
 
     @Override
+    public void setFilter(int index, OutputInterfaceFilter.FilterType type, String filterId, ItemStack iconStack) {
+        filter.setFilter(index, type, filterId, iconStack);
+        pipe.setChanged();
+    }
+
+    @Override
     public void setFilter(int index, ItemStack rawStack) {
         filter.setFilter(index, rawStack);
         pipe.setChanged();
@@ -199,17 +206,44 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
     }
 
     @Override
+    public mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl getRedstoneMode() {
+        return redstoneMode;
+    }
+
+    @Override
+    public void setRedstoneMode(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl mode) {
+        this.redstoneMode = mode != null ? mode : mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
+        pipe.setChanged();
+    }
+
+    @Override
+    public boolean isRedstonePowered() {
+        Level level = pipe.getLevel();
+        BlockPos pos = pipe.getBlockPos();
+        return level != null && (level.hasNeighborSignal(pos) || level.hasSignal(pos.relative(face), face));
+    }
+
+    @Override
     public boolean matchesItem(ItemStack stack) {
+        if (!canOperate()) {
+            return false;
+        }
         return filter.matchesItem(stack);
     }
 
     @Override
     public boolean matchesFluid(FluidStack stack) {
+        if (!canOperate()) {
+            return false;
+        }
         return filter.matchesFluid(stack);
     }
 
     @Override
     public boolean matchesChemical(ChemicalStack stack) {
+        if (!canOperate()) {
+            return false;
+        }
         return filter.matchesChemical(stack);
     }
 
@@ -284,6 +318,7 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
     public CompoundTag save(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.putInt("Priority", priority);
+        tag.putByte("RedstoneMode", (byte) redstoneMode.ordinal());
         tag.put("FilterData", filter.save(registries));
         return tag;
     }
@@ -292,6 +327,9 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
     public void load(CompoundTag tag, HolderLookup.Provider registries) {
         if (tag.contains("Priority")) {
             priority = tag.getInt("Priority");
+        }
+        if (tag.contains("RedstoneMode")) {
+            redstoneMode = com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(tag.getByte("RedstoneMode") & 255);
         }
         if (tag.contains("FilterData", CompoundTag.TAG_COMPOUND)) {
             filter.load(tag.getCompound("FilterData"), registries);
@@ -313,6 +351,9 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
                 buf.writeBlockPos(pipe.getBlockPos());
                 buf.writeBoolean(true); // is attachment
                 buf.writeByte(face.ordinal());
+                if (buf instanceof net.minecraft.network.RegistryFriendlyByteBuf regBuf) {
+                    filter.writeToBuf(regBuf);
+                }
             });
         }
         return InteractionResult.sidedSuccess(player.level().isClientSide());

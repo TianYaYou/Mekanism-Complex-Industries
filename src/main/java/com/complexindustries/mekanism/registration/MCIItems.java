@@ -317,5 +317,20 @@ public final class MCIItems {
     public static final DeferredItem<com.complexindustries.mekanism.content.pipe.item.ItemInterfacePart> POWER_INTERFACE_PART = ITEMS.register("power_interface_part",
             () -> new com.complexindustries.mekanism.content.pipe.item.ItemInterfacePart(new Item.Properties(), com.complexindustries.mekanism.content.pipe.attachment.AttachmentType.POWER));
 
+    public static final DeferredItem<BucketItem> LIQUID_AIR_BUCKET = ITEMS.register("liquid_air_bucket",
+            () -> new BucketItem(MCIFluids.SOURCE_LIQUID_AIR.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
+
+    public static final DeferredItem<BlockItem> FLUID_EXTRACTOR_CASING = ITEMS.register("fluid_extractor_casing",
+            () -> new MCIBlockItem(MCIBlocks.FLUID_EXTRACTOR_CASING.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.fluid_extractor_casing", false));
+
+    public static final DeferredItem<BlockItem> FLUID_EXTRACTOR_PORT = ITEMS.register("fluid_extractor_port",
+            () -> new MCIBlockItem(MCIBlocks.FLUID_EXTRACTOR_PORT.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.fluid_extractor_port", true));
+
+    public static final DeferredItem<BlockItem> POWERED_PUMP = ITEMS.register("powered_pump",
+            () -> new MCIBlockItem(MCIBlocks.POWERED_PUMP.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.powered_pump", false));
+
     private MCIItems() {}
 }

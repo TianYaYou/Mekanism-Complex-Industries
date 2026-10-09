@@ -251,6 +251,12 @@ public class TileEntityOutputInterface extends BlockEntity implements IPipeNode,
     }
 
     @Override
+    public void setFilter(int index, OutputInterfaceFilter.FilterType type, String filterId, ItemStack iconStack) {
+        filter.setFilter(index, type, filterId, iconStack);
+        setChanged();
+    }
+
+    @Override
     public void setFilter(int index, ItemStack rawStack) {
         filter.setFilter(index, rawStack);
         setChanged();
@@ -262,18 +268,45 @@ public class TileEntityOutputInterface extends BlockEntity implements IPipeNode,
         setChanged();
     }
 
+    private mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl redstoneMode = mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
+
+    @Override
+    public mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl getRedstoneMode() {
+        return redstoneMode;
+    }
+
+    @Override
+    public void setRedstoneMode(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl mode) {
+        this.redstoneMode = mode != null ? mode : mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
+        setChanged();
+    }
+
+    @Override
+    public boolean isRedstonePowered() {
+        return level != null && level.hasNeighborSignal(worldPosition);
+    }
+
     @Override
     public boolean matchesItem(ItemStack stack) {
+        if (!canOperate()) {
+            return false;
+        }
         return filter.matchesItem(stack);
     }
 
     @Override
     public boolean matchesFluid(FluidStack stack) {
+        if (!canOperate()) {
+            return false;
+        }
         return filter.matchesFluid(stack);
     }
 
     @Override
     public boolean matchesChemical(ChemicalStack stack) {
+        if (!canOperate()) {
+            return false;
+        }
         return filter.matchesChemical(stack);
     }
 
@@ -400,6 +433,9 @@ public class TileEntityOutputInterface extends BlockEntity implements IPipeNode,
             ), buf -> {
                 buf.writeBlockPos(worldPosition);
                 buf.writeBoolean(false); // is block form
+                if (buf instanceof net.minecraft.network.RegistryFriendlyByteBuf regBuf) {
+                    filter.writeToBuf(regBuf);
+                }
             });
         }
         return InteractionResult.sidedSuccess(player.level().isClientSide());
@@ -417,6 +453,7 @@ public class TileEntityOutputInterface extends BlockEntity implements IPipeNode,
     protected void saveAdditional(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putInt("Priority", priority);
+        tag.putByte("RedstoneMode", (byte) redstoneMode.ordinal());
         tag.putInt("RoundRobinIndex", roundRobinFaceIndex);
         tag.put("FilterData", filter.save(registries));
     }
@@ -426,6 +463,9 @@ public class TileEntityOutputInterface extends BlockEntity implements IPipeNode,
         super.loadAdditional(tag, registries);
         if (tag.contains("Priority")) {
             priority = tag.getInt("Priority");
+        }
+        if (tag.contains("RedstoneMode")) {
+            redstoneMode = com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(tag.getByte("RedstoneMode") & 255);
         }
         if (tag.contains("RoundRobinIndex")) {
             roundRobinFaceIndex = tag.getInt("RoundRobinIndex");

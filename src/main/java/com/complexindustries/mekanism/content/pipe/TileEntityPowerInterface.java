@@ -10,8 +10,11 @@ import mekanism.api.Action;
 import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.util.WorldUtils;
+import mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -221,9 +224,27 @@ public class TileEntityPowerInterface extends BlockEntity implements IPipeNode, 
         return candidates;
     }
 
+    private RedstoneControl redstoneMode = RedstoneControl.DISABLED;
+
+    @Override
+    public RedstoneControl getRedstoneMode() {
+        return redstoneMode;
+    }
+
+    @Override
+    public void setRedstoneMode(RedstoneControl mode) {
+        this.redstoneMode = mode != null ? mode : RedstoneControl.DISABLED;
+        setChanged();
+    }
+
+    @Override
+    public boolean isRedstonePowered() {
+        return level != null && level.hasNeighborSignal(worldPosition);
+    }
+
     @Override
     public int extractEnergyFromExternal(int maxAmount, boolean simulate) {
-        if (level == null || maxAmount <= 0) {
+        if (!canOperate() || level == null || maxAmount <= 0) {
             return 0;
         }
         List<Direction> candidates = getExternalCandidateFaces();
@@ -264,7 +285,24 @@ public class TileEntityPowerInterface extends BlockEntity implements IPipeNode, 
 
     @Override
     public int receiveEnergyFromExternal(int amount, boolean simulate) {
+        if (!canOperate()) {
+            return 0;
+        }
         return 0;
+    }
+
+    @Override
+    protected void saveAdditional(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        tag.putByte("RedstoneMode", (byte) redstoneMode.ordinal());
+    }
+
+    @Override
+    protected void loadAdditional(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        if (tag.contains("RedstoneMode")) {
+            redstoneMode = com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(tag.getByte("RedstoneMode") & 255);
+        }
     }
 
     public InteractionResult openMenu(Player player) {

@@ -1,0 +1,19 @@
+{
+  "type": "mekanism:rotary",
+  "chemical_input": {
+    "amount": 1,
+    "chemical": "mekanism_complex_industries:compressed_air"
+  },
+  "chemical_output": {
+    "amount": 1,
+    "id": "mekanism_complex_industries:compressed_air"
+  },
+  "fluid_input": {
+    "amount": 1,
+    "fluid": "mekanism_complex_industries:liquid_air"
+  },
+  "fluid_output": {
+    "amount": 1,
+    "id": "mekanism_complex_industries:liquid_air"
+  }
+}

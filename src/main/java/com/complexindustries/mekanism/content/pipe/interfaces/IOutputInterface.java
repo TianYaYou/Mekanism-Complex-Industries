@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface IOutputInterface {
+public interface IOutputInterface extends IRedstoneControllable {
 
     int getPriority();
 
@@ -29,11 +29,15 @@ public interface IOutputInterface {
     Direction getAttachedFace();
 
     // --- Filters ---
+    OutputInterfaceFilter getFilter();
+
     List<ItemStack> getItemFilters();
 
     List<FluidStack> getFluidFilters();
 
     List<ChemicalStack> getChemicalFilters();
+
+    void setFilter(int index, OutputInterfaceFilter.FilterType type, String filterId, ItemStack iconStack);
 
     void setFilter(int index, ItemStack rawStack);
 

@@ -19,10 +19,12 @@ public class MCIPacketHandler extends BasePacketHandler {
         registrar.play(PacketSetFlowRate.TYPE, PacketSetFlowRate.STREAM_CODEC);
         registrar.play(PacketSetInterfacePriority.TYPE, PacketSetInterfacePriority.STREAM_CODEC);
         registrar.play(PacketSetOutputFilter.TYPE, PacketSetOutputFilter.STREAM_CODEC);
+        registrar.play(PacketSetRedstoneMode.TYPE, PacketSetRedstoneMode.STREAM_CODEC);
     }
 
     @Override
     protected void registerServerToClient(PacketRegistrar registrar) {
+        registrar.play(PacketSyncOutputFilter.TYPE, PacketSyncOutputFilter.STREAM_CODEC);
     }
 
     public static void sendToServer(CustomPacketPayload payload) {

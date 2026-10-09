@@ -62,5 +62,8 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.pipe.container.ContainerPowerInterface> POWER_INTERFACE =
             CONTAINER_TYPES.register("power_interface", (net.neoforged.neoforge.network.IContainerFactory<com.complexindustries.mekanism.content.pipe.container.ContainerPowerInterface>) com.complexindustries.mekanism.content.pipe.container.ContainerPowerInterface::create);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.extractor.ContainerFluidExtractor> FLUID_EXTRACTOR =
+            CONTAINER_TYPES.register("fluid_extractor", com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorCasing.class, com.complexindustries.mekanism.content.extractor.ContainerFluidExtractor::new);
+
     private MCIContainerTypes() {}
 }

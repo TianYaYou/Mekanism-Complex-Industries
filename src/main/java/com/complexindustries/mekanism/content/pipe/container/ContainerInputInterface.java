@@ -70,19 +70,28 @@ public class ContainerInputInterface extends AbstractContainerMenu {
         this.data = new ContainerData() {
             @Override
             public int get(int index) {
-                return interfaceInstance != null ? interfaceInstance.getPriority() : 0;
+                if (index == 0) {
+                    return interfaceInstance != null ? interfaceInstance.getPriority() : 0;
+                } else if (index == 1) {
+                    return interfaceInstance != null ? interfaceInstance.getRedstoneMode().ordinal() : 0;
+                }
+                return 0;
             }
 
             @Override
             public void set(int index, int value) {
                 if (interfaceInstance != null) {
-                    interfaceInstance.setPriority(value);
+                    if (index == 0) {
+                        interfaceInstance.setPriority(value);
+                    } else if (index == 1) {
+                        interfaceInstance.setRedstoneMode(com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(value));
+                    }
                 }
             }
 
             @Override
             public int getCount() {
-                return 1;
+                return 2;
             }
         };
         addDataSlots(this.data);
@@ -117,6 +126,10 @@ public class ContainerInputInterface extends AbstractContainerMenu {
 
     public int getPriority() {
         return data.get(0);
+    }
+
+    public mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl getRedstoneMode() {
+        return com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(data.get(1));
     }
 
     @Override

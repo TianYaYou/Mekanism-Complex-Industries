@@ -1864,10 +1864,257 @@ public class MCIGameTests {
         helper.assertTrue(pipe.getAttachment(Direction.NORTH) == inAtt, "NORTH 必须成功挂载输入面板！");
         helper.assertTrue(pipe.getAttachment(Direction.SOUTH) == outAtt, "SOUTH 必须成功挂载输出面板！");
 
+        // 验证 BlockState 臂连接状态同步
+        var state = helper.getBlockState(pipePos);
+        helper.assertTrue(state.getValue(com.complexindustries.mekanism.content.pipe.IndustrialPipeBlock.NORTH), "NORTH 挂载附件后管道应呈连接状态！");
+        helper.assertTrue(state.getValue(com.complexindustries.mekanism.content.pipe.IndustrialPipeBlock.SOUTH), "SOUTH 挂载附件后管道应呈连接状态！");
+
         // 验证 Capability 透传
         helper.assertTrue(pipe.getItemHandler(Direction.NORTH) != null, "NORTH 面必须暴露输入物品能力！");
         helper.assertTrue(pipe.getItemHandler(Direction.EAST) == null, "未挂载附件的 EAST 面绝不暴露物品能力！");
 
         helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testOutputInterfaceConfigurableFilters(GameTestHelper helper) {
+        var filter = new com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter();
+
+        // 1. 测试物品 ID 过滤 (包含全称与短路径)
+        filter.setFilter(0, com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter.FilterType.ITEM, "minecraft:iron_ingot", ItemStack.EMPTY);
+        filter.setFilter(1, com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter.FilterType.ITEM, "gold_ingot", ItemStack.EMPTY);
+
+        helper.assertTrue(filter.matchesItem(new ItemStack(net.minecraft.world.item.Items.IRON_INGOT)), "应通过全称 ID 匹配铁锭！");
+        helper.assertTrue(filter.matchesItem(new ItemStack(net.minecraft.world.item.Items.GOLD_INGOT)), "应通过短名称 ID 匹配金锭！");
+        helper.assertTrue(!filter.matchesItem(new ItemStack(net.minecraft.world.item.Items.COPPER_INGOT)), "不应匹配未配置的铜锭！");
+
+        // 2. 测试流体 ID 过滤
+        filter.setFilter(2, com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter.FilterType.FLUID, "minecraft:water", ItemStack.EMPTY);
+        helper.assertTrue(filter.matchesFluid(new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER, 1000)), "应通过 ID 匹配水流体！");
+        helper.assertTrue(!filter.matchesFluid(new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.LAVA, 1000)), "不应匹配未配置的岩浆！");
+
+        // 3. 测试化学品 ID 过滤
+        var nitrogenStack = com.complexindustries.mekanism.registration.MCIChemicals.NITROGEN.asStack(1000);
+        var nobleGasStack = com.complexindustries.mekanism.registration.MCIChemicals.NOBLE_GAS.asStack(1000);
+
+        filter.setFilter(3, com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter.FilterType.CHEMICAL, "nitrogen", ItemStack.EMPTY);
+        helper.assertTrue(filter.matchesChemical(nitrogenStack), "应通过化学品名称匹配氮气！");
+        helper.assertTrue(!filter.matchesChemical(nobleGasStack), "不应匹配未配置的稀有气体！");
+
+        // 4. 测试 NBT 保存与恢复
+        var registries = helper.getLevel().registryAccess();
+        var tag = filter.save(registries);
+        var loadedFilter = new com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter();
+        loadedFilter.load(tag, registries);
+
+        helper.assertTrue(loadedFilter.matchesItem(new ItemStack(net.minecraft.world.item.Items.IRON_INGOT)), "NBT 恢复后仍应匹配铁锭！");
+        helper.assertTrue(loadedFilter.matchesFluid(new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER, 1000)), "NBT 恢复后仍应匹配水！");
+        helper.assertTrue(loadedFilter.matchesChemical(nitrogenStack), "NBT 恢复后仍应匹配氮气！");
+
+        // 5. 测试候选提取与动态匹配
+        var ironCandidates = com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter.extractCandidates(new ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
+        helper.assertTrue(!ironCandidates.isEmpty(), "铁锭应提取出候选类型！");
+        helper.assertTrue(ironCandidates.stream().anyMatch(c -> c.id().contains("iron_ingot")), "铁锭候选应包含自身 ID！");
+
+        filter.setFilter(4, com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter.FilterType.ITEM, "minecraft:iron_ingot", ItemStack.EMPTY);
+        var matchingStacks = filter.getMatchingItemStacks(4);
+        helper.assertTrue(!matchingStacks.isEmpty() && matchingStacks.get(0).is(net.minecraft.world.item.Items.IRON_INGOT), "匹配列表应返回铁锭！");
+        helper.assertTrue(!filter.getDisplayStack(4, 20).isEmpty(), "循环显示应在指定刻返回有效显示物品！");
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testInterfaceRedstoneControl(GameTestHelper helper) {
+        BlockPos inPos = new BlockPos(1, 1, 1);
+        BlockPos outPos = new BlockPos(2, 1, 1);
+        helper.setBlock(inPos, com.complexindustries.mekanism.registration.MCIBlocks.INPUT_INTERFACE.get().defaultBlockState());
+        helper.setBlock(outPos, com.complexindustries.mekanism.registration.MCIBlocks.OUTPUT_INTERFACE.get().defaultBlockState());
+
+        var inTile = (com.complexindustries.mekanism.content.pipe.TileEntityInputInterface) helper.getBlockEntity(inPos);
+        var outTile = (com.complexindustries.mekanism.content.pipe.TileEntityOutputInterface) helper.getBlockEntity(outPos);
+        helper.assertTrue(inTile != null && outTile != null, "接口实体必须成功创建！");
+
+        // 默认模式 DISABLED -> 始终可以工作
+        helper.assertTrue(inTile.canOperate(), "DISABLED 模式下输入接口必须能正常工作！");
+        helper.assertTrue(outTile.canOperate(), "DISABLED 模式下输出接口必须能正常工作！");
+
+        // 切换为 HIGH -> 无红石信号时不工作
+        inTile.setRedstoneMode(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.HIGH);
+        outTile.setRedstoneMode(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.HIGH);
+        helper.assertTrue(!inTile.canOperate(), "HIGH 模式且无红石时输入接口应禁止工作！");
+        helper.assertTrue(!outTile.canOperate(), "HIGH 模式且无红石时输出接口应禁止工作！");
+
+        // 切换为 LOW -> 无红石信号时正常工作
+        inTile.setRedstoneMode(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.LOW);
+        outTile.setRedstoneMode(mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.LOW);
+        helper.assertTrue(inTile.canOperate(), "LOW 模式且无红石时输入接口应正常工作！");
+        helper.assertTrue(outTile.canOperate(), "LOW 模式且无红石时输出接口应正常工作！");
+
+        helper.succeed();
+    }
+
+    private static void build3x3x3Extractor(GameTestHelper helper, BlockPos startPos) {
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 3; y++) {
+                for (int z = 0; z < 3; z++) {
+                    BlockPos p = startPos.offset(x, y, z);
+                    int boundCoords = (x == 0 || x == 2 ? 1 : 0) + (y == 0 || y == 2 ? 1 : 0) + (z == 0 || z == 2 ? 1 : 0);
+
+                    if (boundCoords >= 2) {
+                        // Frame edges and corners
+                        helper.setBlock(p, MCIBlocks.FLUID_EXTRACTOR_CASING.get());
+                    } else if (y == 0) {
+                        // Floor center: Powered Pump
+                        helper.setBlock(p, MCIBlocks.POWERED_PUMP.get());
+                    } else if (y == 1) {
+                        if (x == 1 && z == 1) {
+                            // Cavity interior
+                            helper.setBlock(p, Blocks.AIR);
+                        } else if (x == 1 && z == 0) {
+                            // Face center: Port
+                            helper.setBlock(p, MCIBlocks.FLUID_EXTRACTOR_PORT.get());
+                        } else {
+                            // Other face centers
+                            helper.setBlock(p, MCIBlocks.FLUID_EXTRACTOR_CASING.get());
+                        }
+                    } else {
+                        // Roof center
+                        helper.setBlock(p, MCIBlocks.FLUID_EXTRACTOR_CASING.get());
+                    }
+                }
+            }
+        }
+    }
+
+    @GameTest(template = "empty_10x10x10", timeoutTicks = 60)
+    public static void testFluidExtractorFormation(GameTestHelper helper) {
+        BlockPos origin = new BlockPos(1, 1, 1);
+        build3x3x3Extractor(helper, origin);
+
+        BlockPos portPos = origin.offset(1, 1, 0);
+        helper.runAfterDelay(10, () -> {
+            var tile = helper.getBlockEntity(portPos);
+            helper.assertTrue(tile instanceof com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorPort, "抽取器接口实体必须存在！");
+            var portTile = (com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorPort) tile;
+
+            portTile.getStructure().tick(portTile, true);
+            var res = portTile.getStructure().runUpdate(portTile);
+            var mb = portTile.getMultiblock();
+            helper.assertTrue(mb.isFormed(), "流体抽取器应该成功成型！: " + (res != null && res.getResultText() != null ? res.getResultText().getString() : "未知原因"));
+            helper.assertTrue(mb.getPumpCount() == 1, "流体抽取器底面应检测到1台动力泵机！");
+            helper.assertTrue(mb.getTankCapacity() == 16000, "1x1x1腔体的储罐容量应为16,000 mB！");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty_10x10x10", timeoutTicks = 60)
+    public static void testFluidExtractorWaterExtraction(GameTestHelper helper) {
+        BlockPos origin = new BlockPos(1, 2, 1);
+        // Place water directly below the pump at (2, 1, 2)
+        helper.setBlock(origin.offset(1, -1, 1), Blocks.WATER);
+        build3x3x3Extractor(helper, origin);
+
+        BlockPos portPos = origin.offset(1, 1, 0);
+        helper.runAfterDelay(10, () -> {
+            var portTile = (com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorPort) helper.getBlockEntity(portPos);
+            portTile.getStructure().tick(portTile, true);
+            portTile.getStructure().runUpdate(portTile);
+            var mb = portTile.getMultiblock();
+            helper.assertTrue(mb.isFormed(), "抽取器必须成型！");
+
+            mb.scanEnvironment(helper.getLevel());
+            helper.assertTrue(mb.environment == com.complexindustries.mekanism.content.extractor.ExtractorEnvironment.WATER, "底面有水时应识别为WATER环境！");
+
+            // 注入电量并执行一次tick抽取
+            mb.energyContainer.insert(50_000L, Action.EXECUTE, AutomationType.INTERNAL);
+            mb.tick(helper.getLevel());
+
+            helper.assertTrue(mb.fluidTank.getFluid().is(net.minecraft.world.level.material.Fluids.WATER), "抽取流体应为水！");
+            helper.assertTrue(mb.fluidTank.getFluidAmount() == 200, "1台泵机单tick应抽取200 mB！实际: " + mb.fluidTank.getFluidAmount());
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty_10x10x10", timeoutTicks = 60)
+    public static void testFluidExtractorAirExtraction(GameTestHelper helper) {
+        BlockPos origin = new BlockPos(1, 2, 1);
+        // Place air directly below the pump at (2, 1, 2)
+        helper.setBlock(origin.offset(1, -1, 1), Blocks.AIR);
+        build3x3x3Extractor(helper, origin);
+
+        BlockPos portPos = origin.offset(1, 1, 0);
+        helper.runAfterDelay(10, () -> {
+            var portTile = (com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorPort) helper.getBlockEntity(portPos);
+            portTile.getStructure().tick(portTile, true);
+            portTile.getStructure().runUpdate(portTile);
+            var mb = portTile.getMultiblock();
+            helper.assertTrue(mb.isFormed(), "抽取器必须成型！");
+
+            mb.scanEnvironment(helper.getLevel());
+            helper.assertTrue(mb.environment == com.complexindustries.mekanism.content.extractor.ExtractorEnvironment.AIR, "底面为空气时应识别为AIR环境！");
+
+            // 注入电量并执行tick抽取
+            mb.energyContainer.insert(50_000L, Action.EXECUTE, AutomationType.INTERNAL);
+            mb.tick(helper.getLevel());
+
+            helper.assertTrue(mb.fluidTank.getFluid().is(MCIFluids.SOURCE_LIQUID_AIR.get()), "抽取流体应为液态空气！");
+            helper.assertTrue(mb.fluidTank.getFluidAmount() == 200, "1台泵机单tick应抽取200 mB！实际: " + mb.fluidTank.getFluidAmount());
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty_15x25x15", timeoutTicks = 80)
+    public static void testFluidExtractorLavaDetection(GameTestHelper helper) {
+        BlockPos origin = new BlockPos(1, 2, 1);
+        // 1. 测试不足2048方块岩浆：仅放置1个岩浆方块
+        helper.setBlock(origin.offset(1, -1, 1), Blocks.LAVA);
+        build3x3x3Extractor(helper, origin);
+
+        BlockPos portPos = origin.offset(1, 1, 0);
+        helper.runAfterDelay(10, () -> {
+            var portTile = (com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorPort) helper.getBlockEntity(portPos);
+            portTile.getStructure().tick(portTile, true);
+            portTile.getStructure().runUpdate(portTile);
+            var mb = portTile.getMultiblock();
+            helper.assertTrue(mb.isFormed(), "抽取器必须成型！");
+
+            mb.scanEnvironment(helper.getLevel());
+            helper.assertTrue(mb.environment == com.complexindustries.mekanism.content.extractor.ExtractorEnvironment.LAVA_INSUFFICIENT, "少量岩浆应识别为LAVA_INSUFFICIENT！");
+            helper.assertTrue(mb.lavaBlockCount == 1, "岩浆数量应为1！");
+
+            // 有电但岩浆不足时禁止抽取
+            mb.energyContainer.insert(50_000L, Action.EXECUTE, AutomationType.INTERNAL);
+            mb.tick(helper.getLevel());
+            helper.assertTrue(mb.fluidTank.isEmpty(), "岩浆不足时不应抽取任何流体！");
+
+            // 2. 填充超过2048方块岩浆 (12 x 15 x 12 = 2160方块)
+            BlockPos lavaOrigin = origin.offset(1, -1, 1);
+            for (int dy = 0; dy < 15; dy++) {
+                for (int dx = 0; dx < 12; dx++) {
+                    for (int dz = 0; dz < 12; dz++) {
+                        // 避免覆盖抽取器方块
+                        BlockPos lp = lavaOrigin.offset(dx, dy, dz);
+                        if (lp.getX() >= origin.getX() && lp.getX() < origin.getX() + 3
+                                && lp.getY() >= origin.getY() && lp.getY() < origin.getY() + 3
+                                && lp.getZ() >= origin.getZ() && lp.getZ() < origin.getZ() + 3) {
+                            continue;
+                        }
+                        helper.setBlock(lp, Blocks.LAVA);
+                    }
+                }
+            }
+
+            mb.scanEnvironment(helper.getLevel());
+            helper.assertTrue(mb.environment == com.complexindustries.mekanism.content.extractor.ExtractorEnvironment.LAVA, ">2048方块岩浆应判定为无限岩浆LAVA！");
+            helper.assertTrue(mb.lavaBlockCount >= 2049, "BFS应扫描至上限2049！实际: " + mb.lavaBlockCount);
+
+            // 抽取测试
+            mb.tick(helper.getLevel());
+            helper.assertTrue(mb.fluidTank.getFluid().is(net.minecraft.world.level.material.Fluids.LAVA), "无限岩浆环境下应抽取岩浆！");
+            helper.assertTrue(mb.fluidTank.getFluidAmount() == 200, "单tick应抽取200 mB岩浆！");
+
+            helper.succeed();
+        });
     }
 }

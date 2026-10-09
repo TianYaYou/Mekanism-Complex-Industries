@@ -9,7 +9,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
-public interface IInputInterface {
+public interface IInputInterface extends IRedstoneControllable {
 
     int getPriority();
 

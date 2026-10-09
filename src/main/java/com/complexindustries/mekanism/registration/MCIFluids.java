@@ -75,5 +75,24 @@ public final class MCIFluids {
             .levelDecreasePerBlock(1)
             .tickRate(5);
 
+    public static final DeferredHolder<FluidType, FluidType> LIQUID_AIR_TYPE =
+            FLUID_TYPES.register("liquid_air", com.complexindustries.mekanism.content.fluid.LiquidAirFluidType::new);
+
+    public static final DeferredHolder<Fluid, FlowingFluid> SOURCE_LIQUID_AIR = FLUIDS.register("liquid_air",
+            () -> new BaseFlowingFluid.Source(MCIFluids.LIQUID_AIR_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> FLOWING_LIQUID_AIR = FLUIDS.register("flowing_liquid_air",
+            () -> new BaseFlowingFluid.Flowing(MCIFluids.LIQUID_AIR_PROPERTIES));
+
+    public static final BaseFlowingFluid.Properties LIQUID_AIR_PROPERTIES = new BaseFlowingFluid.Properties(
+            LIQUID_AIR_TYPE,
+            SOURCE_LIQUID_AIR,
+            FLOWING_LIQUID_AIR)
+            .bucket(MCIItems.LIQUID_AIR_BUCKET)
+            .block(MCIBlocks.LIQUID_AIR_BLOCK)
+            .slopeFindDistance(4)
+            .levelDecreasePerBlock(1)
+            .tickRate(5);
+
     private MCIFluids() {}
 }

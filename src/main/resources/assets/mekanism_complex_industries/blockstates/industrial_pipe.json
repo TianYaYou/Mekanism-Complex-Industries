@@ -1,33 +1,52 @@
 {
   "multipart": [
     {
-      "apply": {
-        "model": "mekanism_complex_industries:block/industrial_pipe_center"
-      }
+      "when": { "north": "false" },
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_cap_north" }
+    },
+    {
+      "when": { "south": "false" },
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_cap_south" }
+    },
+    {
+      "when": { "west": "false" },
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_cap_west" }
+    },
+    {
+      "when": { "east": "false" },
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_cap_east" }
+    },
+    {
+      "when": { "down": "false" },
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_cap_down" }
+    },
+    {
+      "when": { "up": "false" },
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_cap_up" }
     },
     {
       "when": { "north": "true" },
-      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_side" }
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_arm_north" }
     },
     {
       "when": { "south": "true" },
-      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_side", "y": 180 }
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_arm_south" }
     },
     {
       "when": { "west": "true" },
-      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_side", "y": 270 }
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_arm_west" }
     },
     {
       "when": { "east": "true" },
-      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_side", "y": 90 }
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_arm_east" }
     },
     {
       "when": { "down": "true" },
-      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_side", "x": 90 }
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_arm_down" }
     },
     {
       "when": { "up": "true" },
-      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_side", "x": 270 }
+      "apply": { "model": "mekanism_complex_industries:block/industrial_pipe_arm_up" }
     }
   ]
 }

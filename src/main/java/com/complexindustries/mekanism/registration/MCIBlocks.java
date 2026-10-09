@@ -317,5 +317,27 @@ public final class MCIBlocks {
                     BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                             .strength(3.0F, 8.0F)));
 
+    public static final DeferredBlock<LiquidBlock> LIQUID_AIR_BLOCK = BLOCKS.register("liquid_air",
+            () -> new LiquidBlock(MCIFluids.SOURCE_LIQUID_AIR.get(),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noCollission().strength(100.0F).noLootTable()));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.extractor.FluidExtractorCasingBlock> FLUID_EXTRACTOR_CASING = BLOCKS.register("fluid_extractor_casing",
+            () -> new com.complexindustries.mekanism.content.extractor.FluidExtractorCasingBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(5.0F, 9.0F)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.extractor.FluidExtractorPortBlock> FLUID_EXTRACTOR_PORT = BLOCKS.register("fluid_extractor_port",
+            () -> new com.complexindustries.mekanism.content.extractor.FluidExtractorPortBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(5.0F, 9.0F)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.extractor.PoweredPumpBlock> POWERED_PUMP = BLOCKS.register("powered_pump",
+            () -> new com.complexindustries.mekanism.content.extractor.PoweredPumpBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(5.0F, 9.0F)));
+
     private MCIBlocks() {}
 }

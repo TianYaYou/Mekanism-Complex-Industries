@@ -1,12 +1,8 @@
 package com.complexindustries.mekanism.content.pipe.client;
 
 import com.complexindustries.mekanism.content.pipe.container.ContainerInputInterface;
-import com.complexindustries.mekanism.content.pipe.interfaces.IInputInterface;
-import com.complexindustries.mekanism.network.MCIPacketHandler;
-import com.complexindustries.mekanism.network.PacketSetInterfacePriority;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.GuiInnerScreen;
-import mekanism.client.gui.element.button.MekanismButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -19,6 +15,7 @@ public class GuiInputInterface extends GuiMekanism<ContainerInputInterface> {
 
     public GuiInputInterface(ContainerInputInterface container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title);
+        this.imageHeight = 176;
         this.dynamicSlots = true;
         this.titleLabelY = 5;
         this.inventoryLabelY = 73;
@@ -28,34 +25,36 @@ public class GuiInputInterface extends GuiMekanism<ContainerInputInterface> {
     protected void addGuiElements() {
         super.addGuiElements();
 
-        // 1. High-Tech CRT Monitor Screen (16, 17, 144, 32)
-        addRenderableWidget(new GuiInnerScreen(this, 16, 17, 144, 32, () -> List.of(
+        // 1. High-Tech CRT Monitor Screen (16, 17, 144, 48)
+        addRenderableWidget(new GuiInnerScreen(this, 16, 17, 144, 48, () -> List.of(
                 Component.literal("模式: 被动接收 (零缓冲即时路由)").withStyle(ChatFormatting.AQUA),
                 Component.literal("当前网络优先级: ").withStyle(ChatFormatting.GRAY)
-                        .append(Component.literal(String.valueOf(menu.getPriority())).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
+                        .append(Component.literal(String.valueOf(menu.getPriority())).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)),
+                Component.literal("红石控制: ").withStyle(ChatFormatting.GRAY)
+                        .append(menu.getRedstoneMode().getTextComponent()),
+                Component.literal("状态: 运行就绪 (Standby)").withStyle(ChatFormatting.DARK_AQUA)
         )).spacing(2));
 
-        // 2. Priority Adjustment Buttons below the screen (y = 52)
-        addRenderableWidget(new MekanismButton(this, 18, 52, 32, 18, Component.literal("-10"),
-                (element, mouseX, mouseY) -> { adjustPriority(-10); return true; }));
-        addRenderableWidget(new MekanismButton(this, 54, 52, 28, 18, Component.literal("-1"),
-                (element, mouseX, mouseY) -> { adjustPriority(-1); return true; }));
-        addRenderableWidget(new MekanismButton(this, 94, 52, 28, 18, Component.literal("+1"),
-                (element, mouseX, mouseY) -> { adjustPriority(1); return true; }));
-        addRenderableWidget(new MekanismButton(this, 126, 52, 32, 18, Component.literal("+10"),
-                (element, mouseX, mouseY) -> { adjustPriority(10); return true; }));
-    }
+        // 2. Right-side Tabs (Redstone at y = 6, Priority at y = 34)
+        addRenderableWidget(new GuiInterfaceRedstoneTab(this,
+                menu.getTargetPos(), menu.isAttachment(), menu.getAttachedFace(),
+                menu::getRedstoneMode,
+                mode -> {
+                    if (menu.getInterfaceInstance() != null) {
+                        menu.getInterfaceInstance().setRedstoneMode(mode);
+                    }
+                }
+        ));
 
-    private void adjustPriority(int delta) {
-        IInputInterface in = menu.getInterfaceInstance();
-        if (in != null) {
-            boolean isAtt = in.getAttachedFace() != null;
-            MCIPacketHandler.sendToServer(new PacketSetInterfacePriority(
-                    in.getInterfacePos(), isAtt, in.getAttachedFace(), delta));
-        } else {
-            MCIPacketHandler.sendToServer(new PacketSetInterfacePriority(
-                    menu.getTargetPos(), menu.isAttachment(), menu.getAttachedFace(), delta));
-        }
+        addRenderableWidget(new GuiInterfacePriorityTab(this,
+                menu.getTargetPos(), menu.isAttachment(), menu.getAttachedFace(),
+                menu::getPriority,
+                val -> {
+                    if (menu.getInterfaceInstance() != null) {
+                        menu.getInterfaceInstance().setPriority(val);
+                    }
+                }
+        ));
     }
 
     @Override

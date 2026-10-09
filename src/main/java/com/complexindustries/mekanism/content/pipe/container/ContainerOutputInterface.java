@@ -32,6 +32,12 @@ public class ContainerOutputInterface extends AbstractContainerMenu {
         BlockPos pos = buf.readBlockPos();
         boolean isAttachment = buf.readBoolean();
         Direction face = isAttachment ? Direction.values()[buf.readByte() & 255] : null;
+
+        OutputInterfaceFilter initialFilter = new OutputInterfaceFilter();
+        if (buf instanceof net.minecraft.network.RegistryFriendlyByteBuf regBuf) {
+            initialFilter.readFromBuf(regBuf);
+        }
+
         BlockEntity be = inv.player.level().getBlockEntity(pos);
 
         IOutputInterface target = null;
@@ -46,6 +52,16 @@ public class ContainerOutputInterface extends AbstractContainerMenu {
             }
         } else if (be instanceof TileEntityOutputInterface tile) {
             target = tile;
+        }
+
+        if (target != null) {
+            OutputInterfaceFilter targetFilter = target.getFilter();
+            if (targetFilter != null) {
+                for (int i = 0; i < OutputInterfaceFilter.FILTER_SLOTS; i++) {
+                    OutputInterfaceFilter.FilterEntry e = initialFilter.getEntry(i);
+                    targetFilter.setFilter(i, e.getType(), e.getFilterId(), e.getIconStack());
+                }
+            }
         }
 
         return new ContainerOutputInterface(windowId, inv, target, pos, isAttachment, face);
@@ -69,19 +85,28 @@ public class ContainerOutputInterface extends AbstractContainerMenu {
         this.data = new ContainerData() {
             @Override
             public int get(int index) {
-                return interfaceInstance != null ? interfaceInstance.getPriority() : 0;
+                if (index == 0) {
+                    return interfaceInstance != null ? interfaceInstance.getPriority() : 0;
+                } else if (index == 1) {
+                    return interfaceInstance != null ? interfaceInstance.getRedstoneMode().ordinal() : 0;
+                }
+                return 0;
             }
 
             @Override
             public void set(int index, int value) {
                 if (interfaceInstance != null) {
-                    interfaceInstance.setPriority(value);
+                    if (index == 0) {
+                        interfaceInstance.setPriority(value);
+                    } else if (index == 1) {
+                        interfaceInstance.setRedstoneMode(com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(value));
+                    }
                 }
             }
 
             @Override
             public int getCount() {
-                return 1;
+                return 2;
             }
         };
         addDataSlots(this.data);
@@ -89,13 +114,17 @@ public class ContainerOutputInterface extends AbstractContainerMenu {
         // Add player inventory slots (3 rows of 9)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 104 + row * 18));
+                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
             }
         }
         // Add player hotbar (1 row of 9)
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInv, col, 8 + col * 18, 162));
+            addSlot(new Slot(playerInv, col, 8 + col * 18, 142));
         }
+    }
+
+    public mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl getRedstoneMode() {
+        return com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(data.get(1));
     }
 
     public IOutputInterface getInterfaceInstance() {
