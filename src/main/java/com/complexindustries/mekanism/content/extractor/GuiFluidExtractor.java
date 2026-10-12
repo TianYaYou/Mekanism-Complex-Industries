@@ -1,6 +1,7 @@
 package com.complexindustries.mekanism.content.extractor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.GuiInnerScreen;
@@ -32,7 +33,7 @@ public class GuiFluidExtractor extends GuiMekanismTile<TileEntityFluidExtractorC
             FluidExtractorMultiblockData multiblock = tile.getMultiblock();
             List<Component> lines = new ArrayList<>();
 
-            if (!multiblock.isFormed()) {
+            if (multiblock == null || !multiblock.isFormed()) {
                 lines.add(Component.translatable("gui.mekanism_complex_industries.extractor.unformed"));
                 return lines;
             }
@@ -69,20 +70,24 @@ public class GuiFluidExtractor extends GuiMekanismTile<TileEntityFluidExtractorC
         addRenderableWidget(new GuiEnergyGauge(new IEnergyInfoHandler() {
             @Override
             public long getEnergy() {
-                return tile.getMultiblock().isFormed() && tile.getMultiblock().energyContainer != null
-                        ? tile.getMultiblock().energyContainer.getEnergy() : 0L;
+                FluidExtractorMultiblockData data = tile.getMultiblock();
+                return data != null && data.isFormed() && data.energyContainer != null
+                        ? data.energyContainer.getEnergy() : 0L;
             }
 
             @Override
             public long getMaxEnergy() {
-                return tile.getMultiblock().isFormed() && tile.getMultiblock().energyContainer != null
-                        ? tile.getMultiblock().energyContainer.getMaxEnergy() : 0L;
+                FluidExtractorMultiblockData data = tile.getMultiblock();
+                return data != null && data.isFormed() && data.energyContainer != null
+                        ? data.energyContainer.getMaxEnergy() : 0L;
             }
         }, GaugeType.STANDARD, this, 14, 18));
 
         // 3. Right Gauge: Fluid Tank Gauge (140, 18)
-        addRenderableWidget(new GuiFluidGauge(() -> tile.getMultiblock().fluidTank,
-                () -> tile.getMultiblock().getFluidTanks(null), GaugeType.STANDARD, this, 140, 18));
+        addRenderableWidget(new GuiFluidGauge(
+                () -> tile.getMultiblock() != null ? tile.getMultiblock().fluidTank : null,
+                () -> tile.getMultiblock() != null ? tile.getMultiblock().getFluidTanks(null) : Collections.emptyList(),
+                GaugeType.STANDARD, this, 140, 18));
     }
 
     @Override

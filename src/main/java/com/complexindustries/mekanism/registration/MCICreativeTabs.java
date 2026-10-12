@@ -83,6 +83,15 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.FLUID_EXTRACTOR_PORT.get());
                         output.accept(MCIItems.POWERED_PUMP.get());
                         output.accept(MCIItems.LIQUID_AIR_BUCKET.get());
+                        output.accept(MCIItems.WINDMILL_INJECTOR.get());
+                        output.accept(MCIItems.WINDMILL_OUTPUT_PORT.get());
+                        output.accept(MCIItems.CLOUDY_OXIDIZED_IRON_POWDER.get());
+                        output.accept(MCIItems.CLOUDY_OXIDIZED_GOLD_POWDER.get());
+                        output.accept(MCIItems.CLOUDY_OXIDIZED_COPPER_POWDER.get());
+                        output.accept(MCIItems.CLOUDY_OXIDIZED_OSMIUM_POWDER.get());
+                        output.accept(MCIItems.CLOUDY_OXIDIZED_TIN_POWDER.get());
+                        output.accept(MCIItems.CLOUDY_OXIDIZED_LEAD_POWDER.get());
+                        output.accept(MCIItems.CLOUDY_OXIDIZED_URANIUM_POWDER.get());
                     })
                     .build());
 

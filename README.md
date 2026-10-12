@@ -1,4 +1,4 @@
-# Mekanism: Complex Industries (Petroleum & Cryogenic Ecology)
+# Mekanism: Complex Industries (Heavy Petrochemical & High-Tech Manufacturing)
 
 [English](README.md) | [简体中文](README_zh.md)
 
@@ -8,22 +8,26 @@
 [![NeoForge](https://img.shields.io/badge/NeoForge-21.1.200-orange?logo=curseforge&logoColor=white)](https://neoforged.net/)
 [![Mekanism](https://img.shields.io/badge/Mekanism-10.7.19.85-5FCDFA)](https://github.com/mekanism/Mekanism)
 
-**Mekanism: Complex Industries (MCI)** is an industrial-scale expansion add-on engineered for [Mekanism](https://github.com/mekanism/Mekanism) on Minecraft 1.21.1 (NeoForge). It introduces a closed-loop **petroleum harvesting, thermal cracking, cryogenic separation, and chemical solidification** production ecology. Designed with strict fidelity to Mekanism's native aesthetics and architectural design principles, MCI seamlessly expands mid-to-endgame industrial infrastructure.
+**Mekanism: Complex Industries (MCI)** is a comprehensive industrial expansion add-on engineered for [Mekanism](https://github.com/mekanism/Mekanism) on Minecraft 1.21.1 (NeoForge). It bridges upstream petroleum resource harvesting, high-temperature thermal cracking, deep cryogenic fractionation, and advanced downstream manufacturing. MCI delivers industrial-scale processing complexes designed with strict adherence to Mekanism's native aesthetics, GUI paradigms, and modular architectural principles.
 
-The mod features two modular multiblock structures: the **Industrial Refinery Tower** (a 7×7 diamond-footprint fractional distillation column driven by thermodynamic gradients) and the **Industrial Freezer** (a sub-100°C cryogenic distillation vault). Coupled with **runtime Mixin bytecode injection** for automated fluid extraction via the Digital Miner, a 4-tier scalable **Chemical Solidifier Factory** system, and a 51-block modular roadway construction matrix, MCI establishes a rigorous, production-grade petrochemical workflow.
+The mod introduces four major multiblock systems—the **Industrial Refinery Tower** (fractional distillation driven by thermodynamic gradients), the **Industrial Freezer** (sub-100°C cryogenic air separation), the **Fluid Extractor** (high-pressure reservoir extraction), and the **Windmill Pulverizer** (6× ore yield nitrogen-flushed mechanical grinding complex)—alongside an end-to-end **semiconductor fabrication pipeline** and high-throughput **Industrial Logistics Pipes**.
 
 ---
 
 ## Table of Contents
 
-- [Industrial Architecture & Processing Topology](#industrial-architecture--processing-topology)
+- [Industrial Topology & Processing Architecture](#industrial-topology--processing-architecture)
 - [Core Subsystems Reference](#core-subsystems-reference)
-  - [1. Industrial Refinery Tower (Fractional Distillation Column)](#1-industrial-refinery-tower-fractional-distillation-column)
-  - [2. Industrial Freezer & Cryogenic Separation](#2-industrial-freezer--cryogenic-separation)
-  - [3. Chemical Solidification & 4-Tier Factory Infrastructure](#3-chemical-solidification--4-tier-factory-infrastructure)
-  - [4. Digital Miner Petroleum Harvesting (Mixin Integration)](#4-digital-miner-petroleum-harvesting-mixin-integration)
-  - [5. High-Durability Bitumen Infrastructure & Road Ecology](#5-high-durability-bitumen-infrastructure--road-ecology)
-  - [6. Dual Recipe Viewer Engines (JEI & EMI)](#6-dual-recipe-viewer-engines-jei--emi)
+  - [1. Industrial Refinery Tower (Thermal Cracking Column)](#1-industrial-refinery-tower-thermal-cracking-column)
+  - [2. Windmill Pulverizer Complex (6× Ore Processing)](#2-windmill-pulverizer-complex-6-ore-processing)
+  - [3. Semiconductor Fabrication & Cleanroom Lithography](#3-semiconductor-fabrication--cleanroom-lithography)
+  - [4. Industrial Logistics Pipe & Intelligent Interface Network](#4-industrial-logistics-pipe--intelligent-interface-network)
+  - [5. Multiblock Fluid Extractor & Powered Pump](#5-multiblock-fluid-extractor--powered-pump)
+  - [6. Cryogenic Air Separation & Industrial Freezer](#6-cryogenic-air-separation--industrial-freezer)
+  - [7. Chemical Solidification & 4-Tier Factory Scaling](#7-chemical-solidification--4-tier-factory-scaling)
+  - [8. Bitumen Infrastructure & Roadway Engineering (51 Blocks)](#8-bitumen-infrastructure--roadway-engineering-51-blocks)
+  - [9. Digital Miner Petroleum Harvesting (Mixin Engine)](#9-digital-miner-petroleum-harvesting-mixin-engine)
+  - [10. Unified Recipe Viewer Integration (JEI & EMI)](#10-unified-recipe-viewer-integration-jei--emi)
 - [Auxiliary Engineering Documentation](#auxiliary-engineering-documentation)
 - [Quick Start & Build Guide](#quick-start--build-guide)
 - [Repository Structure](#repository-structure)
@@ -31,83 +35,53 @@ The mod features two modular multiblock structures: the **Industrial Refinery To
 
 ---
 
-## Industrial Architecture & Processing Topology
+## Industrial Topology & Processing Architecture
 
-The industrial topology encompasses raw resource discovery, fluid extraction, high-temperature thermal cracking, sub-ambient distillation, and material fabrication:
+The integrated processing ecology spans mining, thermodynamic refining, mechanical milling, and ultra-clean electronics manufacturing:
 
 ```mermaid
 flowchart TB
-    subgraph Upstream ["Upstream Resource Extraction"]
-        Ores["Solid Crude Oil Ore & Deepslate (Y=-64..64)"]
-        Lakes["Crude Oil Surface Lakes (Worldgen)"]
-        Miner["Digital Miner + Petroleum Upgrade (Mixin Core)"]
-        Rotary["Rotary Condensentrator (Mekanism Native)"]
-
-        Ores -->|Smelting / Enrichment| SolidItem["Solid Crude Oil (3200t Burn)"]
-        SolidItem --> Rotary
-        Lakes --> Miner
-        Miner --> CrudeOil["Crude Oil Feedstock (Fluid / Chemical)"]
-        Rotary --> CrudeOil
+    subgraph Extraction ["1. Upstream Extraction & Harvesting"]
+        OilLakes["Crude Oil Lakes / Ore Deposits"]
+        Miner["Digital Miner + Petroleum Upgrade"]
+        Pump["Multiblock Fluid Extractor & Powered Pump"]
+        OilLakes --> Miner & Pump
+        Miner & Pump --> CrudeOil["Crude Oil Feedstock"]
     end
 
-    subgraph Refining ["Fractional Thermal Cracking (IRT Multiblock)"]
-        CrudeOil --> IRT["Industrial Refinery Tower (7x7 Column, H:16..41)"]
-        HeatSource["Thermodynamic Conductor / Heat Input"] -->|T_bottom >= 500K| IRT
-        Chiller["Top Dissipation / Cooling Vector"] -->|Delta T >= 100K| IRT
+    subgraph Petrochem ["2. Fractional Cracking & Cryogenics"]
+        CrudeOil --> IRT["Industrial Refinery Tower (Delta T >= 100K, T >= 500K)"]
+        IRT --> Gas["Petroleum Gas"] & Naphtha["Naphtha"] & Fuel["Refined Fuel"] & Heavy["Heavy Oil"] & Bitumen["Bitumen"]
 
-        IRT -->|Yield 2.00x| PetGas["Petroleum Gas"]
-        IRT -->|Yield 0.20x| Naphtha["Naphtha"]
-        IRT -->|Yield 0.10x| RefFuel["Refined Fuel"]
-        IRT -->|Yield 0.10x| HeavyOil["Heavy Oil"]
-        IRT -->|Yield 0.15x| Bitumen["Bitumen Chemical"]
+        AirComp["Air Compressor"] --> Air["Compressed Air"]
+        Freezer["Industrial Freezer (< -100 deg C)"]
+        Air --> Freezer
+        Freezer --> Nitrogen["High-Purity Nitrogen"] & Noble["Noble Gas"] & Refrig["Cryogenic Refrigerant"]
     end
 
-    subgraph Cryo ["Cryogenic Air Separation Cycle"]
-        AirComp["Air Compressor (5 FE/t)"] --> CompAir["Compressed Air (10 mB/t)"]
-        Cooler["Resistive Cooler (Power -> Negative Heat)"] --> Freezer["Industrial Freezer (< -100 deg C)"]
-        CompAir --> Freezer
-
-        Freezer --> Nitrogen["Nitrogen"]
-        Freezer --> NobleGas["Noble Gas"]
-        Freezer --> Refrigerant["Cryogenic Refrigerant"]
+    subgraph OreProc ["3. High-Tier Ore Grinding (6x Multiplier)"]
+        RawOres["Raw Ores (Fe, Cu, Au, Os, Sn, Pb, U)"]
+        Nitrogen -.-> Pulv["Windmill Pulverizer Multiblock (Blades + Coils)"]
+        RawOres --> Pulv
+        Pulv -->|6x Batch Yield| Cloudy["Cloudy Oxidized Powders"]
+        Cloudy -->|Smelting / Blasting| Ingots["Refined Metal Ingots"]
     end
 
-    subgraph Downstream ["Solidification & Infrastructure"]
-        Bitumen --> Solidifier["Chemical Solidifier (Basic -> Ultimate Factory)"]
-        Solidifier --> BitBlock["Bitumen Block (Raw Asphalt)"]
-        BitBlock -->|Mekanism Painting Machine| DyedBit["16 Dyed Bitumen Blocks"]
-        BitBlock & DyedBit -->|Stonecutter| Shapes["Stairs & Slabs (51 Total Blocks)"]
+    subgraph Semiconductor ["4. Semiconductor & Chip Chain"]
+        Quartz["Silicon Precursor"] --> Crystal["Crystal Growth Chamber"]
+        Crystal --> Boule["Refined Silicon Boule"]
+        Boule --> Slicer["Silicon Slicer"]
+        Slicer --> Wafer["Blank Silicon Wafer"]
+        Heavy --> Propylene["Polypropylene Polymers"]
+        Propylene & Wafer --> Coater["Chemical Film Coater"]
+        Coater --> Photo["Photolithography Machine (UV Cleanroom)"]
+        Photo --> Chips["Tiered Logic & Calculation Chips (Infused -> Atomic)"]
     end
-```
 
-### Thermodynamic Cracking & Safety Interlock Sequence
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Heat as Heat Exchanger / External Conduit
-    participant Controller as Refinery Controller
-    participant Multiblock as Refinery Multiblock Data
-    participant Tanks as 5x Product Chemical Tanks
-    participant GUI as Mekanism Native GUI Screen
-
-    Heat->>Multiblock: Transfer thermal energy to Bottom Heat Capacitor
-    Multiblock->>Multiblock: Evaluate T_bottom (Threshold: 500.0 K)
-    Multiblock->>Multiblock: Evaluate Delta T = T_bottom - T_top (Threshold: 100.0 K)
-
-    alt Conditions Satisfied (T >= 500K and Delta T >= 100K)
-        Multiblock->>Multiblock: Calculate r_effective = r_heat + r_deltaT (Max: 640 mB/s)
-        Multiblock->>Tanks: Probe available buffer space across all 5 output fractions
-        alt All Output Buffers Have Capacity
-            Multiblock->>Multiblock: Deduct Crude Oil & produce Gas, Naphtha, Fuel, Heavy Oil, Bitumen
-            Multiblock->>GUI: Update real-time cracking rate gauge & layer flow indicators
-        else Any Output Buffer Saturated
-            Multiblock->>Multiblock: Engage backpressure safety interlock (Set Status: 4)
-            Multiblock->>GUI: Render WarningTab ("Cracking halts when any product tank is full")
-        end
-    else Thermal Conditions Sub-Threshold
-        Multiblock->>Multiblock: Set Status: 1 (T < 500K) or Status: 2 (Delta T < 100K)
-        Multiblock->>GUI: Display insufficient thermal delta diagnostic
+    subgraph Logistics ["5. Plant Logistics & Infrastructure"]
+        Bitumen --> Solidifier["Chemical Solidifier Factories"] --> Roads["51 Bitumen Road Blocks"]
+        Pipes["Industrial Logistics Pipes + Input/Output/Power Interfaces"]
+        Pipes -.->|Automated Transport| Extraction & Petrochem & OreProc & Semiconductor
     end
 ```
 
@@ -115,58 +89,78 @@ sequenceDiagram
 
 ## Core Subsystems Reference
 
-### 1. Industrial Refinery Tower (Fractional Distillation Column)
-The **Industrial Refinery Tower (IRT)** is a vertical column engineered for continuous fractional distillation:
-- **Geometry**: 7×7 diamond cross-section (25 active blocks per layer), variable height between **16 and 41 blocks**.
-- **Internal Partitioning**: 4 structural partition floors isolate 5 vertical chambers corresponding to the 5 cracking fractions.
-- **Thermodynamic Drive**: Requires bottom heating ($T_{\text{bottom}} \ge 500\text{ K}$) and a vertical thermal gradient ($\Delta T \ge 100\text{ K}$). Cracking scales up to **$640\text{ mB/s}$** ($32\text{ mB/tick}$).
-- **Dynamic Valve Routing**: Refinery Valves automatically bind to the output chemical of their corresponding Y-level layer, featuring real-time texture feedback and Configurator mode switching.
-- **Hazard Containment**: Active mob spawn suppression eliminates entity generation within the tower and its immediate perimeter.
+### 1. Industrial Refinery Tower (Thermal Cracking Column)
+- **Geometry**: 7×7 diamond cross-section (25 blocks per layer), variable height between **16 and 41 blocks**.
+- **Thermodynamic Drive**: Requires bottom temperature $T_{\text{bottom}} \ge 500\text{ K}$ and thermal gradient $\Delta T = T_{\text{bottom}} - T_{\text{top}} \ge 100\text{ K}$.
+- **Cracking Kinetics**: Effective processing speed scales up to **$640\text{ mB/s}$** ($32\text{ mB/tick}$).
+- **Yield Distribution**: Fractionates raw crude into Petroleum Gas (2.0×), Naphtha (0.2×), Refined Fuel (0.1×), Heavy Oil (0.1×), and Bitumen (0.15×).
+- **Safety**: Dynamic backpressure interlock halts operation and raises a GUI Warning Tab if any output tank is saturated.
 
-### 2. Industrial Freezer & Cryogenic Separation
-The **Industrial Freezer** is a high-volume cryogenic processing vault:
-- **Geometry**: Scalable cubic enclosure ranging from $4\times 4\times 4$ to $8\times 8\times 8$.
-- **Operating Requirement**: Internal temperature must be driven below **$-100.0^\circ\text{C}$ ($173.15\text{ K}$)**.
-- **Cryogenic Products**: Liquefies and fractionates Compressed Air into **Nitrogen**, **Noble Gas**, and **Cryogenic Refrigerant**.
-- **Resistive Cooler Integration**: Directly accepts negative thermal transfer from the Resistive Cooler to sustain cryogenic temperatures under thermal load.
+### 2. Windmill Pulverizer Complex (6× Ore Processing)
+- **Geometry**: Scalable odd-dimension vault from $5\times 5\times 5$ up to $17\times 18\times 17$.
+- **Core Machinery**: Turbine Rotors with mounted Blades, Rotational Complex, Pressure Disperser ring, and Electromagnetic Coils.
+- **Processing Power**: 6 independent parallel processing groups consuming 32 raw ores + 1,000 mB Nitrogen per batch.
+- **Yield**: Generates **192 Cloudy Oxidized Powders ($6\times$ yield)** directly smeltable into ingots.
+- **Speed Multiplier**: Turbine blades and coils dynamically reduce processing time from 600 ticks (30s) down to 100 ticks (5s).
 
-### 3. Chemical Solidification & 4-Tier Factory Infrastructure
-The **Chemical Solidifier** executes the phase transformation of gases and liquid chemicals into solid blocks and items:
-- **Scalable Factory Tiers**: Fully supports Mekanism's factory progression:
-  - **Basic Factory**: 3 parallel processing channels
-  - **Advanced Factory**: 5 parallel processing channels
-  - **Elite Factory**: 7 parallel processing channels
-  - **Ultimate Factory**: 9 parallel processing channels
-- **Upgrade Support**: Accepts Speed Upgrades, Energy Upgrades, and Muffler Upgrades with native inventory auto-sorting.
+### 3. Semiconductor Fabrication & Cleanroom Lithography
+- **Crystal Growth Chamber**: Czochralski crystal pulling mechanism with dedicated in-world 3D BER rendering for silicon boules.
+- **Silicon Slicer**: Precision diamond-wire cutting transforming silicon boules into blank wafers.
+- **Chemical Film Coater**: Uniform liquid-phase photoresist and polymer deposition.
+- **Photolithography Machine**:
+  - **Cleanroom Verification**: Validates sealed Filtered Glass enclosures before firing.
+  - **Laser Particle Effects**: Custom UV laser animation and cleanroom dust suppression.
+  - **Tiered Chip Progression**: Logic & Calculation lines (Infused $\rightarrow$ Reinforced $\rightarrow$ Atomic).
 
-### 4. Digital Miner Petroleum Harvesting (Mixin Integration)
-MCI extends Mekanism's Digital Miner through targeted bytecode injection:
-- **Petroleum Harvesting Upgrade**: Dynamically injected into Mekanism's native `Upgrade` enum via Mixin.
-- **Filterless Fluid Mining**: When installed, the miner scans and collects crude oil source blocks within its operational radius without requiring item/tag filter configuration.
+### 4. Industrial Logistics Pipe & Intelligent Interface Network
+- **Dynamic 6-Way Rendering**: Industrial Logistics Pipes feature custom directional arms, caps, and animated textures.
+- **Modular Interfaces**: Input, Output, and Power Interfaces attachable as standalone blocks or pipe attachments.
+- **Control Suite**: Integrated priority routing, item & chemical filtering with network packet sync (`PacketSyncOutputFilter`), and triple-state redstone control.
+- **Superconducting Power Interface**: Zero-buffer direct throughput powering attached devices on demand.
 
-### 5. High-Durability Bitumen Infrastructure & Road Ecology
-A comprehensive architectural material suite manufactured from solidified Bitumen:
-- **51 Distinct Variants**: 1 raw dark bitumen + 16 dyed colors (White, Orange, Magenta, Light Blue, Yellow, Lime, Pink, Gray, Light Gray, Cyan, Purple, Blue, Brown, Green, Red, Black).
-- **Architectural Profiles**: Each color includes **Full Blocks**, **Stairs**, and **Slabs**.
-- **Factory Recolor Integration**: Compatible with the Mekanism Painting Machine for rapid chemical recoloring, and Vanilla Stonecutter for zero-waste shape fabrication.
+### 5. Multiblock Fluid Extractor & Powered Pump
+- **Fluid Extractor**: High-pressure multiblock structure with BER animated agitation, designed for massive subterranean fluid reservoir pumping.
+- **Powered Pump**: Standalone high-throughput motorized pump or foundation block for multiblock extractors.
+- **Liquid Air**: Liquefied ambient air production with native Rotary Condensentrator cycling.
 
-### 6. Dual Recipe Viewer Engines (JEI & EMI)
-MCI includes native plugins for major recipe viewers:
-- **Just Enough Items (JEI)**: Custom categories with thermodynamic temperature requirements, operational consumption, and warning descriptions.
-- **EMI Recipe Viewer**: Native EMI NeoForge plugin featuring animated progress bars, live chemical fluid gauges, and factory tier power analytics.
+### 6. Cryogenic Air Separation & Industrial Freezer
+- **Operating Environment**: Requires temperatures below **$-100.0^\circ\text{C}$ ($173.15\text{ K}$)**.
+- **Cryogenic Products**: Separates Compressed Air into high-purity **Nitrogen**, **Noble Gas**, and **Cryogenic Refrigerant**.
+- **Resistive Cooler**: Direct electrical cryogenic chiller designed for seamless multiblock thermal coupling.
+
+### 7. Chemical Solidification & 4-Tier Factory Scaling
+- **Factory Hierarchy**: Basic (3 slots), Advanced (5 slots), Elite (7 slots), and Ultimate (9 slots).
+- **Automation**: Full support for Mekanism upgrades (Speed, Energy, Muffler) and packet-driven automatic inventory sorting.
+
+### 8. Bitumen Infrastructure & Roadway Engineering (51 Blocks)
+- **High-Durability Matrix**: 1 raw industrial asphalt + 16 dyed variations.
+- **Full Geometry Suite**: Full Blocks, Stairs, and Slabs for every color.
+- **Zero-Waste Crafting**: Full compatibility with the Mekanism Painting Machine and Stonecutter.
+
+### 9. Digital Miner Petroleum Harvesting (Mixin Engine)
+- **Petroleum Harvesting Upgrade**: Bytecode injected directly into Mekanism's `Upgrade` enum.
+- **Filterless Operation**: Automatically detects and harvests liquid crude oil blocks across the operational scan volume.
+
+### 10. Unified Recipe Viewer Integration (JEI & EMI)
+- First-class plugins for Just Enough Items (JEI) and EMI NeoForge across all machines:
+  - Thermal Cracking & Cryogenic Separation
+  - Windmill Pulverizing & Ore Oxidation
+  - Crystal Growth, Wafer Slicing & UV Photolithography
+  - Chemical Soaking & Film Coating
 
 ---
 
 ## Auxiliary Engineering Documentation
 
-Detailed technical breakdowns and developer protocols are available in the [`docs/`](docs/) directory:
+Comprehensive blueprints, formulas, and developer specifications are maintained in the [`docs/`](docs/) directory:
 
-| Document | Description | Focus Area |
+| Document | Focus Area | Core Content |
 | :--- | :--- | :--- |
-| [**Refinery Architecture Specification**](docs/REFINERY_ARCHITECTURE.md) | Voxel layouts, partition math, thermodynamic equations, and valve binding. | Multiblock Mechanics |
-| [**Petrochemical Process Ecology**](docs/PETROCHEMICAL_ECOLOGY.md) | Stoichiometric reaction balances, worldgen rates, and factory scaling. | Chemical Process Engineering |
-| [**Agent Collaboration SOP**](docs/AGENT_WORKFLOW.md) | AI Agent engineering workflow, reverse-engineering protocols, and headless QA. | Engineering Standards |
-| [**Developer & Modder Guide**](docs/DEVELOPMENT.md) | Development setup, DeferredRegister taxonomy, Mixin architecture, and packets. | Codebase & Contribution |
+| [**Advanced Manufacturing Specification**](docs/ADVANCED_MANUFACTURING.md) | High-Tech Systems | Windmill Pulverizer mechanics, semiconductor cleanroom rules, logistics interfaces. |
+| [**Refinery Architecture Specification**](docs/REFINERY_ARCHITECTURE.md) | Multiblock Engineering | 7×7 diamond voxel layout, partition calculations, thermodynamic formulas. |
+| [**Petrochemical Process Ecology**](docs/PETROCHEMICAL_ECOLOGY.md) | Chemical Engineering | Stoichiometric reaction balances, cryogenic loops, and bitumen road matrices. |
+| [**Agent Collaboration SOP**](docs/AGENT_WORKFLOW.md) | Engineering Protocols | AI Agent workflow, reverse-engineering protocols, and headless test loop. |
+| [**Developer & Modder Guide**](docs/DEVELOPMENT.md) | Codebase Architecture | Registration systems, Mixin hooks, custom network packets, and GameTests. |
 
 ---
 
@@ -181,30 +175,25 @@ Detailed technical breakdowns and developer protocols are available in the [`doc
 ### Building from Source
 
 ```bash
-# Clone repository
 git clone https://github.com/TianYaYou/Mekanism-Complex-Industries.git
 cd Mekanism-Complex-Industries
-
-# Compile and package jar
 ./gradlew build
 ```
 
-Compiled mod artifacts are generated in `build/libs/`.
+Compiled artifacts are output to `build/libs/`.
 
-### Development & Headless Verification
+### Development & Verification
 
 ```bash
-# Launch development client with mod loaded
+# Launch development client
 ./gradlew runClient
 
-# Execute headless GameTest regression suite
+# Run automated headless GameTest suite
 ./gradlew runGameTestServer
 
-# One-click hot deployment to local test modpack
+# Hot deploy to local test modpack
 ./gradlew deployToModpack
 ```
-
-> **Note**: Configure `modpack_mods_dir` in `gradle.properties` to target your local test modpack folder.
 
 ---
 
@@ -212,43 +201,39 @@ Compiled mod artifacts are generated in `build/libs/`.
 
 ```text
 Mekanism-Complex-Industries/
-├── .github/
-│   ├── ISSUE_TEMPLATE/                   # Bug report and feature request templates
-│   └── pull_request_template.md          # Standardized PR checklist
-├── docs/
-│   ├── AGENT_WORKFLOW.md                 # Agent engineering workflow & SOP
+├── .github/                              # Issue & PR templates
+├── docs/                                 # Architectural specifications & SOPs
+│   ├── ADVANCED_MANUFACTURING.md         # Windmill pulverizer, semiconductors, logistics
+│   ├── AGENT_WORKFLOW.md                 # Agent development SOP & reverse engineering
 │   ├── DEVELOPMENT.md                    # Developer guide & technical taxonomy
-│   ├── REFINERY_ARCHITECTURE.md          # IRT structural blueprint & thermodynamics
-│   └── PETROCHEMICAL_ECOLOGY.md          # Stoichiometry, worldgen, and factory scaling
+│   ├── PETROCHEMICAL_ECOLOGY.md          # Chemical ecology & reaction stoichiometry
+│   └── REFINERY_ARCHITECTURE.md          # IRT blueprints & thermodynamic kinetics
 ├── src/main/java/com/complexindustries/mekanism/
-│   ├── MekanismComplexIndustries.java    # Mod lifecycle entry point
-│   ├── MCIConstants.java                 # Mod constants and ResourceLocation utilities
-│   ├── client/                           # GUI screens, models, and render layers
+│   ├── MekanismComplexIndustries.java    # Mod entry point
+│   ├── client/                           # GUI screens, BER renderers, particles, JEI/EMI
 │   ├── content/
-│   │   ├── block/                        # Block definitions & decorative bitumen blocks
-│   │   ├── fluid/                        # Crude Oil & Refrigerant fluid types
-│   │   ├── freezer/                      # Industrial Freezer multiblock data & validator
-│   │   ├── refinery/                     # IRT multiblock, spawn suppression & kinetics
-│   │   ├── solidifier/                   # Chemical Solidifier & 4-tier factory tiles
-│   │   ├── tile/                         # Air Compressor & Resistive Cooler tile entities
+│   │   ├── block/                        # Machine blocks, decorative bitumen & filtered glass
+│   │   ├── chamber/                      # Crystal Growth Chamber implementation
+│   │   ├── coater/                       # Chemical Film Coater implementation
+│   │   ├── extractor/                    # Fluid Extractor multiblock & Powered Pump
+│   │   ├── fluid/                        # Fluid types (Crude Oil, Liquid Air, Refrigerant)
+│   │   ├── freezer/                      # Industrial Freezer multiblock
+│   │   ├── lithography/                  # Photolithography Machine implementation
+│   │   ├── pipe/                         # Industrial Logistics Pipes, interfaces, network
+│   │   ├── pulverizer/                   # Windmill Pulverizer multiblock (6x ore yield)
+│   │   ├── refinery/                     # Industrial Refinery Tower multiblock
+│   │   ├── slicer/                       # Silicon Slicer implementation
+│   │   ├── soaker/                       # Chemical Soaker & 4-tier factories
+│   │   ├── solidifier/                   # Chemical Solidifier & 4-tier factories
 │   │   └── upgrade/                      # Petroleum Harvesting upgrade mechanics
-│   ├── mixin/                            # Mixin bytecode hooks for Mekanism systems
-│   ├── network/                          # Custom network packet handlers
-│   ├── recipe/                           # Chemical Solidifier custom recipe serializing
+│   ├── mixin/                            # Mixin hooks for Digital Miner & Boiler
+│   ├── network/                          # Custom network packets
+│   ├── recipe/                           # Custom recipe serializing, caches, and inputs
 │   ├── registration/                     # DeferredRegister registries
 │   └── test/                             # GameTest automated verification framework
-├── src/main/resources/
-│   ├── META-INF/neoforge.mods.toml       # NeoForge metadata descriptor
-│   ├── assets/mekanism_complex_industries/
-│   │   ├── lang/                         # Bilingual localization (en_us, zh_cn)
-│   │   ├── models/ & textures/           # Models, blockstates, and animated textures
-│   └── data/mekanism_complex_industries/ # Recipes, loot tables, and worldgen JSONs
-├── build.gradle                          # NeoForge ModDev build configuration
-├── gradle.properties                     # Version coordinates and JVM parameters
-├── settings.gradle                       # Repository mirror configuration
-├── CHANGELOG.md                          # Release history and version change notes
-├── CONTRIBUTING.md                       # Contribution protocols and PR workflow
-├── CODE_OF_CONDUCT.md                    # Community code of conduct
+├── src/main/resources/                   # Blockstates, models, textures, recipes, loot tables
+├── build.gradle                          # Build script
+├── gradle.properties                     # Version coordinates
 └── LICENSE                               # MIT License
 ```
 

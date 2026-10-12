@@ -339,5 +339,17 @@ public final class MCIBlocks {
                             .requiresCorrectToolForDrops()
                             .strength(5.0F, 9.0F)));
 
+    public static final DeferredBlock<com.complexindustries.mekanism.content.pulverizer.WindmillInjectorBlock> WINDMILL_INJECTOR = BLOCKS.register("windmill_injector",
+            () -> new com.complexindustries.mekanism.content.pulverizer.WindmillInjectorBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(5.0F, 9.0F)));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.pulverizer.WindmillOutputPortBlock> WINDMILL_OUTPUT_PORT = BLOCKS.register("windmill_output_port",
+            () -> new com.complexindustries.mekanism.content.pulverizer.WindmillOutputPortBlock(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                            .requiresCorrectToolForDrops()
+                            .strength(5.0F, 9.0F)));
+
     private MCIBlocks() {}
 }

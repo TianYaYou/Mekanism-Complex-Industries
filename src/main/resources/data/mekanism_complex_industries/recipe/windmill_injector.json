@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "ITI",
+    " C "
+  ],
+  "key": {
+    "C": {
+      "item": "mekanism_complex_industries:fluid_extractor_casing"
+    },
+    "I": {
+      "item": "mekanism:basic_pressurized_tube"
+    },
+    "T": {
+      "item": "mekanism:electric_pump"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:windmill_injector"
+  }
+}

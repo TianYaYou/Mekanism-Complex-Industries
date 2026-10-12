@@ -65,5 +65,8 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.extractor.ContainerFluidExtractor> FLUID_EXTRACTOR =
             CONTAINER_TYPES.register("fluid_extractor", com.complexindustries.mekanism.content.extractor.TileEntityFluidExtractorCasing.class, com.complexindustries.mekanism.content.extractor.ContainerFluidExtractor::new);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.pulverizer.ContainerWindmillPulverizer> WINDMILL_PULVERIZER =
+            CONTAINER_TYPES.register("windmill_pulverizer", com.complexindustries.mekanism.content.pulverizer.TileEntityWindmillPulverizerCasing.class, com.complexindustries.mekanism.content.pulverizer.ContainerWindmillPulverizer::new);
+
     private MCIContainerTypes() {}
 }

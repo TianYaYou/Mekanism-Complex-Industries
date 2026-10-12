@@ -84,7 +84,7 @@ repositories {
 dependencies {
     // Mekanism API & Mod
     implementation "mekanism:Mekanism:${property('mekanism_version')}"
-    runtimeOnly "mekanism:Mekanism:${property('mekanism_version')}:generators"
+    implementation "mekanism:Mekanism:${property('mekanism_version')}:generators"
     runtimeOnly "mekanism:Mekanism:${property('mekanism_version')}:additions"
     runtimeOnly "mekanism:Mekanism:${property('mekanism_version')}:tools"
 

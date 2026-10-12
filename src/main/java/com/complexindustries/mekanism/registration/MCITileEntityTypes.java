@@ -262,5 +262,19 @@ public final class MCITileEntityTypes {
                     .withSimple(Capabilities.CONFIGURABLE)
                     .build();
 
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.pulverizer.TileEntityWindmillInjector> WINDMILL_INJECTOR =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.WINDMILL_INJECTOR, com.complexindustries.mekanism.content.pulverizer.TileEntityWindmillInjector::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.pulverizer.TileEntityWindmillOutputPort> WINDMILL_OUTPUT_PORT =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.WINDMILL_OUTPUT_PORT, com.complexindustries.mekanism.content.pulverizer.TileEntityWindmillOutputPort::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .build();
+
     private MCITileEntityTypes() {}
 }

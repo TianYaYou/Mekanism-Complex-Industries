@@ -2117,4 +2117,114 @@ public class MCIGameTests {
             helper.succeed();
         });
     }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testWindmillPulverizerFormationAndProcessing(GameTestHelper helper) {
+        BlockPos origin = new BlockPos(1, 1, 1);
+        int size = 5;
+
+        // 1. Build 5x5x5 cuboid
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                for (int z = 0; z < size; z++) {
+                    BlockPos p = origin.offset(x, y, z);
+                    boolean isEdgeX = (x == 0 || x == size - 1);
+                    boolean isEdgeY = (y == 0 || y == size - 1);
+                    boolean isEdgeZ = (z == 0 || z == size - 1);
+                    int edgeCount = (isEdgeX ? 1 : 0) + (isEdgeY ? 1 : 0) + (isEdgeZ ? 1 : 0);
+
+                    if (edgeCount >= 2) {
+                        // Frame edges: Pressure Casing (保压外壳)
+                        helper.setBlock(p, MCIBlocks.FLUID_EXTRACTOR_CASING.get());
+                    } else if (y == 0) {
+                        // Floor: Pressure Casing
+                        helper.setBlock(p, MCIBlocks.FLUID_EXTRACTOR_CASING.get());
+                    } else if (isEdgeX || isEdgeY || isEdgeZ) {
+                        // Walls & Roof
+                        if (x == 0 && y == 2 && z == 2) {
+                            helper.setBlock(p, MCIBlocks.WINDMILL_INJECTOR.get());
+                        } else if (x == size - 1 && y == 2 && z == 2) {
+                            helper.setBlock(p, MCIBlocks.WINDMILL_OUTPUT_PORT.get());
+                        } else {
+                            helper.setBlock(p, MekanismBlocks.STRUCTURAL_GLASS.get());
+                        }
+                    } else {
+                        // Interior (x: 1..3, y: 1..3, z: 1..3)
+                        if (x == 2 && z == 2) {
+                            // Central Axis
+                            if (y == 1) {
+                                helper.setBlock(p, mekanism.generators.common.registries.GeneratorsBlocks.TURBINE_ROTOR.get());
+                            } else if (y == 2) {
+                                helper.setBlock(p, mekanism.generators.common.registries.GeneratorsBlocks.ROTATIONAL_COMPLEX.get());
+                            } else if (y == 3) {
+                                helper.setBlock(p, mekanism.generators.common.registries.GeneratorsBlocks.ELECTROMAGNETIC_COIL.get());
+                            }
+                        } else if (y == 2) {
+                            // Complex divider layer: Pressure Dispersers
+                            helper.setBlock(p, MekanismBlocks.PRESSURE_DISPERSER.get());
+                        } else {
+                            // Lower (y=1) and Upper (y=3) cavities: Air
+                            helper.setBlock(p, Blocks.AIR);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Add 2 turbine blades to the rotor
+        BlockPos rotorPos = origin.offset(2, 1, 2);
+        mekanism.generators.common.tile.turbine.TileEntityTurbineRotor rotor =
+                (mekanism.generators.common.tile.turbine.TileEntityTurbineRotor) helper.getBlockEntity(rotorPos);
+        helper.assertTrue(rotor != null, "Turbine rotor must exist!");
+        rotor.addBlade(false);
+        rotor.addBlade(false);
+        helper.assertTrue(rotor.getHousedBlades() == 2, "Rotor should have 2 housed blades!");
+
+        // 2. Trigger multiblock formation from Injector
+        BlockPos injectorPos = origin.offset(0, 2, 2);
+        com.complexindustries.mekanism.content.pulverizer.TileEntityWindmillInjector injector =
+                (com.complexindustries.mekanism.content.pulverizer.TileEntityWindmillInjector) helper.getBlockEntity(injectorPos);
+        helper.assertTrue(injector != null, "Windmill injector tile must exist!");
+
+        helper.runAfterDelay(2, () -> {
+            injector.getStructure().tick(injector, true);
+            var formationResult = injector.getStructure().runUpdate(injector);
+            com.complexindustries.mekanism.content.pulverizer.WindmillPulverizerMultiblockData mb = injector.getMultiblock();
+            helper.assertTrue(mb.isFormed(), "风车粉碎机必须成功成型！错误信息: " + (formationResult != null && formationResult.getResultText() != null ? formationResult.getResultText().getString() : "未知原因"));
+            helper.assertTrue(mb.bladesCount == 2, "涡轮叶片数量应为2！实际: " + mb.bladesCount);
+            helper.assertTrue(mb.coilsCount == 1, "电磁线圈数量应为1！实际: " + mb.coilsCount);
+            helper.assertTrue(mb.rotorHeight == 1, "涡轮高度应为1！实际: " + mb.rotorHeight);
+            helper.assertTrue(mb.speedMultiplier > 1.0f, "涡轮增速倍率应大于1.0！实际: " + mb.speedMultiplier);
+
+            // 3. Process 32 Raw Iron with Nitrogen and Power
+            mb.chemicalTank.setStack(new mekanism.api.chemical.ChemicalStack(MCIChemicals.NITROGEN, 10_000L));
+            mb.energyContainer.setEnergy(1_000_000L);
+            mb.inputSlots.get(0).setStack(new ItemStack(net.minecraft.world.item.Items.RAW_IRON, 32));
+
+            // Tick once to start batch
+            mb.tick(helper.getLevel());
+            helper.assertTrue(mb.isGroupActive(0), "第0组加工组应当激活！");
+            helper.assertTrue(mb.inputSlots.get(0).isEmpty(), "原矿输入槽应当已被抽取32个原铁！");
+            helper.assertTrue(mb.chemicalTank.getStored() == 9_000L, "氮气储罐应已消耗1000 mB氮气！实际: " + mb.chemicalTank.getStored());
+
+            // Advance ticks to finish batch
+            int maxTicks = mb.getGroupMaxProgress(0);
+            for (int t = 0; t < maxTicks + 5; t++) {
+                mb.tick(helper.getLevel());
+            }
+
+            helper.assertFalse(mb.isGroupActive(0), "加工组在达到时间后应当已完成！");
+
+            // 4. Verify 192 Cloudy Oxidized Iron Powders in Output
+            int totalOutput = 0;
+            for (var slot : mb.outputSlots) {
+                if (!slot.isEmpty() && slot.getStack().is(MCIItems.CLOUDY_OXIDIZED_IRON_POWDER.get())) {
+                    totalOutput += slot.getStack().getCount();
+                }
+            }
+            helper.assertTrue(totalOutput == 192, "产物槽应累计产出192个浑浊铁的氧化粉末(6倍产物)！实际: " + totalOutput);
+
+            helper.succeed();
+        });
+    }
 }

@@ -332,5 +332,36 @@ public final class MCIItems {
             () -> new MCIBlockItem(MCIBlocks.POWERED_PUMP.get(), new Item.Properties(),
                     "description.mekanism_complex_industries.powered_pump", false));
 
+    // Windmill Pulverizer Blocks
+    public static final DeferredItem<BlockItem> WINDMILL_INJECTOR = ITEMS.register("windmill_injector",
+            () -> new MCIBlockItem(MCIBlocks.WINDMILL_INJECTOR.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.windmill_injector", true));
+
+    public static final DeferredItem<BlockItem> WINDMILL_OUTPUT_PORT = ITEMS.register("windmill_output_port",
+            () -> new MCIBlockItem(MCIBlocks.WINDMILL_OUTPUT_PORT.get(), new Item.Properties(),
+                    "description.mekanism_complex_industries.windmill_output_port", true));
+
+    // Cloudy Oxidized Powders (6x Ore Multiplier Chain)
+    public static final DeferredItem<Item> CLOUDY_OXIDIZED_IRON_POWDER = ITEMS.register("cloudy_oxidized_iron_powder",
+            () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> CLOUDY_OXIDIZED_GOLD_POWDER = ITEMS.register("cloudy_oxidized_gold_powder",
+            () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> CLOUDY_OXIDIZED_COPPER_POWDER = ITEMS.register("cloudy_oxidized_copper_powder",
+            () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> CLOUDY_OXIDIZED_OSMIUM_POWDER = ITEMS.register("cloudy_oxidized_osmium_powder",
+            () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> CLOUDY_OXIDIZED_TIN_POWDER = ITEMS.register("cloudy_oxidized_tin_powder",
+            () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> CLOUDY_OXIDIZED_LEAD_POWDER = ITEMS.register("cloudy_oxidized_lead_powder",
+            () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> CLOUDY_OXIDIZED_URANIUM_POWDER = ITEMS.register("cloudy_oxidized_uranium_powder",
+            () -> new Item(new Item.Properties()));
+
     private MCIItems() {}
 }

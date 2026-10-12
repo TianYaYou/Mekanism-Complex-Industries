@@ -1,4 +1,4 @@
-# Mekanism: Complex Industries (石油化工与低温生态)
+# Mekanism: Complex Industries (重度石化与高新制造生态)
 
 [English](README.md) | [简体中文](README_zh.md)
 
@@ -8,106 +8,80 @@
 [![NeoForge](https://img.shields.io/badge/NeoForge-21.1.200-orange?logo=curseforge&logoColor=white)](https://neoforged.net/)
 [![Mekanism](https://img.shields.io/badge/Mekanism-10.7.19.85-5FCDFA)](https://github.com/mekanism/Mekanism)
 
-**Mekanism: Complex Industries (MCI)** 是专为 Minecraft 1.21.1 (NeoForge) 平台上的 [Mekanism](https://github.com/mekanism/Mekanism) 打造的重工业级拓展模组。它引入了一套完整的**原油开采、热裂解精馏、低温气体分离与化学品固化**化工生产链。模组在视觉美学、交互规范与底层架构上严格对齐 Mekanism 原版标准，为工业工程师提供工业感扎实的中后期生产线。
+**Mekanism: Complex Industries (MCI)** 是专为 Minecraft 1.21.1 (NeoForge) 平台上的 [Mekanism](https://github.com/mekanism/Mekanism) 打造的现代化重工业与高新制造扩展模组。它深度串联起上游原油开采、高温热力学裂解分馏、深冷空气分离、精密半导体制造与高通量厂区物流体系，以原生级的视觉质感与严谨的工业工程逻辑，提供硬核的中后期生产线解决方案。
 
-模组包含两大核心多方块结构：**工业炼油塔（Industrial Refinery Tower）**（基于 7×7 菱形截面、由垂直热力学温差驱动的高温分馏柱）与**工业冷冻机（Industrial Freezer）**（低于 -100°C 的深冷低温分馏腔室）。辅以基于 **Mixin 字节码动态注入**的数字矿机原油免过滤自动开采、4 级可扩展**化学凝固机工厂（Chemical Solidifier Factory）**体系，以及包含 51 种构件的工业级沥青路面建设矩阵，构建起一套严谨、自洽的现代石化工程体系。
+模组搭载四大核心多方块工业集群：**工业炼油塔**（垂直热力学温差驱动的分馏精馏柱）、**工业冷冻机**（低于 -100°C 的深冷液化分离舱）、**多方块流体抽取机**（深层储层大通量抽取）与**风车粉碎机**（6 倍产率氮气保护机械研磨集群）。在此基础上，MCI 构建了完整的**半导体微电子制造链**与基于智能接口的**工业物流管道网络**。
 
 ---
 
 ## 目录
 
-- [工业架构与流程拓扑](#工业架构与流程拓扑)
+- [工业流程拓扑与全局架构](#工业流程拓扑与全局架构)
 - [核心子系统详解](#核心子系统详解)
-  - [1. 工业炼油塔 (分馏精馏塔多方块)](#1-工业炼油塔-分馏精馏塔多方块)
-  - [2. 工业冷冻机与深冷分离循环](#2-工业冷冻机与深冷分离循环)
-  - [3. 化学品凝固与 4 级工厂架构](#3-化学品凝固与-4-级工厂架构)
-  - [4. 数字矿机石油开采升级 (Mixin 运行时注入)](#4-数字矿机石油开采升级-mixin-运行时注入)
-  - [5. 高耐久沥青道路生态 (51 种建筑构件)](#5-高耐久沥青道路生态-51-种建筑构件)
-  - [6. 双配方查看器原生支持 (JEI 与 EMI)](#6-双配方查看器原生支持-jei-与-emi)
-- [扩展工程与开发文档](#扩展工程与开发文档)
+  - [1. 工业炼油塔 (热裂解分馏多方块)](#1-工业炼油塔-热裂解分馏多方块)
+  - [2. 风车粉碎机集群 (6 倍矿物增产)](#2-风车粉碎机集群-6-倍矿物增产)
+  - [3. 半导体芯片制造与超净室光刻](#3-半导体芯片制造与超净室光刻)
+  - [4. 工业物流管道与智能接口网络](#4-工业物流管道与智能接口网络)
+  - [5. 多方块流体抽取机与动力泵机](#5-多方块流体抽取机与动力泵机)
+  - [6. 深冷空气分离与工业冷冻机](#6-深冷空气分离与工业冷冻机)
+  - [7. 化学品固化与 4 级工厂梯队](#7-化学品固化与-4-级工厂梯队)
+  - [8. 沥青道路工程与建筑生态 (51 种构件)](#8-沥青道路工程与建筑生态-51-种构件)
+  - [9. 数字矿机石油开采升级 (Mixin 引擎)](#9-数字矿机石油开采升级-mixin-引擎)
+  - [10. 全配方查看器深度集成 (JEI 与 EMI)](#10-全配方查看器深度集成-jei-与-emi)
+- [扩展工程与技术文档](#扩展工程与技术文档)
 - [快速上手与构建指南](#快速上手与构建指南)
 - [仓库目录结构](#仓库目录结构)
 - [开源协议](#开源协议)
 
 ---
 
-## 工业架构与流程拓扑
+## 工业流程拓扑与全局架构
 
-整个生产拓扑覆盖了地表与地下资源勘探、流体提取、高温热裂解、深冷蒸馏与固态工程材料制备：
+全生态涵盖采矿提纯、热力学分馏、机械深加工与精密微电子制程：
 
 ```mermaid
 flowchart TB
-    subgraph Upstream ["上游原料开采"]
-        Ores["固态原油矿石与深板岩矿 (Y=-64..64)"]
-        Lakes["地表原油湖 (自然世界生成)"]
-        Miner["数字矿机 + 石油开采升级 (Mixin 注入)"]
-        Rotary["旋转凝结器 (Mekanism 原生互转)"]
-
-        Ores -->|熔炼 / 富集仓| SolidItem["固态原油物品 (3200t 燃烧时长)"]
-        SolidItem --> Rotary
-        Lakes --> Miner
-        Miner --> CrudeOil["致密原油原料 (流体 / 化学品)"]
-        Rotary --> CrudeOil
+    subgraph Extraction ["1. 上游资源勘探与开采"]
+        OilLakes["原油湖与固态原油矿脉"]
+        Miner["数字矿机 + 石油开采升级"]
+        Pump["多方块流体抽取机与动力泵机"]
+        OilLakes --> Miner & Pump
+        Miner & Pump --> CrudeOil["致密原油原料"]
     end
 
-    subgraph Refining ["中游热裂解分馏 (IRT 炼油塔)"]
-        CrudeOil --> IRT["工业炼油塔 (7x7 截面柱体, 高度 16..41)"]
-        HeatSource["热力导体 / 底部热源"] -->|T_bottom >= 500K| IRT
-        Chiller["顶部散热通道 / 冷却矢量"] -->|Delta T >= 100K| IRT
+    subgraph Petrochem ["2. 分馏裂解与深冷气体"]
+        CrudeOil --> IRT["工业炼油塔 (温差 Delta T >= 100K, T >= 500K)"]
+        IRT --> Gas["石油气"] & Naphtha["石脑油"] & Fuel["精炼燃料"] & Heavy["重油"] & Bitumen["沥青"]
 
-        IRT -->|产率 2.00x| PetGas["石油气 (Petroleum Gas)"]
-        IRT -->|产率 0.20x| Naphtha["石脑油 (Naphtha)"]
-        IRT -->|产率 0.10x| RefFuel["精炼燃料 (Refined Fuel)"]
-        IRT -->|产率 0.10x| HeavyOil["重油 (Heavy Oil)"]
-        IRT -->|产率 0.15x| Bitumen["沥青化学品 (Bitumen)"]
+        AirComp["空气压缩机"] --> Air["压缩空气"]
+        Freezer["工业冷冻机 (< -100 deg C)"]
+        Air --> Freezer
+        Freezer --> Nitrogen["高纯氮气"] & Noble["稀有气体"] & Refrig["低温制冷剂"]
     end
 
-    subgraph Cryo ["深冷空气分离循环"]
-        AirComp["空气压缩机 (5 FE/t)"] --> CompAir["压缩空气 (10 mB/t)"]
-        Cooler["电阻冷却器 (电能转化为负温)"] --> Freezer["工业冷冻机 (< -100 deg C)"]
-        CompAir --> Freezer
-
-        Freezer --> Nitrogen["高纯氮气 (Nitrogen)"]
-        Freezer --> NobleGas["稀有气体 (Noble Gas)"]
-        Freezer --> Refrigerant["低温制冷剂 (Refrigerant)"]
+    subgraph OreProc ["3. 极超高效矿物研磨 (6 倍产率)"]
+        RawOres["各类原矿 (铁、铜、金、锇、锡、铅、铀)"]
+        Nitrogen -.-> Pulv["风车粉碎机多方块 (叶片 + 复合线圈)"]
+        RawOres --> Pulv
+        Pulv -->|单批 6 倍增产| Cloudy["浑浊氧化粉末"]
+        Cloudy -->|熔炼 / 高炉| Ingots["纯净金属锭"]
     end
 
-    subgraph Downstream ["下游固化与道路工程"]
-        Bitumen --> Solidifier["化学凝固机 (基础 -> 终极工厂)"]
-        Solidifier --> BitBlock["沥青方块 (工业防滑路面)"]
-        BitBlock -->|Mekanism 涂装机| DyedBit["16 色染色沥青方块"]
-        BitBlock & DyedBit -->|切石机| Shapes["沥青楼梯与台阶 (共 51 种构件)"]
+    subgraph Semiconductor ["4. 半导体晶圆与芯片制造"]
+        Quartz["高纯硅前驱体"] --> Crystal["晶体生长室 (Czochralski 单晶拉制)"]
+        Crystal --> Boule["精炼单晶硅棒"]
+        Boule --> Slicer["硅晶切片机"]
+        Slicer --> Wafer["空白硅晶圆"]
+        Heavy --> Propylene["聚丙烯聚合物"]
+        Propylene & Wafer --> Coater["化学覆膜机 (光刻胶均胶)"]
+        Coater --> Photo["光刻机 (紫外激光 + 超净室环境)"]
+        Photo --> Chips["多阶逻辑与计算芯片 (灌注 -> 强化 -> 原子级)"]
     end
-```
 
-### 热力学裂解与安全联锁时序流
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Heat as 外置热源 / 热力管道
-    participant Controller as 炼油塔控制器
-    participant Multiblock as 炼油塔多方块数据核心
-    participant Tanks as 5 大产物化学品储罐
-    participant GUI as Mekanism 原生交互界面
-
-    Heat->>Multiblock: 向底部热容注入热量
-    Multiblock->>Multiblock: 计算底部温度 T_bottom (门槛: 500.0 K)
-    Multiblock->>Multiblock: 计算垂直温差 Delta T = T_bottom - T_top (门槛: 100.0 K)
-
-    alt 热力学工况达标 (T >= 500K 且 Delta T >= 100K)
-        Multiblock->>Multiblock: 计算有效裂解速率 r_effective = r_heat + r_deltaT (最高 640 mB/s)
-        Multiblock->>Tanks: 探测 5 大产物储罐剩余缓冲容量
-        alt 所有产物储罐均有空余
-            Multiblock->>Multiblock: 扣除原油并按计量比产出石油气、石脑油、燃料、重油、沥青
-            Multiblock->>GUI: 实时更新仪表盘速率与分层流速反馈
-        else 任意产物储罐已满
-            Multiblock->>Multiblock: 触发背压安全联锁机制 (状态码置为 4)
-            Multiblock->>GUI: 弹出黄色警告标签页 ("产物储罐已满时裂解中止")
-        end
-    else 热力学工况不满足
-        Multiblock->>Multiblock: 设置状态码 1 (底温过低) 或 状态码 2 (温差不足)
-        Multiblock->>GUI: 界面提示温差不足或未预热诊断信息
+    subgraph Logistics ["5. 厂区智能物流与基础设施"]
+        Bitumen --> Solidifier["化学凝固工厂"] --> Roads["51 种沥青建材矩阵"]
+        Pipes["工业物流管道 + 输入/输出/电力接口 (优先级与过滤)"]
+        Pipes -.->|全自动定向分流| Extraction & Petrochem & OreProc & Semiconductor
     end
 ```
 
@@ -115,58 +89,77 @@ sequenceDiagram
 
 ## 核心子系统详解
 
-### 1. 工业炼油塔 (分馏精馏塔多方块)
-**工业炼油塔（Industrial Refinery Tower）**是用于原油高温连续裂解的大型立式分馏塔：
-- **结构几何**：7×7 菱形截面（每层占用 25 个有效方块），高度可在 **16 至 41 方块** 之间自由定制。
-- **分层隔板**：塔身内部由 4 层隔板物理隔离出 5 个垂直气液分离室，对应 5 级蒸馏馏分。
-- **热力学驱动**：依赖底部加热（$T_{\text{bottom}} \ge 500\text{ K}$）与垂直温度梯度（$\Delta T \ge 100\text{ K}$），裂解速率线性跃升至最高 **$640\text{ mB/s}$**（$32\text{ mB/tick}$）。
-- **动态阀门路由**：炼油阀门根据所在 Y 轴高度自动绑定对应产物层化学品，支持材质动态变色反馈与配置器一键切换输入/输出。
-- **安全与环境防护**：内置生物生成抑制机制，彻底消除塔身内部及周边安全缓冲带内的刷怪隐患。
+### 1. 工业炼油塔 (热裂解分馏多方块)
+- **结构几何**：7×7 菱形截面（每层 25 个有效方块），高度可在 **16 至 41 方块** 之间扩展。
+- **热力学驱动**：依赖底部加热（$T_{\text{bottom}} \ge 500\text{ K}$）与垂直温度梯度（$\Delta T \ge 100\text{ K}$），有效裂解速率最高达到 **$640\text{ mB/s}$**。
+- **馏分切分**：将原油自动分馏为石油气（2.0×）、石脑油（0.2×）、精炼燃料（0.1×）、重油（0.1×）与沥青（0.15×）。
+- **动态安全联锁**：当任意产物储罐满载时，自动触发背压保护并点亮 Mekanism 原生 WarningTab 警告。
 
-### 2. 工业冷冻机与深冷分离循环
-**工业冷冻机（Industrial Freezer）**是用于超低温气体分离的密闭冷冻结构：
-- **结构几何**：$4\times 4\times 4$ 至 $8\times 8\times 8$ 的可扩展立方体结构。
-- **深冷工况**：内部温度必须降至 **$-100.0^\circ\text{C}$ ($173.15\text{ K}$)** 以下方可激活工作循环。
-- **深冷产物**：将空气压缩机生成的压缩空气深度液化并分馏为**高纯氮气**、**稀有气体**与**低温制冷剂**。
-- **电阻冷却器配合**：可与单方块**电阻冷却器**直接热互联，通过消耗电能持续抽取热量维持深冷环境。
+### 2. 风车粉碎机集群 (6 倍矿物增产)
+- **结构几何**：水平尺寸必须为奇数的巨型密闭腔体（$5\times 5\times 5$ 至 $17\times 18\times 17$）。
+- **内部机械装配**：中央轴立式涡轮转子、装配涡轮叶片、复合旋钮装置、周边压力分散层与顶部电磁线圈。
+- **处理能力**：6 组独立并行处理通道，单批次投入 32 块原矿与 1,000 mB 氮气介质。
+- **极致增产**：产出 **192 份浑浊氧化粉末（稳定 6 倍产率）**，可直接进炉熔炼为成品金属锭。
+- **转速动力学**：叶片与线圈数量动态联动，将处理耗时从 600 ticks（30秒）缩减至最低 100 ticks（5秒）。
 
-### 3. 化学品凝固与 4 级工厂架构
-**化学凝固机（Chemical Solidifier）**用于将气体与液相化学品相变固化为实体方块或工业物品：
-- **完整的 4 级工厂升级树**：全面继承 Mekanism 原版工厂升级体系：
-  - **基础工厂（Basic Factory）**：3 通道并行处理
-  - **高级工厂（Advanced Factory）**：5 通道并行处理
-  - **精英工厂（Elite Factory）**：7 通道并行处理
-  - **终极工厂（Ultimate Factory）**：9 通道并行处理
-- **插件槽位与自动整理**：全面兼容速度、能量与消音升级插件，搭载网络同步输出物品自动整理。
+### 3. 半导体芯片制造与超净室光刻
+- **晶体生长室（Crystal Growth Chamber）**：高真空 Czochralski 直拉单晶硅技术，带有世界内籽晶与硅棒生长的实时 3D 渲染（BER）。
+- **硅晶切片机（Silicon Slicer）**：金刚石线锯将精炼硅棒精密切割为晶圆空白基底（Blank Wafer）。
+- **化学覆膜机（Chemical Film Coater）**：基于聚丙烯与光刻胶在晶圆表面均匀涂覆高分子保护膜。
+- **光刻机（Photolithography Machine）**：
+  - **超净室环境校验**：检测机台是否被滤光玻璃（Filtered Glass）严密包裹，杜绝粉尘污染。
+  - **高能激光粒子**：具备紫外激光束与净化室粉尘动态粒子渲染。
+  - **芯片进阶树**：支持逻辑芯片与计算芯片从灌注级（Infused）$\to$ 强化级（Reinforced）$\to$ 原子级（Atomic）的阶梯制造。
 
-### 4. 数字矿机石油开采升级 (Mixin 运行时注入)
-MCI 通过 Mixin 字节码注入深度扩充了 Mekanism 数字矿机的能力边界：
-- **石油开采升级插件**：动态注入 Mekanism 原生 `Upgrade` 枚举体系。
-- **免过滤智能采油**：插入数字矿机后，无需配置复杂的物品/标签过滤器，即可自动扫描并在作业半径内直接抽采所有连通的原油源块。
+### 4. 工业物流管道与智能接口网络
+- **六向动态装配**：工业管道具有专有的动态连接臂、封堵帽与流动动画材质。
+- **多功能智能接口**：提供输入接口、输出接口与电力接口（支持方块与挂接部件双形态）。
+- **精细化控制流**：支持高低整数优先级路由、网络数据包双向同步高级过滤器（`PacketSyncOutputFilter`）及三态红石联锁。
+- **超导电力接口**：零内阻直通模式，按需抽取并供给网络内用电机器。
 
-### 5. 高耐久沥青道路生态 (51 种建筑构件)
-以凝固沥青为基础构建的现代重工业路面建筑系统：
-- **51 种完整变体**：1 种原始深灰黑工业沥青 + 16 种经典染色变体（白、橙、品红、淡蓝、黄、黄绿、粉、灰、淡灰、青、紫、蓝、棕、绿、红、黑）。
-- **完整造型覆盖**：每种颜色均包含**完整方块**、**楼梯**与**台阶**。
-- **工厂无损加工**：全面支持放入 Mekanism 涂装机利用染料快速换色，支持在切石机中零损耗裁切造型。
+### 5. 多方块流体抽取机与动力泵机
+- **流体抽取机**：带动态流体液面与搅拌动画的大型多方块开采装置，用于地下深层油层与地下水脉的持续抽取。
+- **动力泵机**：高吞吐量单方块管道增压机，亦可直接作为流体抽取机底面的动力基座。
+- **液态空气**：提供常温常压空气的低温深冷液化形态及相关循环反应。
 
-### 6. 双配方查看器原生支持 (JEI 与 EMI)
-MCI 为主流配方模组提供了深度适配插件：
-- **JEI (Just Enough Items)**：内置炼油裂解、低温分离、空气压缩与化学品凝固 4 大专属类别，显示热力学温度要求、功耗与满罐警告说明。
-- **EMI Recipe Viewer**：原生 EMI NeoForge 插件，包含平滑流动化学品材质表、动态箭头动画与分级工厂能耗分析。
+### 6. 深冷空气分离与工业冷冻机
+- **深冷工况**：腔室温度必须冷却至 **$-100.0^\circ\text{C}$ ($173.15\text{ K}$)** 以下。
+- **分馏产物**：压缩空气深度分离为高纯**氮气**、**稀有气体**与**低温制冷剂**。
+- **电阻冷却器**：将电能直接转化为深冷负温热流，无缝对接冷冻机维持低温。
+
+### 7. 化学品固化与 4 级工厂梯队
+- **工厂升级树**：支持基础（3 通道）、高级（5 通道）、精英（7 通道）与终极（9 通道）工厂。
+- **插件扩展**：全面支持速度、能量、消音升级，集成网络化产物自动整理。
+
+### 8. 沥青道路工程与建筑生态 (51 种构件)
+- **完整色谱矩阵**：1 种原始防滑沥青 + 16 种经典染色工业沥青。
+- **造型全覆盖**：每种颜色均包含完整方块、楼梯与台阶。
+- **工业无损换色**：全面支持在 Mekanism 涂装机中染色与切石机快速裁切。
+
+### 9. 数字矿机石油开采升级 (Mixin 引擎)
+- **字节码运行时注入**：通过 Mixin 动态挂载到 Mekanism 原生 `Upgrade` 枚举体系。
+- **免过滤智能采油**：插入数字矿机后自动全量采掘作业范围内的所有原油液体源块。
+
+### 10. 全配方查看器深度集成 (JEI 与 EMI)
+- 全模组机器原生接入 JEI 与 EMI NeoForge 插件：
+  - 炼油热裂解与低温空气蒸馏
+  - 风车粉碎机氮气研磨与 6 倍增产
+  - 单晶生长、晶圆切片与超净室紫外光刻
+  - 化学浸泡反应与化学覆膜
 
 ---
 
-## 扩展工程与开发文档
+## 扩展工程与技术文档
 
-更多深层次的机械原理、工程参数与架构规范已整理收录在 [`docs/`](docs/) 目录：
+详细的机械结构、体素布局与数学模型收录于 [`docs/`](docs/) 目录：
 
-| 文档名称 | 核心内容概述 | 适用方向 |
+| 文档名称 | 核心领域 | 主要内容 |
 | :--- | :--- | :--- |
-| [**工业炼油塔架构蓝图**](docs/REFINERY_ARCHITECTURE.md) | 7×7 体素网格剖面图、分层隔板计算公式、热力学动力学方程与阀门绑定原理。 | 多方块工程与数值推演 |
-| [**石油与深冷工艺生态指南**](docs/PETROCHEMICAL_ECOLOGY.md) | 化学反应计量比、自然世界生成规则、深冷循环平衡与工厂能耗梯级。 | 化工流程设计与平衡 |
-| [**Agent 协作研发规范 (SOP)**](docs/AGENT_WORKFLOW.md) | AI Agent 自动化逆向工程规范、无头验证协议与闭环提交标准。 | 自动化工程与代码质量 |
-| [**模组开发与架构参考**](docs/DEVELOPMENT.md) | 开发环境构建、NeoForge 注册器总表、Mixin 注入点分析与数据包通信机制。 | 二次开发与代码贡献 |
+| [**高新制造与矿物处理规约**](docs/ADVANCED_MANUFACTURING.md) | 高新制造核心 | 风车粉碎机结构动力学、超净室光刻标准、智能物流接口原理。 |
+| [**工业炼油塔架构蓝图**](docs/REFINERY_ARCHITECTURE.md) | 多方块工程 | 7×7 菱形体素截面图、分馏隔板计算公式、热力学动力学方程。 |
+| [**石化与深冷工艺生态指南**](docs/PETROCHEMICAL_ECOLOGY.md) | 化工流程 | 反应物计量比、世界生成参数、深冷循环平衡与沥青建材配方。 |
+| [**Agent 协作研发规范 (SOP)**](docs/AGENT_WORKFLOW.md) | 工程质量与流程 | AI Agent 自动化逆向工程、无头验证协议与闭环提交规范。 |
+| [**模组开发与架构参考**](docs/DEVELOPMENT.md) | 二次开发手册 | 开发环境搭建、DeferredRegister 注册表总览与 Mixin 拦截分析。 |
 
 ---
 
@@ -181,20 +174,17 @@ MCI 为主流配方模组提供了深度适配插件：
 ### 从源码编译
 
 ```bash
-# 克隆仓库
 git clone https://github.com/TianYaYou/Mekanism-Complex-Industries.git
 cd Mekanism-Complex-Industries
-
-# 编译并打包 Jar
 ./gradlew build
 ```
 
-编译产物位于 `build/libs/` 目录下。
+编译生成的 Jar 包位于 `build/libs/` 目录下。
 
-### 本地调试与无头验证
+### 本地调试与测试
 
 ```bash
-# 启动带有模组的调试客户端
+# 启动开发调试客户端
 ./gradlew runClient
 
 # 运行自动化无头 GameTest 回归测试套件
@@ -204,52 +194,46 @@ cd Mekanism-Complex-Industries
 ./gradlew deployToModpack
 ```
 
-> **提示**：可以在 `gradle.properties` 中修改 `modpack_mods_dir` 变量，以指向你的本地测试整合包 mods 目录。
-
 ---
 
 ## 仓库目录结构
 
 ```text
 Mekanism-Complex-Industries/
-├── .github/
-│   ├── ISSUE_TEMPLATE/                   # 缺陷报告与功能建议 Issue 模板
-│   └── pull_request_template.md          # 规范化 PR 提交清单
-├── docs/
+├── .github/                              # 缺陷报告与功能建议 Issue/PR 模板
+├── docs/                                 # 架构技术规范与工程白皮书
+│   ├── ADVANCED_MANUFACTURING.md         # 风车粉碎机、半导体微电子、智能管道物流
 │   ├── AGENT_WORKFLOW.md                 # Agent 工程研发工作流与逆向规范 (SOP)
 │   ├── DEVELOPMENT.md                    # 模组开发者手册与架构总表
-│   ├── REFINERY_ARCHITECTURE.md          # 工业炼油塔多方块蓝图与热力学方程
-│   └── PETROCHEMICAL_ECOLOGY.md          # 流程生态、化学计量比与工厂能耗
+│   ├── PETROCHEMICAL_ECOLOGY.md          # 化工生态、反应计量比与工厂能耗梯级
+│   └── REFINERY_ARCHITECTURE.md          # 炼油塔蓝图、隔板计算与热力学方程
 ├── src/main/java/com/complexindustries/mekanism/
 │   ├── MekanismComplexIndustries.java    # 模组生命周期主入口
-│   ├── MCIConstants.java                 # 模组常量与 ResourceLocation 统一构造
-│   ├── client/                           # 客户端渲染层、GUI 部件与模型着色
+│   ├── client/                           # GUI 屏幕、BER 动态渲染器、粒子系统、JEI/EMI 插件
 │   ├── content/
-│   │   ├── block/                        # 机器方块定义与 51 种沥青建材
-│   │   ├── fluid/                        # 原油与低温制冷剂流体类型实现
-│   │   ├── freezer/                      # 工业冷冻机多方块数据与形状验证器
-│   │   ├── refinery/                     # 工业炼油塔核心、生成抑制与动力学逻辑
-│   │   ├── solidifier/                   # 化学凝固机与 4 级工厂方块实体
-│   │   ├── tile/                         # 空气压缩机与电阻冷却器方块实体
-│   │   └── upgrade/                      # 石油开采升级物品逻辑与注入器
-│   ├── mixin/                            # 针对 Mekanism 核心的 Mixin 字节码拦截
-│   ├── network/                          # 客户端-服务端自定义数据包网络层
-│   ├── recipe/                           # 化学凝固机自定义配方序列化器
+│   │   ├── block/                        # 机器方块定义、滤光玻璃与 51 种沥青建材
+│   │   ├── chamber/                      # 晶体生长室方块实体与容器实现
+│   │   ├── coater/                       # 化学覆膜机方块实体与容器实现
+│   │   ├── extractor/                    # 流体抽取机多方块结构与动力泵机
+│   │   ├── fluid/                        # 流体类型（原油、液态空气、低温制冷剂）
+│   │   ├── freezer/                      # 工业冷冻机多方块结构
+│   │   ├── lithography/                  # 光刻机与超净室检测机制
+│   │   ├── pipe/                         # 工业物流管道、智能接口网络与过滤器
+│   │   ├── pulverizer/                   # 风车粉碎机多方块结构（6 倍矿物增产）
+│   │   ├── refinery/                     # 工业炼油塔多方块结构
+│   │   ├── slicer/                       # 硅晶切片机实现
+│   │   ├── soaker/                       # 化学浸泡机与 4 级浸泡工厂
+│   │   ├── solidifier/                   # 化学凝固机与 4 级凝固工厂
+│   │   └── upgrade/                      # 石油开采升级物品与 Mixin 注入器
+│   ├── mixin/                            # 针对 Mekanism 核心的 Mixin 拦截
+│   ├── network/                          # 客户端-服务端自定义数据包通信协议
+│   ├── recipe/                           # 自定义配方序列化器、输入缓存与执行逻辑
 │   ├── registration/                     # DeferredRegister 延迟注册系统
-│   └── test/                             # GameTest 自动化无头回归测试集
-├── src/main/resources/
-│   ├── META-INF/neoforge.mods.toml       # NeoForge 模组元数据配置
-│   ├── assets/mekanism_complex_industries/
-│   │   ├── lang/                         # 完整中英双语国际化 (en_us, zh_cn)
-│   │   ├── models/ & textures/           # 机器模型、方块状态与动态材质
-│   └── data/mekanism_complex_industries/ # 合成配方、战利品表与世界生成 JSON
-├── build.gradle                          # NeoForge ModDev 构建脚本
-├── gradle.properties                     # 版本号、依赖配置与 JVM 参数
-├── settings.gradle                       # 仓库镜像源与 Gradle 插件设置
-├── CHANGELOG.md                          # 版本变更历史与发布说明
-├── CONTRIBUTING.md                       # 社区贡献指南与提交协议
-├── CODE_OF_CONDUCT.md                    # 社区行为准则
-└── LICENSE                               # MIT 开源协议
+│   └── test/                             # GameTest 自动化无头回归测试套件
+├── src/main/resources/                   # 方块状态、模型、纹理贴图、合成配方与战利品表
+├── build.gradle                          # 构建脚本
+├── gradle.properties                     # 版本配置
+└── LICENSE                               # MIT 开源许可证
 ```
 
 ---

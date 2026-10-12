@@ -42,6 +42,7 @@ public class MCIClientRegistration {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.OUTPUT_INTERFACE, com.complexindustries.mekanism.content.pipe.client.GuiOutputInterface::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.POWER_INTERFACE, com.complexindustries.mekanism.content.pipe.client.GuiPowerInterface::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.FLUID_EXTRACTOR, com.complexindustries.mekanism.content.extractor.GuiFluidExtractor::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.WINDMILL_PULVERIZER, com.complexindustries.mekanism.content.pulverizer.GuiWindmillPulverizer::new);
     }
 
     @SubscribeEvent
@@ -80,9 +81,7 @@ public class MCIClientRegistration {
         event.registerBlockEntityRenderer(com.complexindustries.mekanism.registration.MCITileEntityTypes.INDUSTRIAL_PIPE.get(),
                 com.complexindustries.mekanism.client.render.IndustrialPipeRenderer::new);
         ClientRegistrationUtil.bindTileEntityRenderer(event, com.complexindustries.mekanism.client.render.RenderFluidExtractor::new,
-                com.complexindustries.mekanism.registration.MCITileEntityTypes.FLUID_EXTRACTOR_CASING,
-                com.complexindustries.mekanism.registration.MCITileEntityTypes.FLUID_EXTRACTOR_PORT,
-                com.complexindustries.mekanism.registration.MCITileEntityTypes.POWERED_PUMP);
+                com.complexindustries.mekanism.registration.MCITileEntityTypes.FLUID_EXTRACTOR_PORT);
     }
 }
 

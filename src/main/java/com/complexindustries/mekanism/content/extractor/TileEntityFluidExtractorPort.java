@@ -6,16 +6,34 @@ import mekanism.api.IContentsListener;
 import mekanism.common.attachments.containers.ContainerType;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
 import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
+import mekanism.common.lib.multiblock.MultiblockManager;
+import mekanism.common.tile.prefab.TileEntityMultiblock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
-public class TileEntityFluidExtractorPort extends TileEntityFluidExtractorCasing {
+public class TileEntityFluidExtractorPort extends TileEntityMultiblock<FluidExtractorMultiblockData> {
 
     public TileEntityFluidExtractorPort(BlockPos pos, BlockState state) {
         super(MCIBlocks.FLUID_EXTRACTOR_PORT, pos, state);
+    }
+
+    @NotNull
+    @Override
+    public FluidExtractorMultiblockData createMultiblock() {
+        return new FluidExtractorMultiblockData(this);
+    }
+
+    @Override
+    public MultiblockManager<FluidExtractorMultiblockData> getManager() {
+        return MCIFluidExtractorMultiblock.EXTRACTOR_MANAGER;
+    }
+
+    @Override
+    public boolean canBeMaster() {
+        return true;
     }
 
     @NotNull

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "OTO",
+    " C "
+  ],
+  "key": {
+    "C": {
+      "item": "mekanism_complex_industries:fluid_extractor_casing"
+    },
+    "O": {
+      "item": "mekanism:basic_logistical_transporter"
+    },
+    "T": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mekanism_complex_industries:windmill_output_port"
+  }
+}
