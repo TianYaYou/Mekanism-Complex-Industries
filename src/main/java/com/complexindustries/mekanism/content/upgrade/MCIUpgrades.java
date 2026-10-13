@@ -21,13 +21,30 @@ import java.util.function.IntFunction;
 public final class MCIUpgrades {
 
     public static final Upgrade PETROLEUM;
+    private static final boolean INJECTION_SUCCESSFUL;
 
     static {
-        PETROLEUM = injectUpgrade();
+        Upgrade injected = null;
+        try {
+            injected = injectUpgrade();
+        } catch (Throwable t) {
+            MCIConstants.LOGGER.warn("Unsafe injection of PETROLEUM into Upgrade enum failed (strict Java 21 environment). Falling back to safe compatibility mode: {}", t.getMessage());
+            injected = null;
+        }
+        PETROLEUM = injected;
+        INJECTION_SUCCESSFUL = (PETROLEUM != null);
+    }
+
+    public static boolean isInjectionSuccessful() {
+        return INJECTION_SUCCESSFUL;
     }
 
     public static void init() {
-        MCIConstants.LOGGER.info("MCIUpgrades initialized. Injected PETROLEUM upgrade at ordinal {}", PETROLEUM.ordinal());
+        if (INJECTION_SUCCESSFUL && PETROLEUM != null) {
+            MCIConstants.LOGGER.info("MCIUpgrades initialized. Injected PETROLEUM upgrade at ordinal {}", PETROLEUM.ordinal());
+        } else {
+            MCIConstants.LOGGER.warn("MCIUpgrades initialized in fallback mode (PETROLEUM upgrade not injected into enum).");
+        }
     }
 
     private static Upgrade injectUpgrade() {
@@ -134,8 +151,8 @@ public final class MCIUpgrades {
 
             return instance;
         } catch (Throwable e) {
-            MCIConstants.LOGGER.error("Failed to dynamically inject PETROLEUM upgrade into Mekanism Upgrade enum", e);
-            throw new RuntimeException("Failed to dynamically inject PETROLEUM upgrade into Mekanism Upgrade enum", e);
+            MCIConstants.LOGGER.warn("Failed to dynamically inject PETROLEUM upgrade into Mekanism Upgrade enum: {}. Activating safe fallback mode.", e.getMessage());
+            return null;
         }
     }
 

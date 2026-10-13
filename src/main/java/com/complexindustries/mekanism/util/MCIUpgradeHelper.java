@@ -30,7 +30,7 @@ public final class MCIUpgradeHelper {
         }
         TileComponentUpgrade upgradeComponent = miner.getComponent();
         if (upgradeComponent != null) {
-            return upgradeComponent.isUpgradeInstalled(MCIUpgrades.PETROLEUM) ||
+            return (MCIUpgrades.PETROLEUM != null && upgradeComponent.isUpgradeInstalled(MCIUpgrades.PETROLEUM)) ||
                    isPetroleumUpgrade(upgradeComponent.getUpgradeSlot().getStack());
         }
         return false;

@@ -53,6 +53,9 @@ public record PacketSetInterfacePriority(BlockPos pos, boolean isAttachment, @Nu
     public void handle(IPayloadContext context) {
         Player player = context.player();
         BlockEntity be = player.level().getBlockEntity(pos);
+        if (!MCIPacketSecurity.canAccess(player, pos, be)) {
+            return;
+        }
 
         if (isAttachment && be instanceof TileEntityIndustrialPipe pipe) {
             var att = pipe.getAttachment(face);

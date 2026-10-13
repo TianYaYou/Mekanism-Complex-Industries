@@ -27,7 +27,7 @@ public abstract class MixinTileEntityMekanism {
     private void mci$getSupportedUpgrade(CallbackInfoReturnable<Set<Upgrade>> cir) {
         if ((Object) this instanceof TileEntityDigitalMiner) {
             Set<Upgrade> original = cir.getReturnValue();
-            if (original != null && !original.contains(MCIUpgrades.PETROLEUM)) {
+            if (MCIUpgrades.PETROLEUM != null && original != null && !original.contains(MCIUpgrades.PETROLEUM)) {
                 Set<Upgrade> modified = EnumSet.copyOf(original);
                 modified.add(MCIUpgrades.PETROLEUM);
                 cir.setReturnValue(modified);

@@ -2227,4 +2227,58 @@ public class MCIGameTests {
             helper.succeed();
         });
     }
+
+    @GameTest(template = "empty_10x10x10")
+    public static void testP0P1ComplianceFixes(GameTestHelper helper) {
+        // 1. Test MCIKeyLookup functionality
+        helper.assertTrue(com.complexindustries.mekanism.content.block.MCIKeyLookup.getDescriptionKeyMessage() != null, "Description key message should not be null");
+        helper.assertTrue(com.complexindustries.mekanism.content.block.MCIKeyLookup.getDetailsKeyMessage() != null, "Details key message should not be null");
+
+        // 2. Test MCIUpgrades and Digital Miner upgrade support
+        com.complexindustries.mekanism.content.upgrade.MCIUpgrades.init();
+        if (com.complexindustries.mekanism.content.upgrade.MCIUpgrades.isInjectionSuccessful()) {
+            helper.assertTrue(com.complexindustries.mekanism.content.upgrade.MCIUpgrades.PETROLEUM != null, "PETROLEUM upgrade must not be null when injected");
+            helper.assertTrue(MCIItems.PETROLEUM_UPGRADE.get().getUpgradeType(ItemStack.EMPTY) == com.complexindustries.mekanism.content.upgrade.MCIUpgrades.PETROLEUM, "Petroleum upgrade item must return PETROLEUM upgrade type");
+
+            BlockPos minerPos = new BlockPos(2, 1, 2);
+            helper.setBlock(minerPos, MekanismBlocks.DIGITAL_MINER.get().defaultBlockState());
+            TileEntityMekanism minerTile = (TileEntityMekanism) helper.getBlockEntity(minerPos);
+            helper.assertTrue(minerTile != null, "Digital miner tile entity should exist");
+            helper.assertTrue(minerTile.getSupportedUpgrade().contains(com.complexindustries.mekanism.content.upgrade.MCIUpgrades.PETROLEUM), "Digital miner must include PETROLEUM in supported upgrades");
+        }
+
+        // 3. Test Refinery memory leak cleanup
+        RefineryMultiblockData.clearAll();
+        helper.assertTrue(RefineryMultiblockData.FORMED_REFINERIES.isEmpty(), "clearAll must empty FORMED_REFINERIES");
+
+        // Place a controller and register its multiblock data to test level unload removal
+        BlockPos ctrlPos = new BlockPos(3, 1, 3);
+        helper.setBlock(ctrlPos, MCIBlocks.REFINERY_CONTROLLER.get().defaultBlockState());
+        TileEntityRefineryController ctrl = (TileEntityRefineryController) helper.getBlockEntity(ctrlPos);
+        helper.assertTrue(ctrl != null, "Refinery controller should exist");
+        RefineryMultiblockData testRefinery = new RefineryMultiblockData(ctrl);
+        testRefinery.onCreated(helper.getLevel());
+        helper.assertTrue(RefineryMultiblockData.FORMED_REFINERIES.contains(testRefinery), "Refinery must be registered in FORMED_REFINERIES after onCreated");
+
+        // Simulate level unload event
+        com.complexindustries.mekanism.content.refinery.RefinerySpawnHandler.onLevelUnload(new net.neoforged.neoforge.event.level.LevelEvent.Unload(helper.getLevel()));
+        helper.assertTrue(!RefineryMultiblockData.FORMED_REFINERIES.contains(testRefinery), "Refinery must be removed from FORMED_REFINERIES upon LevelEvent.Unload");
+
+        // 4. Test MCIPacketSecurity checks (null safety, reach adaptation, and resolution)
+        helper.assertFalse(com.complexindustries.mekanism.network.MCIPacketSecurity.canAccess(null, ctrlPos, null), "Null player must be rejected");
+
+        Player fakePlayer = FakePlayerFactory.getMinecraft(helper.getLevel());
+        BlockPos nearPos = helper.absolutePos(new BlockPos(1, 1, 1));
+        BlockPos farPos = helper.absolutePos(new BlockPos(50, 50, 50));
+        fakePlayer.setPos(nearPos.getX() + 0.5, nearPos.getY() + 0.5, nearPos.getZ() + 0.5);
+
+        // Near check (distance = 0)
+        helper.assertTrue(com.complexindustries.mekanism.network.MCIPacketSecurity.canAccess(fakePlayer, nearPos, null), "Fake player near position should pass security check");
+
+        // Out-of-reach check (distance > reach)
+        helper.assertFalse(com.complexindustries.mekanism.network.MCIPacketSecurity.canAccess(fakePlayer, farPos, null), "Out-of-reach position must be rejected by MCIPacketSecurity");
+
+        helper.succeed();
+    }
 }
+

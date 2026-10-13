@@ -101,7 +101,7 @@ public abstract class MixinTileEntityDigitalMiner {
 
     @Inject(method = "getInfo", at = @At("HEAD"), cancellable = true, remap = false)
     private void mci$getInfo(Upgrade upgrade, CallbackInfoReturnable<List<Component>> cir) {
-        if (upgrade == MCIUpgrades.PETROLEUM) {
+        if (MCIUpgrades.PETROLEUM != null && upgrade == MCIUpgrades.PETROLEUM) {
             cir.setReturnValue(List.of(Component.translatable("upgrade.mekanism_complex_industries.petroleum.info")));
         }
     }

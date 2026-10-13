@@ -212,7 +212,9 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
     @Override
     public void onCreated(Level world) {
         super.onCreated(world);
-        FORMED_REFINERIES.add(this);
+        if (world != null && !world.isClientSide()) {
+            FORMED_REFINERIES.add(this);
+        }
         biomeAmbientTemp = calculateAverageAmbientTemperature(world);
         double cap = Math.max(10_000.0, Math.max(64, getVolume()) * 40.0);
         bottomHeatCapacitor.setHeatCapacity(cap, true);
@@ -247,7 +249,7 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
 
         // Heat exchange and vertical gradient between bottom and top
         if (isFormed()) {
-            if (!FORMED_REFINERIES.contains(this)) {
+            if (world != null && !world.isClientSide() && !FORMED_REFINERIES.contains(this)) {
                 FORMED_REFINERIES.add(this);
             }
             double bottomTemp = bottomHeatCapacitor.getTemperature();
@@ -556,6 +558,23 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
      * - Inside tower: suppress ALL mob spawns.
      * - Around tower (16 blocks horizontal, 8 blocks vertical): suppress hostile / monster spawns.
      */
+    public static void onLevelUnload(Level level) {
+        if (level == null) {
+            return;
+        }
+        FORMED_REFINERIES.removeIf(refinery -> {
+            if (!refinery.isFormed() || refinery.isRemote()) {
+                return true;
+            }
+            Level refLevel = refinery.getLevel();
+            return refLevel == null || refLevel == level || refLevel.dimension().equals(level.dimension());
+        });
+    }
+
+    public static void clearAll() {
+        FORMED_REFINERIES.clear();
+    }
+
     public static boolean shouldSuppressSpawn(Level level, BlockPos pos, MobCategory category, Class<?> entityClass, MobSpawnType spawnType) {
         if (spawnType == MobSpawnType.SPAWN_EGG || spawnType == MobSpawnType.COMMAND) {
             return false;
@@ -565,12 +584,16 @@ public class RefineryMultiblockData extends MultiblockData implements IValveHand
         Iterator<RefineryMultiblockData> iterator = FORMED_REFINERIES.iterator();
         while (iterator.hasNext()) {
             RefineryMultiblockData refinery = iterator.next();
-            if (!refinery.isFormed() || refinery.getBounds() == null) {
+            if (!refinery.isFormed() || refinery.getBounds() == null || refinery.isRemote()) {
                 iterator.remove();
                 continue;
             }
             Level refineryLevel = refinery.getLevel();
-            if (refineryLevel != null && level != null && !refineryLevel.dimension().equals(level.dimension())) {
+            if (refineryLevel == null) {
+                iterator.remove();
+                continue;
+            }
+            if (level != null && !refineryLevel.dimension().equals(level.dimension())) {
                 continue;
             }
 

@@ -42,12 +42,14 @@ public record PacketToggleFactorySorting(BlockPos pos) implements IMekanismPacke
         TileEntityChemicalSolidifierFactory solidifierFactory = WorldUtils.getTileEntity(
                 TileEntityChemicalSolidifierFactory.class, player.level(), pos);
         if (solidifierFactory != null) {
-            solidifierFactory.setSorting(!solidifierFactory.isSorting());
+            if (MCIPacketSecurity.canAccess(player, pos, solidifierFactory)) {
+                solidifierFactory.setSorting(!solidifierFactory.isSorting());
+            }
             return;
         }
         com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory soakingFactory = WorldUtils.getTileEntity(
                 com.complexindustries.mekanism.content.soaker.TileEntityChemicalSoakingFactory.class, player.level(), pos);
-        if (soakingFactory != null) {
+        if (soakingFactory != null && MCIPacketSecurity.canAccess(player, pos, soakingFactory)) {
             soakingFactory.setSorting(!soakingFactory.isSorting());
         }
     }

@@ -13,14 +13,14 @@ public abstract class MixinUpgrade {
 
     @Inject(method = "getTranslationKey", at = @At("HEAD"), cancellable = true, remap = false)
     private void mci$getTranslationKey(CallbackInfoReturnable<String> cir) {
-        if ((Object) this == MCIUpgrades.PETROLEUM) {
+        if (MCIUpgrades.PETROLEUM != null && (Object) this == MCIUpgrades.PETROLEUM) {
             cir.setReturnValue("upgrade.mekanism_complex_industries.petroleum");
         }
     }
 
     @Inject(method = "getDescription", at = @At("HEAD"), cancellable = true, remap = false)
     private void mci$getDescription(CallbackInfoReturnable<Component> cir) {
-        if ((Object) this == MCIUpgrades.PETROLEUM) {
+        if (MCIUpgrades.PETROLEUM != null && (Object) this == MCIUpgrades.PETROLEUM) {
             cir.setReturnValue(Component.translatable("upgrade.mekanism_complex_industries.petroleum.desc"));
         }
     }

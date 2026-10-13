@@ -74,6 +74,9 @@ public record PacketSetOutputFilter(
     public void handle(IPayloadContext context) {
         Player player = context.player();
         BlockEntity be = player.level().getBlockEntity(pos);
+        if (!MCIPacketSecurity.canAccess(player, pos, be)) {
+            return;
+        }
 
         IOutputInterface out = null;
         if (isAttachment && be instanceof TileEntityIndustrialPipe pipe) {

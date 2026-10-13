@@ -44,7 +44,7 @@ public record PacketSetCoolerEnergy(BlockPos pos, long energyUsage) implements I
         Player player = context.player();
         TileEntityResistiveCooler cooler = WorldUtils.getTileEntity(
                 TileEntityResistiveCooler.class, player.level(), pos);
-        if (cooler != null) {
+        if (cooler != null && MCIPacketSecurity.canAccess(player, pos, cooler)) {
             cooler.setEnergyUsage(energyUsage);
         }
     }

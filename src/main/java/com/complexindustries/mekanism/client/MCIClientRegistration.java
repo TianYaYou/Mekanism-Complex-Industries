@@ -23,6 +23,15 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 @EventBusSubscriber(modid = MCIConstants.MODID, value = Dist.CLIENT)
 public class MCIClientRegistration {
 
+    static {
+        com.complexindustries.mekanism.content.block.MCIKeyLookup.setInstance(new ClientKeyLookup());
+    }
+
+    @SubscribeEvent
+    public static void onClientSetup(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {
+        com.complexindustries.mekanism.content.block.MCIKeyLookup.setInstance(new ClientKeyLookup());
+    }
+
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.RESISTIVE_COOLER, GuiResistiveCooler::new);

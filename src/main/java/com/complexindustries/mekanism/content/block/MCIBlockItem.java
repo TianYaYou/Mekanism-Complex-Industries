@@ -6,8 +6,6 @@ import mekanism.api.Upgrade;
 import mekanism.api.security.IItemSecurityUtils;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.ILangEntry;
-import mekanism.client.key.MekKeyHandler;
-import mekanism.client.key.MekanismKeyHandler;
 import mekanism.common.MekanismLang;
 import mekanism.common.attachments.component.UpgradeAware;
 import mekanism.common.attachments.containers.ContainerType;
@@ -85,19 +83,19 @@ public class MCIBlockItem extends ItemBlockMekanism<Block> implements ICapabilit
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @NotNull Item.TooltipContext context, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
         ILangEntry desc = getBlockDescription();
-        if (MekKeyHandler.isKeyPressed(MekanismKeyHandler.descriptionKey)) {
+        if (MCIKeyLookup.isDescriptionKeyPressed()) {
             if (desc != null) {
                 tooltip.add(desc.translate());
             }
-        } else if (hasDetails && MekKeyHandler.isKeyPressed(MekanismKeyHandler.detailsKey)) {
+        } else if (hasDetails && MCIKeyLookup.isDetailsKeyPressed()) {
             addDetails(stack, context, tooltip, flag);
         } else {
             addStats(stack, context, tooltip, flag);
             if (hasDetails) {
-                tooltip.add(MekanismLang.HOLD_FOR_DETAILS.translateColored(EnumColor.GRAY, EnumColor.INDIGO, MekanismKeyHandler.detailsKey.getTranslatedKeyMessage()));
+                tooltip.add(MekanismLang.HOLD_FOR_DETAILS.translateColored(EnumColor.GRAY, EnumColor.INDIGO, MCIKeyLookup.getDetailsKeyMessage()));
             }
             if (desc != null) {
-                tooltip.add(MekanismLang.HOLD_FOR_DESCRIPTION.translateColored(EnumColor.GRAY, EnumColor.AQUA, MekanismKeyHandler.descriptionKey.getTranslatedKeyMessage()));
+                tooltip.add(MekanismLang.HOLD_FOR_DESCRIPTION.translateColored(EnumColor.GRAY, EnumColor.AQUA, MCIKeyLookup.getDescriptionKeyMessage()));
             }
         }
         super.appendHoverText(stack, context, tooltip, flag);

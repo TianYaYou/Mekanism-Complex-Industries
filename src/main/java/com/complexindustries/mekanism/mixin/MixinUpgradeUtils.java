@@ -17,14 +17,14 @@ public abstract class MixinUpgradeUtils {
 
     @Inject(method = "getItem", at = @At("HEAD"), cancellable = true, remap = false)
     private static void mci$getItem(Upgrade upgrade, CallbackInfoReturnable<Holder<Item>> cir) {
-        if (upgrade == MCIUpgrades.PETROLEUM) {
+        if (MCIUpgrades.PETROLEUM != null && upgrade == MCIUpgrades.PETROLEUM) {
             cir.setReturnValue(MCIItems.PETROLEUM_UPGRADE);
         }
     }
 
     @Inject(method = "getStack(Lmekanism/api/Upgrade;I)Lnet/minecraft/world/item/ItemStack;", at = @At("HEAD"), cancellable = true, remap = false)
     private static void mci$getStack(Upgrade upgrade, int count, CallbackInfoReturnable<ItemStack> cir) {
-        if (upgrade == MCIUpgrades.PETROLEUM) {
+        if (MCIUpgrades.PETROLEUM != null && upgrade == MCIUpgrades.PETROLEUM) {
             cir.setReturnValue(new ItemStack(MCIItems.PETROLEUM_UPGRADE.get(), count));
         }
     }

@@ -44,7 +44,7 @@ public record PacketSetFlowRate(BlockPos pos, long flowRate) implements IMekanis
         Player player = context.player();
         TileEntityFlowRegulator regulator = WorldUtils.getTileEntity(
                 TileEntityFlowRegulator.class, player.level(), pos);
-        if (regulator != null) {
+        if (regulator != null && MCIPacketSecurity.canAccess(player, pos, regulator)) {
             regulator.setFlowRate(flowRate);
         }
     }

@@ -53,6 +53,9 @@ public record PacketSetRedstoneMode(BlockPos pos, boolean isAttachment, @Nullabl
     public void handle(IPayloadContext context) {
         Player player = context.player();
         BlockEntity be = player.level().getBlockEntity(pos);
+        if (!MCIPacketSecurity.canAccess(player, pos, be)) {
+            return;
+        }
 
         IRedstoneControllable target = null;
         if (isAttachment && be instanceof TileEntityIndustrialPipe pipe) {
