@@ -368,5 +368,19 @@
   "gui.mekanism_complex_industries.pulverizer.lower_not_air": "下部转子周围腔室必须留空（空气）",
   "gui.mekanism_complex_industries.pulverizer.missing_disperser": "复合旋钮装置所在水平层其余方块必须为压力分散层",
   "gui.mekanism_complex_industries.pulverizer.missing_coil": "复合旋钮装置正上方必须紧邻电磁线圈",
-  "gui.mekanism_complex_industries.pulverizer.upper_not_air": "上部腔室除连续的电磁线圈外必须留空（空气）"
+  "gui.mekanism_complex_industries.pulverizer.upper_not_air": "上部腔室除连续的电磁线圈外必须留空（空气）",
+  "block.mekanism_complex_industries.supercritical_oxidation_precipitator": "超临界氧化沉淀器",
+  "block.mekanism_complex_industries.liquid_ozone": "液态臭氧",
+  "fluid.mekanism_complex_industries.liquid_ozone": "液态臭氧",
+  "fluid.mekanism_complex_industries.flowing_liquid_ozone": "流动的液态臭氧",
+  "item.mekanism_complex_industries.liquid_ozone_bucket": "液态臭氧桶",
+  "description.mekanism_complex_industries.supercritical_oxidation_precipitator": "利用超临界液态臭氧对浑浊氧化矿粉进行深度络合氧化，输出 2 倍（2,000 mB）浑浊金属络合物气溶胶的高压反应设备。",
+  "chemical.mekanism_complex_industries.ozone": "臭氧",
+  "chemical.mekanism_complex_industries.cloudy_iron_complex_aerosol": "浑浊铁络合物气溶胶",
+  "chemical.mekanism_complex_industries.cloudy_gold_complex_aerosol": "浑浊金络合物气溶胶",
+  "chemical.mekanism_complex_industries.cloudy_copper_complex_aerosol": "浑浊铜络合物气溶胶",
+  "chemical.mekanism_complex_industries.cloudy_osmium_complex_aerosol": "浑浊锇络合物气溶胶",
+  "chemical.mekanism_complex_industries.cloudy_tin_complex_aerosol": "浑浊锡络合物气溶胶",
+  "chemical.mekanism_complex_industries.cloudy_lead_complex_aerosol": "浑浊铅络合物气溶胶",
+  "chemical.mekanism_complex_industries.cloudy_uranium_complex_aerosol": "浑浊铀络合物气溶胶"
 }

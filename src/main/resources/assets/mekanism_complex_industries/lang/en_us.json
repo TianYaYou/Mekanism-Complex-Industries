@@ -368,5 +368,19 @@
   "gui.mekanism_complex_industries.pulverizer.lower_not_air": "Cavity surrounding turbine rotors in lower section must be air.",
   "gui.mekanism_complex_industries.pulverizer.missing_disperser": "Divider layer around Rotational Complex must be Pressure Dispersers.",
   "gui.mekanism_complex_industries.pulverizer.missing_coil": "At least one Electromagnetic Coil must sit directly atop Rotational Complex.",
-  "gui.mekanism_complex_industries.pulverizer.upper_not_air": "Remaining upper section cavity must be air."
+  "gui.mekanism_complex_industries.pulverizer.upper_not_air": "Remaining upper section cavity must be air.",
+  "block.mekanism_complex_industries.supercritical_oxidation_precipitator": "Supercritical Oxidation Precipitator",
+  "block.mekanism_complex_industries.liquid_ozone": "Liquid Ozone",
+  "fluid.mekanism_complex_industries.liquid_ozone": "Liquid Ozone",
+  "fluid.mekanism_complex_industries.flowing_liquid_ozone": "Flowing Liquid Ozone",
+  "item.mekanism_complex_industries.liquid_ozone_bucket": "Liquid Ozone Bucket",
+  "description.mekanism_complex_industries.supercritical_oxidation_precipitator": "A high-pressure reactor that oxidizes Cloudy Oxidized Powders with Liquid Ozone to yield 2x (2,000 mB) Cloudy Metal Complex Aerosols.",
+  "chemical.mekanism_complex_industries.ozone": "Ozone",
+  "chemical.mekanism_complex_industries.cloudy_iron_complex_aerosol": "Cloudy Iron Complex Aerosol",
+  "chemical.mekanism_complex_industries.cloudy_gold_complex_aerosol": "Cloudy Gold Complex Aerosol",
+  "chemical.mekanism_complex_industries.cloudy_copper_complex_aerosol": "Cloudy Copper Complex Aerosol",
+  "chemical.mekanism_complex_industries.cloudy_osmium_complex_aerosol": "Cloudy Osmium Complex Aerosol",
+  "chemical.mekanism_complex_industries.cloudy_tin_complex_aerosol": "Cloudy Tin Complex Aerosol",
+  "chemical.mekanism_complex_industries.cloudy_lead_complex_aerosol": "Cloudy Lead Complex Aerosol",
+  "chemical.mekanism_complex_industries.cloudy_uranium_complex_aerosol": "Cloudy Uranium Complex Aerosol"
 }

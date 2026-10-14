@@ -52,6 +52,8 @@ public class MCIClientRegistration {
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.POWER_INTERFACE, com.complexindustries.mekanism.content.pipe.client.GuiPowerInterface::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.FLUID_EXTRACTOR, com.complexindustries.mekanism.content.extractor.GuiFluidExtractor::new);
         ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.WINDMILL_PULVERIZER, com.complexindustries.mekanism.content.pulverizer.GuiWindmillPulverizer::new);
+        ClientRegistrationUtil.registerScreen(event, MCIContainerTypes.SUPERCRITICAL_OXIDATION_PRECIPITATOR,
+                com.complexindustries.mekanism.client.gui.GuiSupercriticalOxidationPrecipitator::new);
     }
 
     @SubscribeEvent
@@ -93,4 +95,3 @@ public class MCIClientRegistration {
                 com.complexindustries.mekanism.registration.MCITileEntityTypes.FLUID_EXTRACTOR_PORT);
     }
 }
-

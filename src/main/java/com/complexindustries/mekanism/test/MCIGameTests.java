@@ -2280,5 +2280,32 @@ public class MCIGameTests {
 
         helper.succeed();
     }
-}
 
+    @GameTest(template = "empty_10x10x10")
+    public static void testSupercriticalOxidationPrecipitator(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(3, 1, 3);
+        helper.setBlock(pos, MCIBlocks.SUPERCRITICAL_OXIDATION_PRECIPITATOR.get());
+        helper.assertBlockPresent(MCIBlocks.SUPERCRITICAL_OXIDATION_PRECIPITATOR.get(), pos);
+
+        com.complexindustries.mekanism.content.precipitator.TileEntitySupercriticalOxidationPrecipitator tile =
+                (com.complexindustries.mekanism.content.precipitator.TileEntitySupercriticalOxidationPrecipitator) helper.getBlockEntity(pos);
+        helper.assertTrue(tile != null, "方块实体应为 TileEntitySupercriticalOxidationPrecipitator");
+
+        // Supply 200 mB Liquid Ozone, 1x Cloudy Oxidized Iron Powder, and energy
+        tile.fluidTank.setStack(new FluidStack(MCIFluids.SOURCE_LIQUID_OZONE.get(), 1000));
+        tile.inputSlot.setStack(new ItemStack(MCIItems.CLOUDY_OXIDIZED_IRON_POWDER.get(), 2));
+        tile.getEnergyContainer().setEnergy(tile.getEnergyContainer().getMaxEnergy());
+
+        // Run for 100 ticks (1 operation)
+        for (int i = 0; i < 100; i++) {
+            TileEntityMekanism.tickServer(helper.getLevel(), helper.absolutePos(pos), helper.getBlockState(pos), tile);
+        }
+
+        helper.assertTrue(tile.inputSlot.getCount() == 1, "应消耗 1 个浑浊铁的氧化粉末，剩余 1 个");
+        helper.assertTrue(tile.fluidTank.getFluidAmount() == 800, "应消耗 200 mB 液态臭氧，剩余 800 mB");
+        helper.assertTrue(tile.outputChemicalTank.getStack().is(MCIChemicals.CLOUDY_IRON_COMPLEX_AEROSOL.get()), "产物应为浑浊铁络合物气溶胶");
+        helper.assertTrue(tile.outputChemicalTank.getStored() == 2000L, "单次应产出 2,000 mB 浑浊铁络合物气溶胶");
+
+        helper.succeed();
+    }
+}

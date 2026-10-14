@@ -410,10 +410,21 @@ public class TileEntityChemicalSoakingFactory extends TileEntityConfigurableMach
         return upgradeComponent;
     }
 
+    public static class SoakingFactoryUpgradeData extends AdvancedMachineUpgradeData {
+        public SoakingFactoryUpgradeData(HolderLookup.Provider provider, boolean redstone, RedstoneControl controlType,
+                                         mekanism.api.energy.IEnergyContainer energyContainer, int[] progress, long[] usedSoFar,
+                                         IChemicalTank stored, ChemicalInventorySlot extraSlot, EnergyInventorySlot energySlot,
+                                         List<IInventorySlot> inputSlots, List<IInventorySlot> outputSlots,
+                                         boolean sorting, List<ITileComponent> components) {
+            super(provider, redstone, controlType, energyContainer, progress, usedSoFar, stored, extraSlot,
+                    energySlot, inputSlots, outputSlots, sorting, components);
+        }
+    }
+
     @Nullable
     @Override
     public AdvancedMachineUpgradeData getUpgradeData(HolderLookup.Provider provider) {
-        return new AdvancedMachineUpgradeData(
+        return new SoakingFactoryUpgradeData(
                 provider,
                 redstone,
                 getControlType(),
@@ -432,10 +443,38 @@ public class TileEntityChemicalSoakingFactory extends TileEntityConfigurableMach
 
     @Override
     public void parseUpgradeData(HolderLookup.Provider provider, @NotNull IUpgradeData upgradeData) {
-        if (upgradeData instanceof AdvancedMachineUpgradeData data) {
+        if (upgradeData instanceof SoakingFactoryUpgradeData factoryData) {
+            redstone = factoryData.redstone;
+            setControlType(factoryData.controlType);
+            this.sorting = factoryData.sorting;
+            getEnergyContainer().setEnergy(factoryData.energyContainer.getEnergy());
+            energySlot.deserializeNBT(provider, factoryData.energySlot.serializeNBT(provider));
+            if (factoryData.chemicalSlot != null && !factoryData.chemicalSlot.isEmpty()) {
+                extraSlot.deserializeNBT(provider, factoryData.chemicalSlot.serializeNBT(provider));
+            }
+            if (factoryData.stored != null && !factoryData.stored.isEmpty()) {
+                chemicalTank.setStack(factoryData.stored.getStack());
+            }
+
+            if (factoryData.progress != null) {
+                System.arraycopy(factoryData.progress, 0, progress, 0, Math.min(factoryData.progress.length, progress.length));
+            }
+            if (factoryData.inputSlots != null) {
+                for (int i = 0; i < Math.min(factoryData.inputSlots.size(), inputSlots.size()); i++) {
+                    inputSlots.get(i).setStack(factoryData.inputSlots.get(i).getStack());
+                }
+            }
+            if (factoryData.outputSlots != null) {
+                for (int i = 0; i < Math.min(factoryData.outputSlots.size(), outputSlots.size()); i++) {
+                    outputSlots.get(i).setStack(factoryData.outputSlots.get(i).getStack());
+                }
+            }
+            for (ITileComponent component : getComponents()) {
+                component.read(factoryData.components, provider);
+            }
+        } else if (upgradeData instanceof AdvancedMachineUpgradeData data) {
             redstone = data.redstone;
             setControlType(data.controlType);
-            this.sorting = data.sorting;
             getEnergyContainer().setEnergy(data.energyContainer.getEnergy());
             energySlot.deserializeNBT(provider, data.energySlot.serializeNBT(provider));
             if (data.chemicalSlot != null && !data.chemicalSlot.isEmpty()) {
@@ -448,15 +487,11 @@ public class TileEntityChemicalSoakingFactory extends TileEntityConfigurableMach
             if (data.progress != null) {
                 System.arraycopy(data.progress, 0, progress, 0, Math.min(data.progress.length, progress.length));
             }
-            if (data.inputSlots != null) {
-                for (int i = 0; i < Math.min(data.inputSlots.size(), inputSlots.size()); i++) {
-                    inputSlots.get(i).setStack(data.inputSlots.get(i).getStack());
-                }
+            if (data.inputSlots != null && !data.inputSlots.isEmpty()) {
+                inputSlots.get(0).setStack(data.inputSlots.get(0).getStack());
             }
-            if (data.outputSlots != null) {
-                for (int i = 0; i < Math.min(data.outputSlots.size(), outputSlots.size()); i++) {
-                    outputSlots.get(i).setStack(data.outputSlots.get(i).getStack());
-                }
+            if (data.outputSlots != null && !data.outputSlots.isEmpty()) {
+                outputSlots.get(0).setStack(data.outputSlots.get(0).getStack());
             }
             for (ITileComponent component : getComponents()) {
                 component.read(data.components, provider);

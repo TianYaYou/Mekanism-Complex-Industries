@@ -276,5 +276,13 @@ public final class MCITileEntityTypes {
                     .withSimple(Capabilities.CONFIGURABLE)
                     .build();
 
+    public static final TileEntityTypeRegistryObject<com.complexindustries.mekanism.content.precipitator.TileEntitySupercriticalOxidationPrecipitator> SUPERCRITICAL_OXIDATION_PRECIPITATOR =
+            TILE_ENTITY_TYPES.mekBuilder(MCIBlocks.SUPERCRITICAL_OXIDATION_PRECIPITATOR, com.complexindustries.mekanism.content.precipitator.TileEntitySupercriticalOxidationPrecipitator::new)
+                    .clientTicker(TileEntityMekanism::tickClient)
+                    .serverTicker(TileEntityMekanism::tickServer)
+                    .withSimple(Capabilities.CONFIGURABLE)
+                    .withSimple(Capabilities.CONFIG_CARD)
+                    .build();
+
     private MCITileEntityTypes() {}
 }

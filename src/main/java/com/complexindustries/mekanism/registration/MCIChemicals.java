@@ -36,5 +36,25 @@ public final class MCIChemicals {
     // Styrene: 0xE6A8D7 (orchid/pink monomer)
     public static final DeferredChemical<Chemical> STYRENE = CHEMICALS.register("styrene", 0xE6A8D7);
 
+    // Ozone & Supercritical Oxidation Aerosol Chain:
+    // Ozone: 0x55A8FF (vivid ozone blue)
+    public static final DeferredChemical<Chemical> OZONE = CHEMICALS.register("ozone", 0x55A8FF);
+
+    // Cloudy X Complex Aerosols (Supercritical Oxidation Precipitator outputs):
+    public static final DeferredChemical<Chemical> CLOUDY_IRON_COMPLEX_AEROSOL =
+            CHEMICALS.register("cloudy_iron_complex_aerosol", 0xD4B098);
+    public static final DeferredChemical<Chemical> CLOUDY_GOLD_COMPLEX_AEROSOL =
+            CHEMICALS.register("cloudy_gold_complex_aerosol", 0xF5D142);
+    public static final DeferredChemical<Chemical> CLOUDY_COPPER_COMPLEX_AEROSOL =
+            CHEMICALS.register("cloudy_copper_complex_aerosol", 0xE07A48);
+    public static final DeferredChemical<Chemical> CLOUDY_OSMIUM_COMPLEX_AEROSOL =
+            CHEMICALS.register("cloudy_osmium_complex_aerosol", 0x8CB8D6);
+    public static final DeferredChemical<Chemical> CLOUDY_TIN_COMPLEX_AEROSOL =
+            CHEMICALS.register("cloudy_tin_complex_aerosol", 0xC8D6DE);
+    public static final DeferredChemical<Chemical> CLOUDY_LEAD_COMPLEX_AEROSOL =
+            CHEMICALS.register("cloudy_lead_complex_aerosol", 0x6E788C);
+    public static final DeferredChemical<Chemical> CLOUDY_URANIUM_COMPLEX_AEROSOL =
+            CHEMICALS.register("cloudy_uranium_complex_aerosol", 0x68D85B);
+
     private MCIChemicals() {}
 }

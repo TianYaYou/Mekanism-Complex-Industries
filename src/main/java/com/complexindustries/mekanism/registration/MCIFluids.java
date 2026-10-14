@@ -94,5 +94,24 @@ public final class MCIFluids {
             .levelDecreasePerBlock(1)
             .tickRate(5);
 
+    public static final DeferredHolder<FluidType, FluidType> LIQUID_OZONE_TYPE =
+            FLUID_TYPES.register("liquid_ozone", com.complexindustries.mekanism.content.fluid.LiquidOzoneFluidType::new);
+
+    public static final DeferredHolder<Fluid, FlowingFluid> SOURCE_LIQUID_OZONE = FLUIDS.register("liquid_ozone",
+            () -> new BaseFlowingFluid.Source(MCIFluids.LIQUID_OZONE_PROPERTIES));
+
+    public static final DeferredHolder<Fluid, FlowingFluid> FLOWING_LIQUID_OZONE = FLUIDS.register("flowing_liquid_ozone",
+            () -> new BaseFlowingFluid.Flowing(MCIFluids.LIQUID_OZONE_PROPERTIES));
+
+    public static final BaseFlowingFluid.Properties LIQUID_OZONE_PROPERTIES = new BaseFlowingFluid.Properties(
+            LIQUID_OZONE_TYPE,
+            SOURCE_LIQUID_OZONE,
+            FLOWING_LIQUID_OZONE)
+            .bucket(MCIItems.LIQUID_OZONE_BUCKET)
+            .block(MCIBlocks.LIQUID_OZONE_BLOCK)
+            .slopeFindDistance(4)
+            .levelDecreasePerBlock(1)
+            .tickRate(5);
+
     private MCIFluids() {}
 }

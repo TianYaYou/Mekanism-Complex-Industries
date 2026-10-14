@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import com.complexindustries.mekanism.content.block.BlockChemicalFilmCoater;
 import com.complexindustries.mekanism.recipe.ChemicalFilmCoatingRecipe;
 import com.complexindustries.mekanism.recipe.cache.ChemicalFilmCoatingCachedRecipe;
 import com.complexindustries.mekanism.recipe.input.ChemicalFilmCoatingRecipeInput;

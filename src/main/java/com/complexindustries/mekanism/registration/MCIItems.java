@@ -363,5 +363,28 @@ public final class MCIItems {
     public static final DeferredItem<Item> CLOUDY_OXIDIZED_URANIUM_POWDER = ITEMS.register("cloudy_oxidized_uranium_powder",
             () -> new Item(new Item.Properties()));
 
+    // Supercritical Oxidation Precipitator & Liquid Ozone Bucket
+    private static final mekanism.common.attachments.component.AttachedSideConfig PRECIPITATOR_SIDE_CONFIG = net.minecraft.Util.make(() -> {
+        java.util.Map<mekanism.common.lib.transmitter.TransmissionType, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo> configInfo =
+                new java.util.EnumMap<>(mekanism.common.lib.transmitter.TransmissionType.class);
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.ITEM, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo.MACHINE);
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.FLUID, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo.INPUT_ONLY);
+        java.util.Map<mekanism.api.RelativeSide, mekanism.common.tile.component.config.DataType> chemicalSides =
+                new java.util.EnumMap<>(mekanism.api.RelativeSide.class);
+        chemicalSides.put(mekanism.api.RelativeSide.RIGHT, mekanism.common.tile.component.config.DataType.OUTPUT);
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.CHEMICAL, new mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo(chemicalSides, true));
+        configInfo.put(mekanism.common.lib.transmitter.TransmissionType.ENERGY, mekanism.common.attachments.component.AttachedSideConfig.LightConfigInfo.INPUT_ONLY);
+        return new mekanism.common.attachments.component.AttachedSideConfig(configInfo);
+    });
+
+    public static final DeferredItem<BucketItem> LIQUID_OZONE_BUCKET = ITEMS.register("liquid_ozone_bucket",
+            () -> new BucketItem(MCIFluids.SOURCE_LIQUID_OZONE.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
+
+    public static final DeferredItem<BlockItem> SUPERCRITICAL_OXIDATION_PRECIPITATOR = ITEMS.register("supercritical_oxidation_precipitator",
+            () -> new MCIBlockItem(MCIBlocks.SUPERCRITICAL_OXIDATION_PRECIPITATOR.get(), new Item.Properties()
+                    .component(mekanism.common.registries.MekanismDataComponents.EJECTOR, mekanism.common.attachments.component.AttachedEjector.DEFAULT)
+                    .component(mekanism.common.registries.MekanismDataComponents.SIDE_CONFIG, PRECIPITATOR_SIDE_CONFIG),
+                    "description.mekanism_complex_industries.supercritical_oxidation_precipitator", true));
+
     private MCIItems() {}
 }

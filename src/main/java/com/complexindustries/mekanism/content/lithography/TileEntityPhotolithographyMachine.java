@@ -241,13 +241,13 @@ public class TileEntityPhotolithographyMachine extends TileEntityProgressMachine
             currentLaserEnergy = 0;
         }
 
-        // 2. Adjust exposure speed based on laser power (5s = 100 ticks, 55s = 1100 ticks) and installed speed upgrades
-        int baseLaserTicks = MAX_TICKS_REQUIRED;
+        // 2. Adjust exposure speed based on laser power (5s = 100 ticks, 55s = 1100 ticks)
         if (hasActiveLaser()) {
             double ratio = Math.min(1.0, Math.max(0.0, (currentLaserEnergy - 100.0) / 9900.0));
-            baseLaserTicks = (int) Math.round(MAX_TICKS_REQUIRED - (MAX_TICKS_REQUIRED - MIN_TICKS_REQUIRED) * ratio);
+            ticksRequired = (int) Math.round(MAX_TICKS_REQUIRED - (MAX_TICKS_REQUIRED - MIN_TICKS_REQUIRED) * ratio);
+        } else {
+            ticksRequired = MAX_TICKS_REQUIRED;
         }
-        ticksRequired = MekanismUtils.getTicks(this, baseLaserTicks);
 
         // 3. Environmental dissipation (0.1% per tick)
         if (!chemicalTank.isEmpty() && isNitrogen(chemicalTank.getStack())) {

@@ -92,6 +92,8 @@ public final class MCICreativeTabs {
                         output.accept(MCIItems.CLOUDY_OXIDIZED_TIN_POWDER.get());
                         output.accept(MCIItems.CLOUDY_OXIDIZED_LEAD_POWDER.get());
                         output.accept(MCIItems.CLOUDY_OXIDIZED_URANIUM_POWDER.get());
+                        output.accept(MCIItems.LIQUID_OZONE_BUCKET.get());
+                        output.accept(MCIItems.SUPERCRITICAL_OXIDATION_PRECIPITATOR.get());
                     })
                     .build());
 

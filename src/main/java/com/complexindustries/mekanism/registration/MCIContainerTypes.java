@@ -68,5 +68,8 @@ public final class MCIContainerTypes {
     public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.pulverizer.ContainerWindmillPulverizer> WINDMILL_PULVERIZER =
             CONTAINER_TYPES.register("windmill_pulverizer", com.complexindustries.mekanism.content.pulverizer.TileEntityWindmillPulverizerCasing.class, com.complexindustries.mekanism.content.pulverizer.ContainerWindmillPulverizer::new);
 
+    public static final ContainerTypeRegistryObject<com.complexindustries.mekanism.content.precipitator.ContainerSupercriticalOxidationPrecipitator> SUPERCRITICAL_OXIDATION_PRECIPITATOR =
+            CONTAINER_TYPES.register("supercritical_oxidation_precipitator", com.complexindustries.mekanism.content.precipitator.TileEntitySupercriticalOxidationPrecipitator.class, com.complexindustries.mekanism.content.precipitator.ContainerSupercriticalOxidationPrecipitator::new);
+
     private MCIContainerTypes() {}
 }

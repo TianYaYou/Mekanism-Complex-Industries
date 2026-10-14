@@ -12,8 +12,6 @@ import com.complexindustries.mekanism.content.block.RefineryValveBlock;
 import com.complexindustries.mekanism.content.block.ResistiveCoolerBlock;
 import com.complexindustries.mekanism.content.block.SolidCrudeOilOreBlock;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -258,7 +256,6 @@ public final class MCIBlocks {
                             .strength(3.5F, 16.0F)
                             .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.block.ChemicalSoakingFactoryBlock.ACTIVE) ? 8 : 0)));
 
-
     public static final DeferredBlock<com.complexindustries.mekanism.content.block.CrystalGrowthChamberBlock> CRYSTAL_GROWTH_CHAMBER = BLOCKS.register("crystal_growth_chamber",
             () -> new com.complexindustries.mekanism.content.block.CrystalGrowthChamberBlock(
                     BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS)
@@ -350,6 +347,19 @@ public final class MCIBlocks {
                     BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                             .requiresCorrectToolForDrops()
                             .strength(5.0F, 9.0F)));
+
+    public static final DeferredBlock<LiquidBlock> LIQUID_OZONE_BLOCK = BLOCKS.register("liquid_ozone",
+            () -> new LiquidBlock(MCIFluids.SOURCE_LIQUID_OZONE.get(),
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noCollission().strength(100.0F).noLootTable()));
+
+    public static final DeferredBlock<com.complexindustries.mekanism.content.precipitator.BlockSupercriticalOxidationPrecipitator> SUPERCRITICAL_OXIDATION_PRECIPITATOR =
+            BLOCKS.register("supercritical_oxidation_precipitator",
+                    () -> new com.complexindustries.mekanism.content.precipitator.BlockSupercriticalOxidationPrecipitator(
+                            BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                                    .requiresCorrectToolForDrops()
+                                    .strength(3.5F, 16.0F)
+                                    .lightLevel(state -> state.getValue(com.complexindustries.mekanism.content.precipitator.BlockSupercriticalOxidationPrecipitator.ACTIVE) ? 10 : 0)
+                                    .noOcclusion()));
 
     private MCIBlocks() {}
 }
