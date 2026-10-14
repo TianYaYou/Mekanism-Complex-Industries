@@ -105,17 +105,28 @@ public class TileEntityIndustrialPipe extends BlockEntity implements IPipeNode {
 
     @Nullable
     @Override
-    public IPipeAttachment getAttachment(Direction face) {
-        return attachments[face.ordinal()];
+    public IPipeAttachment getAttachment(@Nullable Direction face) {
+        return face == null ? null : attachments[face.ordinal()];
     }
 
     public void addAttachment(Direction face, IPipeAttachment attachment) {
+        if (face == null) {
+            return;
+        }
+        IPipeAttachment prev = attachments[face.ordinal()];
+        if (prev != null && network != null) {
+            prev.onDetachedFromNetwork(network);
+        }
         attachments[face.ordinal()] = attachment;
         if (network != null) {
             attachment.onAttachedToNetwork(network);
         }
         setChanged();
         if (level != null) {
+            if (!level.isClientSide()) {
+                PipeNetworkManager.onNodeRemoved(level, worldPosition, this);
+                PipeNetworkManager.onNodeAdded(level, worldPosition, this);
+            }
             net.minecraft.world.level.block.state.BlockState current = getBlockState();
             if (current.getBlock() instanceof IndustrialPipeBlock pipeBlock) {
                 level.setBlock(worldPosition, pipeBlock.updateConnections(current, level, worldPosition), 3);
@@ -125,6 +136,9 @@ public class TileEntityIndustrialPipe extends BlockEntity implements IPipeNode {
     }
 
     public void removeAttachment(Direction face) {
+        if (face == null) {
+            return;
+        }
         IPipeAttachment existing = attachments[face.ordinal()];
         if (existing != null) {
             if (network != null) {
@@ -133,6 +147,10 @@ public class TileEntityIndustrialPipe extends BlockEntity implements IPipeNode {
             attachments[face.ordinal()] = null;
             setChanged();
             if (level != null) {
+                if (!level.isClientSide()) {
+                    PipeNetworkManager.onNodeRemoved(level, worldPosition, this);
+                    PipeNetworkManager.onNodeAdded(level, worldPosition, this);
+                }
                 net.minecraft.world.level.block.state.BlockState current = getBlockState();
                 if (current.getBlock() instanceof IndustrialPipeBlock pipeBlock) {
                     level.setBlock(worldPosition, pipeBlock.updateConnections(current, level, worldPosition), 3);
@@ -206,6 +224,9 @@ public class TileEntityIndustrialPipe extends BlockEntity implements IPipeNode {
     protected void loadAdditional(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         for (int i = 0; i < 6; i++) {
+            if (attachments[i] != null && network != null) {
+                attachments[i].onDetachedFromNetwork(network);
+            }
             attachments[i] = null;
         }
         if (tag.contains("Attachments", Tag.TAG_LIST)) {

@@ -2,7 +2,6 @@ package com.complexindustries.mekanism.content.flowregulator;
 
 import com.complexindustries.mekanism.registration.MCIBlocks;
 import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.RelativeSide;
 import mekanism.api.chemical.BasicChemicalTank;
@@ -16,6 +15,7 @@ import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.SyncableLong;
 import mekanism.common.tile.base.TileEntityMekanism;
+import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -29,6 +29,7 @@ public class TileEntityFlowRegulator extends TileEntityMekanism {
 
     public static final long DEFAULT_BUFFER = 10_000L;
     public static final long DEFAULT_FLOW_RATE = 1_000L; // 1,000 mB/s
+    public static final long MAX_FLOW_RATE = 100_000_000L; // 100,000,000 mB/s safe upper bound
 
     public IChemicalTank bufferTank;
     private long flowRate = DEFAULT_FLOW_RATE;
@@ -52,7 +53,7 @@ public class TileEntityFlowRegulator extends TileEntityMekanism {
                 ConstantPredicates.alwaysTrue(), null, listener, null) {
             @Override
             public long getCapacity() {
-                return Math.max(DEFAULT_BUFFER, flowRate);
+                return Math.max(DEFAULT_BUFFER, Math.max(flowRate, getStored()));
             }
         }, RelativeSide.FRONT, RelativeSide.BACK);
         return helper.build();
@@ -129,26 +130,28 @@ public class TileEntityFlowRegulator extends TileEntityMekanism {
             return sendUpdatePacket;
         }
 
-        // 3. Exact per-tick token budget calculation
-        flowAccumulator += flowRate;
+        // 3. Exact per-tick token budget calculation with overflow protection
+        flowAccumulator = Math.min(MAX_FLOW_RATE * 20L, flowAccumulator + flowRate);
         remainingBudget = flowAccumulator / 20L;
         flowAccumulator %= 20L;
 
         // 4. Auto-ejection to output port
-        if (remainingBudget > 0 && !bufferTank.isEmpty()) {
+        if (remainingBudget > 0 && !bufferTank.isEmpty() && level != null) {
             Direction front = getDirection();
             BlockPos targetPos = worldPosition.relative(front);
-            IChemicalHandler target = level.getCapability(Capabilities.CHEMICAL.block(), targetPos, front.getOpposite());
-            if (target != null) {
-                long toEjectAmount = Math.min(remainingBudget, bufferTank.getStored());
-                if (toEjectAmount > 0) {
-                    ChemicalStack toSend = bufferTank.getStack().copyWithAmount(toEjectAmount);
-                    ChemicalStack remainder = target.insertChemical(toSend, Action.EXECUTE);
-                    long sent = toEjectAmount - remainder.getAmount();
-                    if (sent > 0) {
-                        bufferTank.shrinkStack(sent, Action.EXECUTE);
-                        remainingBudget -= sent;
-                        transferredThisSecond += sent;
+            if (WorldUtils.isBlockLoaded(level, targetPos)) {
+                IChemicalHandler target = WorldUtils.getCapability(level, Capabilities.CHEMICAL.block(), targetPos, front.getOpposite());
+                if (target != null) {
+                    long toEjectAmount = Math.min(remainingBudget, bufferTank.getStored());
+                    if (toEjectAmount > 0) {
+                        ChemicalStack toSend = bufferTank.getStack().copyWithAmount(toEjectAmount);
+                        ChemicalStack remainder = target.insertChemical(toSend, Action.EXECUTE);
+                        long sent = toEjectAmount - remainder.getAmount();
+                        if (sent > 0) {
+                            bufferTank.shrinkStack(sent, Action.EXECUTE);
+                            remainingBudget -= sent;
+                            transferredThisSecond += sent;
+                        }
                     }
                 }
             }
@@ -169,7 +172,7 @@ public class TileEntityFlowRegulator extends TileEntityMekanism {
     }
 
     public void setFlowRate(long rate) {
-        this.flowRate = Math.max(0, rate);
+        this.flowRate = Math.max(0, Math.min(rate, MAX_FLOW_RATE));
         markForSave();
     }
 
@@ -201,13 +204,13 @@ public class TileEntityFlowRegulator extends TileEntityMekanism {
 
     @Override
     public void loadAdditional(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
         if (tag.contains("flowRate")) {
-            flowRate = tag.getLong("flowRate");
+            flowRate = Math.max(0, Math.min(tag.getLong("flowRate"), MAX_FLOW_RATE));
         }
         if (tag.contains("ringColor")) {
             ringColor = DyeColor.byName(tag.getString("ringColor"), DyeColor.WHITE);
         }
+        super.loadAdditional(tag, provider);
     }
 
     @NotNull
@@ -221,12 +224,12 @@ public class TileEntityFlowRegulator extends TileEntityMekanism {
 
     @Override
     public void handleUpdateTag(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider provider) {
-        super.handleUpdateTag(tag, provider);
+        if (tag.contains("flowRate")) {
+            this.flowRate = Math.max(0, Math.min(tag.getLong("flowRate"), MAX_FLOW_RATE));
+        }
         if (tag.contains("ringColor")) {
             this.ringColor = DyeColor.byId(tag.getInt("ringColor"));
         }
-        if (tag.contains("flowRate")) {
-            this.flowRate = tag.getLong("flowRate");
-        }
+        super.handleUpdateTag(tag, provider);
     }
 }

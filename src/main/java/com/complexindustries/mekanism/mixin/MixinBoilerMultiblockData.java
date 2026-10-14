@@ -86,7 +86,8 @@ public abstract class MixinBoilerMultiblockData {
         remap = false
     )
     private double mci$suppressNormalBoilingIfCracking(BoilerMultiblockData instance) {
-        if (this.superheatedCoolantTank.getStack().is(MCIChemicals.PETROLEUM_GAS)) {
+        if (this.superheatedCoolantTank.getStack().is(MCIChemicals.PETROLEUM_GAS)
+                || this.steamTank.getStack().is(MCIChemicals.PROPYLENE)) {
             return 0.0;
         }
         return instance.getTotalTemperature();

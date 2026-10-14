@@ -7,13 +7,11 @@ import mekanism.common.attachments.containers.ContainerType;
 import mekanism.common.capabilities.heat.CachedAmbientTemperature;
 import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
 import mekanism.common.capabilities.holder.heat.IHeatCapacitorHolder;
-import mekanism.common.tile.base.WrenchResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -378,7 +376,7 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
     public void handleUpdateTag(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider provider) {
         super.handleUpdateTag(tag, provider);
         if (tag.contains("valveMode")) {
-            mode = ValveMode.values()[tag.getInt("valveMode") % ValveMode.values().length];
+            mode = ValveMode.values()[Math.floorMod(tag.getInt("valveMode"), ValveMode.values().length)];
             if (level != null && level.isClientSide) {
                 BlockState state = getBlockState();
                 if (state.hasProperty(com.complexindustries.mekanism.content.block.RefineryValveBlock.MODE)
@@ -393,7 +391,7 @@ public class TileEntityRefineryValve extends TileEntityRefineryCasing implements
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
         if (tag.contains("valveMode")) {
-            mode = ValveMode.values()[tag.getInt("valveMode") % ValveMode.values().length];
+            mode = ValveMode.values()[Math.floorMod(tag.getInt("valveMode"), ValveMode.values().length)];
         }
     }
 

@@ -29,15 +29,12 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import org.jetbrains.annotations.NotNull;
 
 public class FluidExtractorMultiblockData extends MultiblockData implements IValveHandler {
 
@@ -113,13 +110,14 @@ public class FluidExtractorMultiblockData extends MultiblockData implements IVal
 
     public void updatePumpPositions(Level world) {
         pumpPositions.clear();
-        if (getBounds() == null) {
+        if (getBounds() == null || world == null) {
             pumpCount = 0;
             return;
         }
         int minY = getBounds().getMinPos().getY();
         for (BlockPos pos : locations) {
-            if (pos.getY() == minY && world.getBlockState(pos).is(MCIBlocks.POWERED_PUMP.get())) {
+            if (pos.getY() == minY && WorldUtils.isBlockLoaded(world, pos)
+                    && world.getBlockState(pos).is(MCIBlocks.POWERED_PUMP.get())) {
                 pumpPositions.add(pos.immutable());
             }
         }
@@ -128,7 +126,7 @@ public class FluidExtractorMultiblockData extends MultiblockData implements IVal
 
     public void scanEnvironment(Level world) {
         updatePumpPositions(world);
-        if (pumpPositions.isEmpty()) {
+        if (pumpPositions.isEmpty() || world == null) {
             environment = ExtractorEnvironment.NONE;
             lavaBlockCount = 0;
             return;
@@ -142,6 +140,9 @@ public class FluidExtractorMultiblockData extends MultiblockData implements IVal
 
         for (BlockPos pumpPos : pumpPositions) {
             BlockPos below = pumpPos.below();
+            if (!WorldUtils.isBlockLoaded(world, below)) {
+                continue;
+            }
             FluidState fs = world.getFluidState(below);
             if (fs.is(FluidTags.LAVA)) {
                 lavaFound++;
@@ -174,7 +175,7 @@ public class FluidExtractorMultiblockData extends MultiblockData implements IVal
     }
 
     private int scanUpwardLava(Level world, List<BlockPos> starts) {
-        if (getBounds() == null || starts.isEmpty()) {
+        if (getBounds() == null || starts.isEmpty() || world == null) {
             return 0;
         }
         int minFloorY = getBounds().getMinPos().getY() - 1;
@@ -191,8 +192,8 @@ public class FluidExtractorMultiblockData extends MultiblockData implements IVal
             BlockPos current = queue.poll();
             for (Direction dir : Direction.values()) {
                 BlockPos neighbor = current.relative(dir);
-                // Scan upward & contiguous lava (at or above extraction surface)
-                if (neighbor.getY() >= minFloorY && !visited.contains(neighbor)) {
+                // Scan upward & contiguous lava (at or above extraction surface) in loaded chunks only
+                if (neighbor.getY() >= minFloorY && !visited.contains(neighbor) && WorldUtils.isBlockLoaded(world, neighbor)) {
                     FluidState nfs = world.getFluidState(neighbor);
                     if (nfs.is(FluidTags.LAVA)) {
                         visited.add(neighbor);
@@ -256,20 +257,22 @@ public class FluidExtractorMultiblockData extends MultiblockData implements IVal
         // Eject fluid from ports if any connected fluid handlers exist
         if (!fluidTank.isEmpty() && !valves.isEmpty()) {
             for (ValveData valve : valves) {
-                BlockEntity target = WorldUtils.getTileEntity(world, valve.location.relative(valve.side));
-                if (target != null && target.getLevel() != null) {
-                    IFluidHandler handler = target.getLevel().getCapability(
-                            Capabilities.FluidHandler.BLOCK,
-                            valve.location.relative(valve.side),
-                            valve.side.getOpposite()
-                    );
-                    if (handler != null) {
-                        FluidStack toSend = fluidTank.extract(1000, Action.SIMULATE, AutomationType.INTERNAL);
-                        if (!toSend.isEmpty()) {
-                            int filled = handler.fill(toSend, IFluidHandler.FluidAction.EXECUTE);
-                            if (filled > 0) {
-                                fluidTank.extract(filled, Action.EXECUTE, AutomationType.INTERNAL);
-                            }
+                BlockPos targetPos = valve.location.relative(valve.side);
+                if (!WorldUtils.isBlockLoaded(world, targetPos)) {
+                    continue;
+                }
+                IFluidHandler handler = WorldUtils.getCapability(
+                        world,
+                        Capabilities.FluidHandler.BLOCK,
+                        targetPos,
+                        valve.side.getOpposite()
+                );
+                if (handler != null) {
+                    FluidStack toSend = fluidTank.extract(1000, Action.SIMULATE, AutomationType.INTERNAL);
+                    if (!toSend.isEmpty()) {
+                        int filled = handler.fill(toSend, IFluidHandler.FluidAction.EXECUTE);
+                        if (filled > 0) {
+                            fluidTank.extract(filled, Action.EXECUTE, AutomationType.INTERNAL);
                         }
                     }
                 }
@@ -306,7 +309,11 @@ public class FluidExtractorMultiblockData extends MultiblockData implements IVal
         }
         readValves(tag);
         if (tag.contains("env")) {
-            environment = ExtractorEnvironment.values()[tag.getByte("env")];
+            int envIdx = tag.getByte("env") & 255;
+            ExtractorEnvironment[] envs = ExtractorEnvironment.values();
+            if (envIdx < envs.length) {
+                environment = envs[envIdx];
+            }
         }
         lavaBlockCount = tag.getInt("lavaCount");
         pumpCount = tag.getInt("pumps");

@@ -80,15 +80,8 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
         if (stack.getFluid() == Fluids.WATER) {
             return true;
         }
-        if (stack.getFluid() == MCIFluids.SOURCE_CRYOGENIC_REFRIGERANT.get() || stack.getFluid() == MCIFluids.FLOWING_CRYOGENIC_REFRIGERANT.get()) {
-            return true;
-        }
-        Level world = getLevel();
-        if (world == null) {
-            return true;
-        }
-        RotaryRecipe recipe = MekanismRecipeType.ROTARY.getInputCache().findFirstRecipe(world, stack);
-        return recipe != null;
+        return stack.getFluid() == MCIFluids.SOURCE_CRYOGENIC_REFRIGERANT.get()
+                || stack.getFluid() == MCIFluids.FLOWING_CRYOGENIC_REFRIGERANT.get();
     }
 
     public int getTankCapacity() {
@@ -156,7 +149,9 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
 
                 if (toProcess > 0) {
                     int potentialGas = (nobleGasAccumulator + toProcess) / 100;
-                    if (potentialGas == 0 || outputChemicalTank.getNeeded() >= potentialGas) {
+                    boolean canFitGas = (outputChemicalTank.isEmpty() || outputChemicalTank.getStack().is(MCIChemicals.NOBLE_GAS.get()))
+                            && (potentialGas == 0 || outputChemicalTank.insert(MCIChemicals.NOBLE_GAS.asStack(potentialGas), Action.SIMULATE, AutomationType.INTERNAL).isEmpty());
+                    if (canFitGas) {
                         FluidStack outFluid = new FluidStack(Fluids.WATER, toProcess);
                         if (outputFluidTank.insert(outFluid, Action.SIMULATE, AutomationType.INTERNAL).isEmpty()) {
                             inputFluidTank.shrinkStack(toProcess, Action.EXECUTE);
@@ -182,7 +177,9 @@ public class FreezerMultiblockData extends MultiblockData implements IValveHandl
                     int toProcess = (int) Math.min(inGas.getAmount(), (long) maxProcessRate);
                     if (toProcess > 0) {
                         int potentialGas = (nitrogenAccumulator + toProcess) / 2;
-                        if (potentialGas == 0 || outputChemicalTank.getNeeded() >= potentialGas) {
+                        boolean canFitGas = (outputChemicalTank.isEmpty() || outputChemicalTank.getStack().is(MCIChemicals.NITROGEN.get()))
+                                && (potentialGas == 0 || outputChemicalTank.insert(MCIChemicals.NITROGEN.asStack(potentialGas), Action.SIMULATE, AutomationType.INTERNAL).isEmpty());
+                        if (canFitGas) {
                             inputChemicalTank.shrinkStack(toProcess, Action.EXECUTE);
 
                             nitrogenAccumulator += toProcess;

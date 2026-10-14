@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import mekanism.common.tile.component.TileComponentUpgrade;
 import com.complexindustries.mekanism.content.block.BlockPhotolithographyMachine;
 import com.complexindustries.mekanism.recipe.PhotolithographyRecipe;
 import com.complexindustries.mekanism.recipe.cache.PhotolithographyCachedRecipe;
@@ -14,7 +13,6 @@ import com.complexindustries.mekanism.registration.MCIChemicals;
 import com.complexindustries.mekanism.registration.MCIItems;
 import com.complexindustries.mekanism.registration.MCIRecipeTypes;
 import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.Upgrade;
 import mekanism.api.chemical.BasicChemicalTank;
@@ -40,7 +38,6 @@ import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.slot.SlotOverlay;
 import mekanism.common.inventory.container.sync.SyncableBoolean;
-import mekanism.common.inventory.container.sync.SyncableDouble;
 import mekanism.common.inventory.container.sync.SyncableInt;
 import mekanism.common.inventory.container.sync.SyncableLong;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
@@ -49,12 +46,14 @@ import mekanism.common.inventory.slot.OutputInventorySlot;
 import mekanism.common.inventory.slot.chemical.ChemicalInventorySlot;
 import mekanism.common.inventory.warning.WarningTracker.WarningType;
 import mekanism.common.lib.transmitter.TransmissionType;
-import mekanism.common.recipe.IMekanismRecipeTypeProvider;
 import mekanism.common.recipe.lookup.IRecipeLookupHandler;
 import mekanism.common.tile.component.TileComponentEjector;
 import mekanism.common.tile.component.TileComponentUpgrade;
-import mekanism.common.tile.interfaces.IHasDumpButton;
+import mekanism.common.tile.component.config.ConfigInfo;
+import mekanism.common.tile.component.config.DataType;
+import mekanism.common.tile.component.config.slot.InventorySlotInfo;
 import mekanism.common.tile.prefab.TileEntityProgressMachine;
+import mekanism.common.util.MekanismUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -116,7 +115,11 @@ public class TileEntityPhotolithographyMachine extends TileEntityProgressMachine
         if (this.upgradeComponent == null) {
             this.upgradeComponent = new TileComponentUpgrade(this);
         }
-        configComponent.setupItemIOExtraConfig(inputSlot, outputSlot, secondarySlot, energySlot);
+        configComponent.setupItemIOConfig(List.of(inputSlot, maskSlot), Collections.singletonList(outputSlot), energySlot, false);
+        ConfigInfo itemConfig = configComponent.getConfig(TransmissionType.ITEM);
+        if (itemConfig != null && secondarySlot != null) {
+            itemConfig.addSlotInfo(DataType.EXTRA, new InventorySlotInfo(true, true, secondarySlot));
+        }
         configComponent.setupInputConfig(TransmissionType.CHEMICAL, chemicalTank);
         configComponent.setupInputConfig(TransmissionType.ENERGY, energyContainer);
 
@@ -238,13 +241,13 @@ public class TileEntityPhotolithographyMachine extends TileEntityProgressMachine
             currentLaserEnergy = 0;
         }
 
-        // 2. Adjust exposure speed based on laser power (5s = 100 ticks, 55s = 1100 ticks)
+        // 2. Adjust exposure speed based on laser power (5s = 100 ticks, 55s = 1100 ticks) and installed speed upgrades
+        int baseLaserTicks = MAX_TICKS_REQUIRED;
         if (hasActiveLaser()) {
             double ratio = Math.min(1.0, Math.max(0.0, (currentLaserEnergy - 100.0) / 9900.0));
-            ticksRequired = (int) Math.round(MAX_TICKS_REQUIRED - (MAX_TICKS_REQUIRED - MIN_TICKS_REQUIRED) * ratio);
-        } else {
-            ticksRequired = MAX_TICKS_REQUIRED;
+            baseLaserTicks = (int) Math.round(MAX_TICKS_REQUIRED - (MAX_TICKS_REQUIRED - MIN_TICKS_REQUIRED) * ratio);
         }
+        ticksRequired = MekanismUtils.getTicks(this, baseLaserTicks);
 
         // 3. Environmental dissipation (0.1% per tick)
         if (!chemicalTank.isEmpty() && isNitrogen(chemicalTank.getStack())) {
@@ -261,7 +264,6 @@ public class TileEntityPhotolithographyMachine extends TileEntityProgressMachine
         recipeCacheLookupMonitor.updateAndProcess();
         return sendUpdatePacket;
     }
-
 
     @Override
     public void setActive(boolean active) {
@@ -284,7 +286,6 @@ public class TileEntityPhotolithographyMachine extends TileEntityProgressMachine
         }
         return super.getActive();
     }
-
 
     @NotNull
     @Override

@@ -5,6 +5,7 @@ import com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe;
 import com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl;
+import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -38,7 +39,12 @@ public record PacketSetRedstoneMode(BlockPos pos, boolean isAttachment, @Nullabl
     public static PacketSetRedstoneMode decode(RegistryFriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
         boolean isAttachment = buf.readBoolean();
-        Direction face = isAttachment ? Direction.values()[buf.readByte() & 255] : null;
+        Direction face = null;
+        if (isAttachment) {
+            int faceOrd = buf.readByte() & 255;
+            Direction[] dirs = Direction.values();
+            face = faceOrd < dirs.length ? dirs[faceOrd] : null;
+        }
         RedstoneControl mode = IRedstoneControllable.byIndex(buf.readByte() & 255);
         return new PacketSetRedstoneMode(pos, isAttachment, face, mode);
     }
@@ -52,8 +58,11 @@ public record PacketSetRedstoneMode(BlockPos pos, boolean isAttachment, @Nullabl
     @Override
     public void handle(IPayloadContext context) {
         Player player = context.player();
-        BlockEntity be = player.level().getBlockEntity(pos);
-        if (!MCIPacketSecurity.canAccess(player, pos, be)) {
+        if (!MCIPacketSecurity.canAccess(player, pos, null)) {
+            return;
+        }
+        BlockEntity be = WorldUtils.getTileEntity(player.level(), pos);
+        if (be == null) {
             return;
         }
 

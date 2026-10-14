@@ -188,27 +188,39 @@ public class TileEntityChemicalSolidifierFactory extends TileEntityConfigurableM
         boolean sendUpdatePacket = super.onUpdateServer();
         energySlot.fillContainerOrConvert();
 
-        // 1. Auto-balance chemicals across all input tanks if sorting is enabled
+        // 1. Auto-balance chemicals across compatible input tanks if sorting is enabled
+        // Strictly group by chemical type so different chemicals are NEVER transmuted into one another.
         if (sorting) {
             ChemicalStack totalStack = ChemicalStack.EMPTY;
-            long totalAmount = 0L;
             for (IChemicalTank tank : inputTank) {
                 if (!tank.isEmpty()) {
-                    if (totalStack.isEmpty()) {
-                        totalStack = tank.getStack();
-                    }
-                    totalAmount += tank.getStored();
+                    totalStack = tank.getStack().copy();
+                    break;
                 }
             }
-            if (!totalStack.isEmpty() && totalAmount > 0) {
-                long perTank = totalAmount / tier.processes;
-                long remainder = totalAmount % tier.processes;
-                for (int i = 0; i < tier.processes; i++) {
-                    long target = perTank + (i < remainder ? 1 : 0);
-                    if (target > 0) {
-                        inputTank[i].setStack(totalStack.copyWithAmount(target));
-                    } else {
-                        inputTank[i].setEmpty();
+            if (!totalStack.isEmpty()) {
+                List<IChemicalTank> compatibleTanks = new ArrayList<>(tier.processes);
+                long totalAmount = 0L;
+                for (IChemicalTank tank : inputTank) {
+                    if (tank.isEmpty()) {
+                        compatibleTanks.add(tank);
+                    } else if (ChemicalStack.isSameChemical(tank.getStack(), totalStack)) {
+                        compatibleTanks.add(tank);
+                        totalAmount += tank.getStored();
+                    }
+                }
+                int count = compatibleTanks.size();
+                if (count > 1 && totalAmount > 0) {
+                    long perTank = totalAmount / count;
+                    long remainder = totalAmount % count;
+                    for (int i = 0; i < count; i++) {
+                        long target = perTank + (i < remainder ? 1 : 0);
+                        IChemicalTank tank = compatibleTanks.get(i);
+                        if (target > 0) {
+                            tank.setStack(totalStack.copyWithAmount(target));
+                        } else {
+                            tank.setEmpty();
+                        }
                     }
                 }
             }
@@ -239,9 +251,12 @@ public class TileEntityChemicalSolidifierFactory extends TileEntityConfigurableM
                             continue;
                         }
                     }
+                    // Insufficient energy or output full: pause without wiping progress
+                    activeStates[i] = false;
+                } else {
+                    progress[i] = 0;
+                    activeStates[i] = false;
                 }
-                progress[i] = 0;
-                activeStates[i] = false;
             }
         } else {
             Arrays.fill(activeStates, false);
@@ -362,60 +377,96 @@ public class TileEntityChemicalSolidifierFactory extends TileEntityConfigurableM
         if (nbt.contains("sorting")) {
             this.sorting = nbt.getBoolean("sorting");
         }
+        if (nbt.contains("progress")) {
+            int[] saved = nbt.getIntArray("progress");
+            System.arraycopy(saved, 0, this.progress, 0, Math.min(saved.length, this.progress.length));
+        }
     }
 
     @Override
     public void saveAdditional(@NotNull net.minecraft.nbt.CompoundTag nbtTags, @NotNull HolderLookup.Provider provider) {
         super.saveAdditional(nbtTags, provider);
         nbtTags.putBoolean("sorting", sorting);
+        nbtTags.putIntArray("progress", progress);
+    }
+
+    public static class SolidifierFactoryUpgradeData extends AdvancedMachineUpgradeData {
+        public final List<ChemicalStack> tankStacks;
+
+        public SolidifierFactoryUpgradeData(HolderLookup.Provider provider, boolean redstone, RedstoneControl controlType,
+                                            mekanism.api.energy.IEnergyContainer energyContainer, int[] progress, long[] usedSoFar,
+                                            IChemicalTank stored, EnergyInventorySlot energySlot, List<IInventorySlot> outputSlots,
+                                            boolean sorting, List<ITileComponent> components, List<ChemicalStack> tankStacks) {
+            super(provider, redstone, controlType, energyContainer, progress, usedSoFar, stored, null,
+                    energySlot, Collections.emptyList(), outputSlots, sorting, components);
+            this.tankStacks = tankStacks;
+        }
     }
 
     @Nullable
     @Override
     public AdvancedMachineUpgradeData getUpgradeData(HolderLookup.Provider provider) {
-        ChemicalStack totalChem = ChemicalStack.EMPTY;
-        long sum = 0;
+        List<ChemicalStack> stacks = new ArrayList<>(inputTank.length);
         for (IChemicalTank tank : inputTank) {
-            if (!tank.isEmpty()) {
-                if (totalChem.isEmpty()) {
-                    totalChem = tank.getStack();
-                }
-                sum += tank.getStored();
-            }
+            stacks.add(tank.getStack().copy());
         }
-        IChemicalTank storedTank = chemicalTank;
-        if (!totalChem.isEmpty()) {
-            storedTank = BasicChemicalTank.inputModern(getMaxChemical(), c -> true, null);
-            storedTank.setStack(totalChem.copyWithAmount(sum));
-        }
-        return new AdvancedMachineUpgradeData(
+        return new SolidifierFactoryUpgradeData(
                 provider,
                 redstone,
                 getControlType(),
                 getEnergyContainer(),
                 progress,
                 new long[tier.processes],
-                storedTank,
-                null,
+                chemicalTank,
                 energySlot,
-                Collections.emptyList(),
                 outputSlots,
-                false,
-                getComponents()
+                sorting,
+                getComponents(),
+                stacks
         );
     }
 
     @Override
     public void parseUpgradeData(HolderLookup.Provider provider, @NotNull IUpgradeData upgradeData) {
-        if (upgradeData instanceof AdvancedMachineUpgradeData data) {
+        if (upgradeData instanceof SolidifierFactoryUpgradeData factoryData) {
+            redstone = factoryData.redstone;
+            setControlType(factoryData.controlType);
+            getEnergyContainer().setEnergy(factoryData.energyContainer.getEnergy());
+            energySlot.deserializeNBT(provider, factoryData.energySlot.serializeNBT(provider));
+            this.sorting = factoryData.sorting;
+            for (int i = 0; i < Math.min(factoryData.tankStacks.size(), inputTank.length); i++) {
+                ChemicalStack stack = factoryData.tankStacks.get(i);
+                if (!stack.isEmpty()) {
+                    inputTank[i].setStack(stack.copyWithAmount(Math.min(stack.getAmount(), inputTank[i].getCapacity())));
+                } else {
+                    inputTank[i].setEmpty();
+                }
+            }
+            if (factoryData.progress != null) {
+                System.arraycopy(factoryData.progress, 0, progress, 0, Math.min(factoryData.progress.length, progress.length));
+            }
+            if (factoryData.outputSlots != null) {
+                for (int i = 0; i < Math.min(factoryData.outputSlots.size(), outputSlots.size()); i++) {
+                    outputSlots.get(i).setStack(factoryData.outputSlots.get(i).getStack());
+                }
+            }
+            for (ITileComponent component : getComponents()) {
+                component.read(factoryData.components, provider);
+            }
+        } else if (upgradeData instanceof AdvancedMachineUpgradeData data) {
             redstone = data.redstone;
             setControlType(data.controlType);
             getEnergyContainer().setEnergy(data.energyContainer.getEnergy());
             energySlot.deserializeNBT(provider, data.energySlot.serializeNBT(provider));
             if (data.stored != null && !data.stored.isEmpty()) {
-                inputTank[0].setStack(data.stored.getStack());
+                ChemicalStack stack = data.stored.getStack();
+                long remaining = stack.getAmount();
+                for (int i = 0; i < inputTank.length && remaining > 0; i++) {
+                    long toPut = Math.min(remaining, inputTank[i].getCapacity());
+                    inputTank[i].setStack(stack.copyWithAmount(toPut));
+                    remaining -= toPut;
+                }
             }
-
             if (data.progress != null) {
                 System.arraycopy(data.progress, 0, progress, 0, Math.min(data.progress.length, progress.length));
             }

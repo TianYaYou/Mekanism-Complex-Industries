@@ -26,6 +26,13 @@ public class IndustrialPipeNetwork {
     private final Set<IOutputInterface> outputInterfaces = Collections.synchronizedSet(new HashSet<>());
     private final Set<IPowerInterface> powerInterfaces = Collections.synchronizedSet(new HashSet<>());
 
+    // Re-entrancy guards to prevent cyclic / infinite recursive routing across network topologies
+    private final ThreadLocal<Boolean> isRoutingItem = ThreadLocal.withInitial(() -> Boolean.FALSE);
+    private final ThreadLocal<Boolean> isRoutingFluid = ThreadLocal.withInitial(() -> Boolean.FALSE);
+    private final ThreadLocal<Boolean> isRoutingChemical = ThreadLocal.withInitial(() -> Boolean.FALSE);
+    private final ThreadLocal<Boolean> isExtractingEnergy = ThreadLocal.withInitial(() -> Boolean.FALSE);
+    private final ThreadLocal<Boolean> isReceivingEnergy = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
     // Round-robin tracking per priority group
     private final Map<Integer, Integer> outputPriorityRoundRobinIndex = new ConcurrentHashMap<>();
 
@@ -149,156 +156,171 @@ public class IndustrialPipeNetwork {
     // =========================================================================
 
     public ItemStack routeItem(IInputInterface fromInput, ItemStack stack, boolean simulate) {
-        if (stack.isEmpty() || (fromInput != null && !fromInput.canOperate())) {
+        if (stack.isEmpty() || (fromInput != null && !fromInput.canOperate()) || isRoutingItem.get()) {
             return stack;
         }
 
-        List<IOutputInterface> snapshot;
-        synchronized (outputInterfaces) {
-            if (outputInterfaces.isEmpty()) {
-                return stack;
-            }
-            snapshot = new ArrayList<>(outputInterfaces);
-        }
-
-        // Strict whitelist: must match output filter and be enabled by redstone
-        List<IOutputInterface> matching = snapshot.stream()
-                .filter(out -> out.canOperate() && out.matchesItem(stack))
-                .sorted(Comparator.comparingInt(IOutputInterface::getPriority).reversed())
-                .toList();
-
-        if (matching.isEmpty()) {
-            return stack; // Rejected! Blocks auto-ejection!
-        }
-
-        ItemStack remaining = stack.copy();
-
-        // Group by priority descending
-        Map<Integer, List<IOutputInterface>> byPriority = matching.stream()
-                .collect(Collectors.groupingBy(IOutputInterface::getPriority, LinkedHashMap::new, Collectors.toList()));
-
-        for (Map.Entry<Integer, List<IOutputInterface>> entry : byPriority.entrySet()) {
-            int priority = entry.getKey();
-            List<IOutputInterface> group = entry.getValue();
-            int offset = outputPriorityRoundRobinIndex.getOrDefault(priority, 0);
-            int size = group.size();
-
-            for (int i = 0; i < size; i++) {
-                IOutputInterface out = group.get((offset + i) % size);
-                ItemStack before = remaining.copy();
-                remaining = out.insertItemIntoTarget(remaining, simulate);
-
-                if (remaining.getCount() < before.getCount() && !simulate) {
-                    outputPriorityRoundRobinIndex.put(priority, (offset + i + 1) % size);
+        isRoutingItem.set(true);
+        try {
+            List<IOutputInterface> snapshot;
+            synchronized (outputInterfaces) {
+                if (outputInterfaces.isEmpty()) {
+                    return stack;
                 }
+                snapshot = new ArrayList<>(outputInterfaces);
+            }
 
-                if (remaining.isEmpty()) {
-                    return ItemStack.EMPTY;
+            // Strict whitelist: must match output filter and be enabled by redstone
+            List<IOutputInterface> matching = snapshot.stream()
+                    .filter(out -> out.canOperate() && out.matchesItem(stack))
+                    .sorted(Comparator.comparingInt(IOutputInterface::getPriority).reversed())
+                    .toList();
+
+            if (matching.isEmpty()) {
+                return stack; // Rejected! Blocks auto-ejection!
+            }
+
+            ItemStack remaining = stack.copy();
+
+            // Group by priority descending
+            Map<Integer, List<IOutputInterface>> byPriority = matching.stream()
+                    .collect(Collectors.groupingBy(IOutputInterface::getPriority, LinkedHashMap::new, Collectors.toList()));
+
+            for (Map.Entry<Integer, List<IOutputInterface>> entry : byPriority.entrySet()) {
+                int priority = entry.getKey();
+                List<IOutputInterface> group = entry.getValue();
+                int offset = outputPriorityRoundRobinIndex.getOrDefault(priority, 0);
+                int size = group.size();
+
+                for (int i = 0; i < size; i++) {
+                    IOutputInterface out = group.get((offset + i) % size);
+                    ItemStack before = remaining.copy();
+                    remaining = out.insertItemIntoTarget(remaining, simulate);
+
+                    if (remaining.getCount() < before.getCount() && !simulate) {
+                        outputPriorityRoundRobinIndex.put(priority, (offset + i + 1) % size);
+                    }
+
+                    if (remaining.isEmpty()) {
+                        return ItemStack.EMPTY;
+                    }
                 }
             }
-        }
 
-        return remaining;
+            return remaining;
+        } finally {
+            isRoutingItem.set(false);
+        }
     }
 
     public FluidStack routeFluid(IInputInterface fromInput, FluidStack stack, boolean simulate) {
-        if (stack.isEmpty() || (fromInput != null && !fromInput.canOperate())) {
+        if (stack.isEmpty() || (fromInput != null && !fromInput.canOperate()) || isRoutingFluid.get()) {
             return stack;
         }
 
-        List<IOutputInterface> snapshot;
-        synchronized (outputInterfaces) {
-            if (outputInterfaces.isEmpty()) {
+        isRoutingFluid.set(true);
+        try {
+            List<IOutputInterface> snapshot;
+            synchronized (outputInterfaces) {
+                if (outputInterfaces.isEmpty()) {
+                    return stack;
+                }
+                snapshot = new ArrayList<>(outputInterfaces);
+            }
+
+            List<IOutputInterface> matching = snapshot.stream()
+                    .filter(out -> out.canOperate() && out.matchesFluid(stack))
+                    .sorted(Comparator.comparingInt(IOutputInterface::getPriority).reversed())
+                    .toList();
+
+            if (matching.isEmpty()) {
                 return stack;
             }
-            snapshot = new ArrayList<>(outputInterfaces);
-        }
 
-        List<IOutputInterface> matching = snapshot.stream()
-                .filter(out -> out.canOperate() && out.matchesFluid(stack))
-                .sorted(Comparator.comparingInt(IOutputInterface::getPriority).reversed())
-                .toList();
+            FluidStack remaining = stack.copy();
+            Map<Integer, List<IOutputInterface>> byPriority = matching.stream()
+                    .collect(Collectors.groupingBy(IOutputInterface::getPriority, LinkedHashMap::new, Collectors.toList()));
 
-        if (matching.isEmpty()) {
-            return stack;
-        }
+            for (Map.Entry<Integer, List<IOutputInterface>> entry : byPriority.entrySet()) {
+                int priority = entry.getKey();
+                List<IOutputInterface> group = entry.getValue();
+                int offset = outputPriorityRoundRobinIndex.getOrDefault(priority, 0);
+                int size = group.size();
 
-        FluidStack remaining = stack.copy();
-        Map<Integer, List<IOutputInterface>> byPriority = matching.stream()
-                .collect(Collectors.groupingBy(IOutputInterface::getPriority, LinkedHashMap::new, Collectors.toList()));
+                for (int i = 0; i < size; i++) {
+                    IOutputInterface out = group.get((offset + i) % size);
+                    int beforeAmount = remaining.getAmount();
+                    remaining = out.insertFluidIntoTarget(remaining, simulate);
 
-        for (Map.Entry<Integer, List<IOutputInterface>> entry : byPriority.entrySet()) {
-            int priority = entry.getKey();
-            List<IOutputInterface> group = entry.getValue();
-            int offset = outputPriorityRoundRobinIndex.getOrDefault(priority, 0);
-            int size = group.size();
+                    if (remaining.getAmount() < beforeAmount && !simulate) {
+                        outputPriorityRoundRobinIndex.put(priority, (offset + i + 1) % size);
+                    }
 
-            for (int i = 0; i < size; i++) {
-                IOutputInterface out = group.get((offset + i) % size);
-                int beforeAmount = remaining.getAmount();
-                remaining = out.insertFluidIntoTarget(remaining, simulate);
-
-                if (remaining.getAmount() < beforeAmount && !simulate) {
-                    outputPriorityRoundRobinIndex.put(priority, (offset + i + 1) % size);
-                }
-
-                if (remaining.isEmpty()) {
-                    return FluidStack.EMPTY;
+                    if (remaining.isEmpty()) {
+                        return FluidStack.EMPTY;
+                    }
                 }
             }
-        }
 
-        return remaining;
+            return remaining;
+        } finally {
+            isRoutingFluid.set(false);
+        }
     }
 
     public ChemicalStack routeChemical(IInputInterface fromInput, ChemicalStack stack, boolean simulate) {
-        if (stack.isEmpty() || (fromInput != null && !fromInput.canOperate())) {
+        if (stack.isEmpty() || (fromInput != null && !fromInput.canOperate()) || isRoutingChemical.get()) {
             return stack;
         }
 
-        List<IOutputInterface> snapshot;
-        synchronized (outputInterfaces) {
-            if (outputInterfaces.isEmpty()) {
+        isRoutingChemical.set(true);
+        try {
+            List<IOutputInterface> snapshot;
+            synchronized (outputInterfaces) {
+                if (outputInterfaces.isEmpty()) {
+                    return stack;
+                }
+                snapshot = new ArrayList<>(outputInterfaces);
+            }
+
+            List<IOutputInterface> matching = snapshot.stream()
+                    .filter(out -> out.canOperate() && out.matchesChemical(stack))
+                    .sorted(Comparator.comparingInt(IOutputInterface::getPriority).reversed())
+                    .toList();
+
+            if (matching.isEmpty()) {
                 return stack;
             }
-            snapshot = new ArrayList<>(outputInterfaces);
-        }
 
-        List<IOutputInterface> matching = snapshot.stream()
-                .filter(out -> out.canOperate() && out.matchesChemical(stack))
-                .sorted(Comparator.comparingInt(IOutputInterface::getPriority).reversed())
-                .toList();
+            ChemicalStack remaining = stack.copy();
+            Map<Integer, List<IOutputInterface>> byPriority = matching.stream()
+                    .collect(Collectors.groupingBy(IOutputInterface::getPriority, LinkedHashMap::new, Collectors.toList()));
 
-        if (matching.isEmpty()) {
-            return stack;
-        }
+            for (Map.Entry<Integer, List<IOutputInterface>> entry : byPriority.entrySet()) {
+                int priority = entry.getKey();
+                List<IOutputInterface> group = entry.getValue();
+                int offset = outputPriorityRoundRobinIndex.getOrDefault(priority, 0);
+                int size = group.size();
 
-        ChemicalStack remaining = stack.copy();
-        Map<Integer, List<IOutputInterface>> byPriority = matching.stream()
-                .collect(Collectors.groupingBy(IOutputInterface::getPriority, LinkedHashMap::new, Collectors.toList()));
+                for (int i = 0; i < size; i++) {
+                    IOutputInterface out = group.get((offset + i) % size);
+                    long beforeAmount = remaining.getAmount();
+                    remaining = out.insertChemicalIntoTarget(remaining, simulate);
 
-        for (Map.Entry<Integer, List<IOutputInterface>> entry : byPriority.entrySet()) {
-            int priority = entry.getKey();
-            List<IOutputInterface> group = entry.getValue();
-            int offset = outputPriorityRoundRobinIndex.getOrDefault(priority, 0);
-            int size = group.size();
+                    if (remaining.getAmount() < beforeAmount && !simulate) {
+                        outputPriorityRoundRobinIndex.put(priority, (offset + i + 1) % size);
+                    }
 
-            for (int i = 0; i < size; i++) {
-                IOutputInterface out = group.get((offset + i) % size);
-                long beforeAmount = remaining.getAmount();
-                remaining = out.insertChemicalIntoTarget(remaining, simulate);
-
-                if (remaining.getAmount() < beforeAmount && !simulate) {
-                    outputPriorityRoundRobinIndex.put(priority, (offset + i + 1) % size);
-                }
-
-                if (remaining.isEmpty()) {
-                    return ChemicalStack.EMPTY;
+                    if (remaining.isEmpty()) {
+                        return ChemicalStack.EMPTY;
+                    }
                 }
             }
-        }
 
-        return remaining;
+            return remaining;
+        } finally {
+            isRoutingChemical.set(false);
+        }
     }
 
     // =========================================================================
@@ -313,29 +335,97 @@ public class IndustrialPipeNetwork {
             return 0;
         }
 
-        List<IPowerInterface> snapshot;
-        synchronized (powerInterfaces) {
-            if (powerInterfaces.isEmpty()) {
+        // Prevent recursive / cyclic invocation across coupled networks or facing interfaces
+        if (isExtractingEnergy.get()) {
+            return 0;
+        }
+
+        isExtractingEnergy.set(true);
+        try {
+            List<IPowerInterface> snapshot;
+            synchronized (powerInterfaces) {
+                if (powerInterfaces.isEmpty()) {
+                    return 0;
+                }
+                snapshot = new ArrayList<>(powerInterfaces);
+            }
+
+            int totalExtracted = 0;
+            int needed = maxAmount;
+
+            for (IPowerInterface pwr : snapshot) {
+                if (!pwr.canOperate()) {
+                    continue;
+                }
+                int extracted = pwr.extractEnergyFromExternal(needed, simulate);
+                totalExtracted += extracted;
+                needed -= extracted;
+                if (needed <= 0) {
+                    break;
+                }
+            }
+            return totalExtracted;
+        } finally {
+            isExtractingEnergy.set(false);
+        }
+    }
+
+    /**
+     * Receives energy pushed from external generators into power interfaces and dispatches it on-demand.
+     */
+    public int receiveEnergy(int maxAmount, boolean simulate) {
+        if (maxAmount <= 0 || isReceivingEnergy.get()) {
+            return 0;
+        }
+
+        isReceivingEnergy.set(true);
+        try {
+            List<IInputInterface> inputSnapshot;
+            synchronized (inputInterfaces) {
+                inputSnapshot = new ArrayList<>(inputInterfaces);
+            }
+
+            List<IOutputInterface> outputSnapshot;
+            synchronized (outputInterfaces) {
+                outputSnapshot = new ArrayList<>(outputInterfaces);
+            }
+
+            List<EnergyConsumer> consumers = new ArrayList<>();
+            for (IInputInterface in : inputSnapshot) {
+                if (!in.canOperate() || !(in.getInterfaceLevel() instanceof ServerLevel sLevel)) {
+                    continue;
+                }
+                collectConsumers(sLevel, in.getInterfacePos(), in.getAttachedFace(), in.getPriority(), consumers);
+            }
+            for (IOutputInterface out : outputSnapshot) {
+                if (!out.canOperate() || !(out.getInterfaceLevel() instanceof ServerLevel sLevel)) {
+                    continue;
+                }
+                collectConsumers(sLevel, out.getInterfacePos(), out.getAttachedFace(), out.getPriority(), consumers);
+            }
+
+            if (consumers.isEmpty()) {
                 return 0;
             }
-            snapshot = new ArrayList<>(powerInterfaces);
-        }
 
-        int totalExtracted = 0;
-        int needed = maxAmount;
+            consumers.sort(Comparator.comparingInt(EnergyConsumer::priority).reversed());
+            int remaining = maxAmount;
+            int totalAccepted = 0;
 
-        for (IPowerInterface pwr : snapshot) {
-            if (!pwr.canOperate()) {
-                continue;
+            for (EnergyConsumer consumer : consumers) {
+                int accepted = consumer.handler().receiveEnergy(remaining, simulate);
+                if (accepted > 0) {
+                    totalAccepted += accepted;
+                    remaining -= accepted;
+                    if (remaining <= 0) {
+                        break;
+                    }
+                }
             }
-            int extracted = pwr.extractEnergyFromExternal(needed, simulate);
-            totalExtracted += extracted;
-            needed -= extracted;
-            if (needed <= 0) {
-                break;
-            }
+            return totalAccepted;
+        } finally {
+            isReceivingEnergy.set(false);
         }
-        return totalExtracted;
     }
 
     private record EnergyConsumer(int priority, IEnergyStorage handler) {}
@@ -411,6 +501,9 @@ public class IndustrialPipeNetwork {
             // Part form: single facing target
             BlockPos targetPos = pos.relative(attachedFace);
             if (!WorldUtils.isBlockLoaded(level, targetPos)) {
+                return;
+            }
+            if (WorldUtils.getTileEntity(level, targetPos) instanceof IPipeNode) {
                 return;
             }
             IEnergyStorage storage = WorldUtils.getCapability(level, Capabilities.EnergyStorage.BLOCK, targetPos, attachedFace.getOpposite());

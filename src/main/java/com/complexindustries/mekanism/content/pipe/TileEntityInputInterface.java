@@ -10,6 +10,7 @@ import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -168,6 +169,9 @@ public class TileEntityInputInterface extends BlockEntity implements IPipeNode, 
 
             @Override
             public int extractEnergy(int maxExtract, boolean simulate) {
+                if (!canOperate()) {
+                    return 0;
+                }
                 IndustrialPipeNetwork net = getPipeNetwork();
                 return net != null ? net.extractEnergy(maxExtract, simulate) : 0;
             }
@@ -225,6 +229,9 @@ public class TileEntityInputInterface extends BlockEntity implements IPipeNode, 
 
             @Override
             public long extractEnergy(int container, long amount, @NotNull Action action) {
+                if (!canOperate()) {
+                    return 0L;
+                }
                 IndustrialPipeNetwork net = getPipeNetwork();
                 if (net == null || amount <= 0) {
                     return 0L;
@@ -246,6 +253,9 @@ public class TileEntityInputInterface extends BlockEntity implements IPipeNode, 
             PipeNetworkManager.onNodeAdded(level, worldPosition, this);
             for (Direction dir : Direction.values()) {
                 BlockPos neighborPos = worldPosition.relative(dir);
+                if (!WorldUtils.isBlockLoaded(level, neighborPos)) {
+                    continue;
+                }
                 BlockState neighborState = level.getBlockState(neighborPos);
                 if (neighborState.getBlock() instanceof IndustrialPipeBlock pipeBlock) {
                     BlockState updated = pipeBlock.updateConnections(neighborState, level, neighborPos);

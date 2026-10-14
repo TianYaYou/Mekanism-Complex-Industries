@@ -6,6 +6,7 @@ import com.complexindustries.mekanism.content.pipe.attachment.IPipeAttachment;
 import com.complexindustries.mekanism.content.pipe.attachment.PowerInterfaceAttachment;
 import com.complexindustries.mekanism.content.pipe.interfaces.IPowerInterface;
 import com.complexindustries.mekanism.registration.MCIContainerTypes;
+import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,11 +26,17 @@ public class ContainerPowerInterface extends AbstractContainerMenu {
     private final BlockPos targetPos;
     private final boolean isAttachment;
     private final Direction attachedFace;
+    private final ContainerData data;
 
     public static ContainerPowerInterface create(int windowId, Inventory inv, FriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
         boolean isAttachment = buf.readBoolean();
-        Direction face = isAttachment ? Direction.values()[buf.readByte() & 255] : null;
+        Direction face = null;
+        if (isAttachment) {
+            int ord = buf.readByte() & 255;
+            Direction[] dirs = Direction.values();
+            face = ord < dirs.length ? dirs[ord] : Direction.DOWN;
+        }
         BlockEntity be = inv.player.level().getBlockEntity(pos);
 
         IPowerInterface target = null;
@@ -64,7 +71,7 @@ public class ContainerPowerInterface extends AbstractContainerMenu {
         this.isAttachment = isAttachment;
         this.attachedFace = attachedFace;
 
-        ContainerData data = new ContainerData() {
+        this.data = new ContainerData() {
             @Override
             public int get(int index) {
                 if (index == 0) {
@@ -85,7 +92,7 @@ public class ContainerPowerInterface extends AbstractContainerMenu {
                 return 1;
             }
         };
-        addDataSlots(data);
+        addDataSlots(this.data);
 
         // Player inventory
         for (int row = 0; row < 3; row++) {
@@ -99,7 +106,7 @@ public class ContainerPowerInterface extends AbstractContainerMenu {
     }
 
     public mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl getRedstoneMode() {
-        return interfaceInstance != null ? interfaceInstance.getRedstoneMode() : mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl.DISABLED;
+        return com.complexindustries.mekanism.content.pipe.interfaces.IRedstoneControllable.byIndex(data.get(0));
     }
 
     public IPowerInterface getInterfaceInstance() {
@@ -120,7 +127,17 @@ public class ContainerPowerInterface extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return player.distanceToSqr(targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5) <= 64.0;
+        if (player.distanceToSqr(targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5) > 64.0) {
+            return false;
+        }
+        if (!WorldUtils.isBlockLoaded(player.level(), targetPos)) {
+            return false;
+        }
+        BlockEntity be = WorldUtils.getTileEntity(player.level(), targetPos);
+        if (isAttachment) {
+            return be instanceof TileEntityIndustrialPipe pipe && pipe.getAttachment(attachedFace) instanceof IPowerInterface;
+        }
+        return be instanceof TileEntityPowerInterface;
     }
 
     @NotNull

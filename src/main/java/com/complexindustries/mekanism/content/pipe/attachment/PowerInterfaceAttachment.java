@@ -2,6 +2,7 @@ package com.complexindustries.mekanism.content.pipe.attachment;
 
 import com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe;
 import com.complexindustries.mekanism.content.pipe.container.ContainerPowerInterface;
+import com.complexindustries.mekanism.content.pipe.interfaces.IPipeNode;
 import com.complexindustries.mekanism.content.pipe.interfaces.IPowerInterface;
 import com.complexindustries.mekanism.content.pipe.network.IndustrialPipeNetwork;
 import com.complexindustries.mekanism.registration.MCIItems;
@@ -103,7 +104,7 @@ public class PowerInterfaceAttachment implements IPipeAttachment, IPowerInterfac
                 int fe = (int) Math.min(Integer.MAX_VALUE, (long) (amount * 0.4));
                 int acceptedFE = receiveEnergyFromExternal(fe, action.simulate());
                 long accepted = (long) (acceptedFE * 2.5);
-                return amount - accepted;
+                return Math.max(0L, amount - accepted);
             }
 
             @Override
@@ -177,6 +178,10 @@ public class PowerInterfaceAttachment implements IPipeAttachment, IPowerInterfac
         if (!WorldUtils.isBlockLoaded(level, targetPos)) {
             return 0;
         }
+        // Do not extract from another pipe node or interface block (prevents recursive feedback loops)
+        if (WorldUtils.getTileEntity(level, targetPos) instanceof IPipeNode) {
+            return 0;
+        }
         Direction opposite = face.getOpposite();
 
         // Try Mekanism energy first
@@ -197,10 +202,11 @@ public class PowerInterfaceAttachment implements IPipeAttachment, IPowerInterfac
 
     @Override
     public int receiveEnergyFromExternal(int amount, boolean simulate) {
-        if (!canOperate()) {
+        if (!canOperate() || amount <= 0) {
             return 0;
         }
-        return 0;
+        IndustrialPipeNetwork net = getPipeNetwork();
+        return net != null ? net.receiveEnergy(amount, simulate) : 0;
     }
 
     @Override

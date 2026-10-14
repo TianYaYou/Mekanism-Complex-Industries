@@ -1,9 +1,10 @@
 package com.complexindustries.mekanism.content.coater;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import com.complexindustries.mekanism.content.item.SemiFinishedChipItem;
+import com.complexindustries.mekanism.content.block.BlockChemicalFilmCoater;
 import com.complexindustries.mekanism.recipe.ChemicalFilmCoatingRecipe;
 import com.complexindustries.mekanism.recipe.cache.ChemicalFilmCoatingCachedRecipe;
 import com.complexindustries.mekanism.recipe.input.ChemicalFilmCoatingRecipeInput;
@@ -42,6 +43,9 @@ import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.recipe.lookup.IRecipeLookupHandler;
 import mekanism.common.tile.component.TileComponentEjector;
 import mekanism.common.tile.component.TileComponentUpgrade;
+import mekanism.common.tile.component.config.ConfigInfo;
+import mekanism.common.tile.component.config.DataType;
+import mekanism.common.tile.component.config.slot.InventorySlotInfo;
 import mekanism.common.tile.prefab.TileEntityProgressMachine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -86,7 +90,11 @@ public class TileEntityChemicalFilmCoater extends TileEntityProgressMachine<Chem
         if (this.upgradeComponent == null) {
             this.upgradeComponent = new TileComponentUpgrade(this);
         }
-        configComponent.setupItemIOExtraConfig(chipSlot, outputSlot, secondarySlot, energySlot);
+        configComponent.setupItemIOConfig(List.of(alloySlot, chipSlot), Collections.singletonList(outputSlot), energySlot, false);
+        ConfigInfo itemConfig = configComponent.getConfig(TransmissionType.ITEM);
+        if (itemConfig != null && secondarySlot != null) {
+            itemConfig.addSlotInfo(DataType.EXTRA, new InventorySlotInfo(true, true, secondarySlot));
+        }
         configComponent.setupInputConfig(TransmissionType.CHEMICAL, chemicalTank);
         configComponent.setupInputConfig(TransmissionType.ENERGY, energyContainer);
 

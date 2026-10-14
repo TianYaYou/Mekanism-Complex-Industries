@@ -5,6 +5,7 @@ import com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe;
 import com.complexindustries.mekanism.content.pipe.interfaces.IInputInterface;
 import com.complexindustries.mekanism.content.pipe.interfaces.IOutputInterface;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -38,8 +39,15 @@ public record PacketSetInterfacePriority(BlockPos pos, boolean isAttachment, @Nu
     public static PacketSetInterfacePriority decode(FriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
         boolean isAttachment = buf.readBoolean();
-        Direction face = isAttachment ? Direction.values()[buf.readByte() & 255] : null;
+        Direction face = null;
+        if (isAttachment) {
+            int faceOrd = buf.readByte() & 255;
+            Direction[] dirs = Direction.values();
+            face = faceOrd < dirs.length ? dirs[faceOrd] : null;
+        }
         int delta = buf.readVarInt();
+        // Clamp single delta step to a reasonable range [-1000, 1000]
+        delta = Math.max(-1000, Math.min(1000, delta));
         return new PacketSetInterfacePriority(pos, isAttachment, face, delta);
     }
 
@@ -52,22 +60,30 @@ public record PacketSetInterfacePriority(BlockPos pos, boolean isAttachment, @Nu
     @Override
     public void handle(IPayloadContext context) {
         Player player = context.player();
-        BlockEntity be = player.level().getBlockEntity(pos);
-        if (!MCIPacketSecurity.canAccess(player, pos, be)) {
+        if (!MCIPacketSecurity.canAccess(player, pos, null)) {
+            return;
+        }
+        BlockEntity be = WorldUtils.getTileEntity(player.level(), pos);
+        if (be == null) {
             return;
         }
 
+        // Clamp priority to safe bounds [-10000, 10000]
         if (isAttachment && be instanceof TileEntityIndustrialPipe pipe) {
             var att = pipe.getAttachment(face);
             if (att instanceof IInputInterface in) {
-                in.setPriority(in.getPriority() + delta);
+                int next = (int) Math.max(-10000L, Math.min(10000L, (long) in.getPriority() + delta));
+                in.setPriority(next);
             } else if (att instanceof IOutputInterface out) {
-                out.setPriority(out.getPriority() + delta);
+                int next = (int) Math.max(-10000L, Math.min(10000L, (long) out.getPriority() + delta));
+                out.setPriority(next);
             }
         } else if (be instanceof IInputInterface in) {
-            in.setPriority(in.getPriority() + delta);
+            int next = (int) Math.max(-10000L, Math.min(10000L, (long) in.getPriority() + delta));
+            in.setPriority(next);
         } else if (be instanceof IOutputInterface out) {
-            out.setPriority(out.getPriority() + delta);
+            int next = (int) Math.max(-10000L, Math.min(10000L, (long) out.getPriority() + delta));
+            out.setPriority(next);
         }
     }
 }

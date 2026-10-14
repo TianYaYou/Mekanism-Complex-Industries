@@ -5,6 +5,7 @@ import com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe;
 import com.complexindustries.mekanism.content.pipe.interfaces.IOutputInterface;
 import com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -56,7 +57,12 @@ public record PacketSetOutputFilter(
     public static PacketSetOutputFilter decode(RegistryFriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
         boolean isAttachment = buf.readBoolean();
-        Direction face = isAttachment ? Direction.values()[buf.readByte() & 255] : null;
+        Direction face = null;
+        if (isAttachment) {
+            int faceOrd = buf.readByte() & 255;
+            Direction[] dirs = Direction.values();
+            face = faceOrd < dirs.length ? dirs[faceOrd] : null;
+        }
         int slotIndex = buf.readVarInt();
         OutputInterfaceFilter.FilterType filterType = OutputInterfaceFilter.FilterType.byOrdinal(buf.readByte() & 255);
         String filterId = buf.readUtf(128);
@@ -73,8 +79,11 @@ public record PacketSetOutputFilter(
     @Override
     public void handle(IPayloadContext context) {
         Player player = context.player();
-        BlockEntity be = player.level().getBlockEntity(pos);
-        if (!MCIPacketSecurity.canAccess(player, pos, be)) {
+        if (!MCIPacketSecurity.canAccess(player, pos, null)) {
+            return;
+        }
+        BlockEntity be = WorldUtils.getTileEntity(player.level(), pos);
+        if (be == null) {
             return;
         }
 

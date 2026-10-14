@@ -7,6 +7,7 @@ import com.complexindustries.mekanism.content.pipe.attachment.OutputInterfaceAtt
 import com.complexindustries.mekanism.content.pipe.interfaces.IOutputInterface;
 import com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter;
 import com.complexindustries.mekanism.registration.MCIContainerTypes;
+import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -31,7 +32,12 @@ public class ContainerOutputInterface extends AbstractContainerMenu {
     public static ContainerOutputInterface create(int windowId, Inventory inv, FriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
         boolean isAttachment = buf.readBoolean();
-        Direction face = isAttachment ? Direction.values()[buf.readByte() & 255] : null;
+        Direction face = null;
+        if (isAttachment) {
+            int ord = buf.readByte() & 255;
+            Direction[] dirs = Direction.values();
+            face = ord < dirs.length ? dirs[ord] : Direction.DOWN;
+        }
 
         OutputInterfaceFilter initialFilter = new OutputInterfaceFilter();
         if (buf instanceof net.minecraft.network.RegistryFriendlyByteBuf regBuf) {
@@ -158,7 +164,17 @@ public class ContainerOutputInterface extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return player.distanceToSqr(targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5) <= 64.0;
+        if (player.distanceToSqr(targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5) > 64.0) {
+            return false;
+        }
+        if (!WorldUtils.isBlockLoaded(player.level(), targetPos)) {
+            return false;
+        }
+        BlockEntity be = WorldUtils.getTileEntity(player.level(), targetPos);
+        if (isAttachment) {
+            return be instanceof TileEntityIndustrialPipe pipe && pipe.getAttachment(attachedFace) instanceof IOutputInterface;
+        }
+        return be instanceof TileEntityOutputInterface;
     }
 
     @NotNull

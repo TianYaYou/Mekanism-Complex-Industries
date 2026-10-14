@@ -170,6 +170,9 @@ public class InputInterfaceAttachment implements IPipeAttachment, IInputInterfac
 
             @Override
             public int extractEnergy(int maxExtract, boolean simulate) {
+                if (!canOperate()) {
+                    return 0;
+                }
                 IndustrialPipeNetwork net = getPipeNetwork();
                 return net != null ? net.extractEnergy(maxExtract, simulate) : 0;
             }
@@ -227,6 +230,9 @@ public class InputInterfaceAttachment implements IPipeAttachment, IInputInterfac
 
             @Override
             public long extractEnergy(int container, long amount, @NotNull Action action) {
+                if (!canOperate()) {
+                    return 0L;
+                }
                 IndustrialPipeNetwork net = getPipeNetwork();
                 if (net == null || amount <= 0) {
                     return 0L;

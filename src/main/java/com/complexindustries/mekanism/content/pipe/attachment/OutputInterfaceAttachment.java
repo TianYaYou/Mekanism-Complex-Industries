@@ -3,6 +3,7 @@ package com.complexindustries.mekanism.content.pipe.attachment;
 import com.complexindustries.mekanism.content.pipe.TileEntityIndustrialPipe;
 import com.complexindustries.mekanism.content.pipe.container.ContainerOutputInterface;
 import com.complexindustries.mekanism.content.pipe.interfaces.IOutputInterface;
+import com.complexindustries.mekanism.content.pipe.interfaces.IPipeNode;
 import com.complexindustries.mekanism.content.pipe.interfaces.OutputInterfaceFilter;
 import com.complexindustries.mekanism.content.pipe.network.IndustrialPipeNetwork;
 import com.complexindustries.mekanism.registration.MCIItems;
@@ -56,6 +57,9 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
 
             @Override
             public int extractEnergy(int maxExtract, boolean simulate) {
+                if (!canOperate()) {
+                    return 0;
+                }
                 IndustrialPipeNetwork net = getPipeNetwork();
                 return net != null ? net.extractEnergy(maxExtract, simulate) : 0;
             }
@@ -113,6 +117,9 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
 
             @Override
             public long extractEnergy(int container, long amount, @NotNull Action action) {
+                if (!canOperate()) {
+                    return 0L;
+                }
                 IndustrialPipeNetwork net = getPipeNetwork();
                 if (net == null || amount <= 0) {
                     return 0L;
@@ -257,6 +264,9 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
         if (!WorldUtils.isBlockLoaded(level, targetPos)) {
             return stack;
         }
+        if (WorldUtils.getTileEntity(level, targetPos) instanceof IPipeNode) {
+            return stack;
+        }
         IItemHandler target = WorldUtils.getCapability(level, net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, targetPos, face.getOpposite());
         if (target != null) {
             return ItemHandlerHelper.insertItem(target, stack, simulate);
@@ -272,6 +282,9 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
         }
         BlockPos targetPos = pipe.getBlockPos().relative(face);
         if (!WorldUtils.isBlockLoaded(level, targetPos)) {
+            return stack;
+        }
+        if (WorldUtils.getTileEntity(level, targetPos) instanceof IPipeNode) {
             return stack;
         }
         IFluidHandler target = WorldUtils.getCapability(level, net.neoforged.neoforge.capabilities.Capabilities.FluidHandler.BLOCK, targetPos, face.getOpposite());
@@ -295,6 +308,9 @@ public class OutputInterfaceAttachment implements IPipeAttachment, IOutputInterf
         }
         BlockPos targetPos = pipe.getBlockPos().relative(face);
         if (!WorldUtils.isBlockLoaded(level, targetPos)) {
+            return stack;
+        }
+        if (WorldUtils.getTileEntity(level, targetPos) instanceof IPipeNode) {
             return stack;
         }
         IChemicalHandler target = WorldUtils.getCapability(level, Capabilities.CHEMICAL.block(), targetPos, face.getOpposite());

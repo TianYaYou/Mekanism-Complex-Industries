@@ -30,6 +30,7 @@ public record PacketSetFlowRate(BlockPos pos, long flowRate) implements IMekanis
     public static PacketSetFlowRate decode(FriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
         long flowRate = buf.readVarLong();
+        flowRate = Math.max(0, Math.min(flowRate, TileEntityFlowRegulator.MAX_FLOW_RATE));
         return new PacketSetFlowRate(pos, flowRate);
     }
 
@@ -45,7 +46,7 @@ public record PacketSetFlowRate(BlockPos pos, long flowRate) implements IMekanis
         TileEntityFlowRegulator regulator = WorldUtils.getTileEntity(
                 TileEntityFlowRegulator.class, player.level(), pos);
         if (regulator != null && MCIPacketSecurity.canAccess(player, pos, regulator)) {
-            regulator.setFlowRate(flowRate);
+            regulator.setFlowRate(Math.max(0, Math.min(flowRate, TileEntityFlowRegulator.MAX_FLOW_RATE)));
         }
     }
 }

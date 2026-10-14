@@ -35,6 +35,7 @@ import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.slot.SlotOverlay;
+import mekanism.common.inventory.container.sync.SyncableBoolean;
 import mekanism.common.inventory.container.sync.SyncableInt;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.inventory.slot.InputInventorySlot;
@@ -59,6 +60,7 @@ import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -240,6 +242,9 @@ public class TileEntityChemicalSoakingFactory extends TileEntityConfigurableMach
                                 continue;
                             }
                         }
+                        // Insufficient energy or output full: pause without wiping progress
+                        activeStates[i] = false;
+                        continue;
                     }
                 }
                 progress[i] = 0;
@@ -265,8 +270,14 @@ public class TileEntityChemicalSoakingFactory extends TileEntityConfigurableMach
         return lastUsage;
     }
 
+    public int getTicksRequired() {
+        return ticksRequired;
+    }
+
     public double getScaledProgress(int index, int process) {
-        if (ticksRequired == 0) return 0;
+        if (process < 0 || process >= progress.length || ticksRequired <= 0) {
+            return 0;
+        }
         return (double) progress[process] / ticksRequired;
     }
 
@@ -337,6 +348,27 @@ public class TileEntityChemicalSoakingFactory extends TileEntityConfigurableMach
             int idx = i;
             container.track(SyncableInt.create(() -> progress[idx], val -> progress[idx] = val));
         }
+        container.track(SyncableInt.create(this::getTicksRequired, val -> ticksRequired = val));
+        container.track(SyncableBoolean.create(this::isSorting, this::setSorting));
+    }
+
+    @Override
+    public void loadAdditional(@NotNull CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
+        super.loadAdditional(nbt, provider);
+        if (nbt.contains("sorting")) {
+            this.sorting = nbt.getBoolean("sorting");
+        }
+        if (nbt.contains("progress")) {
+            int[] saved = nbt.getIntArray("progress");
+            System.arraycopy(saved, 0, this.progress, 0, Math.min(saved.length, this.progress.length));
+        }
+    }
+
+    @Override
+    public void saveAdditional(@NotNull CompoundTag nbtTags, @NotNull HolderLookup.Provider provider) {
+        super.saveAdditional(nbtTags, provider);
+        nbtTags.putBoolean("sorting", sorting);
+        nbtTags.putIntArray("progress", progress);
     }
 
     @Override
@@ -403,6 +435,7 @@ public class TileEntityChemicalSoakingFactory extends TileEntityConfigurableMach
         if (upgradeData instanceof AdvancedMachineUpgradeData data) {
             redstone = data.redstone;
             setControlType(data.controlType);
+            this.sorting = data.sorting;
             getEnergyContainer().setEnergy(data.energyContainer.getEnergy());
             energySlot.deserializeNBT(provider, data.energySlot.serializeNBT(provider));
             if (data.chemicalSlot != null && !data.chemicalSlot.isEmpty()) {

@@ -104,7 +104,7 @@ public class TileEntityPowerInterface extends BlockEntity implements IPipeNode, 
                 int fe = (int) Math.min(Integer.MAX_VALUE, (long) (amount * 0.4));
                 int acceptedFE = receiveEnergyFromExternal(fe, action.simulate());
                 long accepted = (long) (acceptedFE * 2.5);
-                return amount - accepted;
+                return Math.max(0L, amount - accepted);
             }
 
             @Override
@@ -124,6 +124,9 @@ public class TileEntityPowerInterface extends BlockEntity implements IPipeNode, 
             PipeNetworkManager.onNodeAdded(level, worldPosition, this);
             for (Direction dir : Direction.values()) {
                 BlockPos neighborPos = worldPosition.relative(dir);
+                if (!WorldUtils.isBlockLoaded(level, neighborPos)) {
+                    continue;
+                }
                 BlockState neighborState = level.getBlockState(neighborPos);
                 if (neighborState.getBlock() instanceof IndustrialPipeBlock pipeBlock) {
                     BlockState updated = pipeBlock.updateConnections(neighborState, level, neighborPos);
@@ -285,10 +288,11 @@ public class TileEntityPowerInterface extends BlockEntity implements IPipeNode, 
 
     @Override
     public int receiveEnergyFromExternal(int amount, boolean simulate) {
-        if (!canOperate()) {
+        if (!canOperate() || amount <= 0) {
             return 0;
         }
-        return 0;
+        IndustrialPipeNetwork net = getPipeNetwork();
+        return net != null ? net.receiveEnergy(amount, simulate) : 0;
     }
 
     @Override

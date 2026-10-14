@@ -8,7 +8,6 @@ import java.util.List;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
-import mekanism.api.chemical.ChemicalStack;
 import mekanism.common.capabilities.chemical.VariableCapacityChemicalTank;
 import mekanism.common.capabilities.energy.VariableCapacityEnergyContainer;
 import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
@@ -17,9 +16,9 @@ import mekanism.common.inventory.slot.OutputInventorySlot;
 import mekanism.common.lib.multiblock.IValveHandler;
 import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.lib.multiblock.Structure;
-import mekanism.common.registries.MekanismItems;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
 import mekanism.common.util.WorldUtils;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -28,7 +27,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -278,6 +276,7 @@ public class WindmillPulverizerMultiblockData extends MultiblockData implements 
                         setGroupActive(i, true);
                         setGroupProgress(i, 0);
                         setGroupMaxProgress(i, targetTicks);
+                        markDirty();
                         needsPacket = true;
                     }
                 }
@@ -287,13 +286,41 @@ public class WindmillPulverizerMultiblockData extends MultiblockData implements 
         // 2. Process active groups
         for (int i = 0; i < GROUP_COUNT; i++) {
             if (isGroupActive(i)) {
+                int curProg = getGroupProgress(i);
+                int maxProg = getGroupMaxProgress(i);
+
+                // If already at or beyond target progress, check if outputs can fit before doing anything
+                if (curProg >= maxProg) {
+                    Item powder = getOutputPowder(groupProcessingType[i]);
+                    if (powder != null) {
+                        ItemStack toDistribute = new ItemStack(powder, BATCH_OUTPUT_COUNT);
+                        if (canFitOutput(toDistribute)) {
+                            distributeOutput(toDistribute);
+                            setGroupActive(i, false);
+                            setGroupProgress(i, 0);
+                            groupProcessingType[i] = ItemStack.EMPTY;
+                            markDirty();
+                            needsPacket = true;
+                        }
+                        // If cannot fit, stall without consuming energy or advancing
+                    } else {
+                        setGroupActive(i, false);
+                        setGroupProgress(i, 0);
+                        groupProcessingType[i] = ItemStack.EMPTY;
+                        markDirty();
+                        needsPacket = true;
+                    }
+                    continue;
+                }
+
+                // Still in progress: check energy and advance
                 if (energyContainer.getEnergy() >= ENERGY_PER_TICK_PER_GROUP) {
                     energyContainer.extract(ENERGY_PER_TICK_PER_GROUP, Action.EXECUTE, AutomationType.INTERNAL);
                     totalEnergyThisTick += ENERGY_PER_TICK_PER_GROUP;
-                    int curProg = getGroupProgress(i) + 1;
+                    curProg++;
                     setGroupProgress(i, curProg);
 
-                    if (curProg >= getGroupMaxProgress(i)) {
+                    if (curProg >= maxProg) {
                         Item powder = getOutputPowder(groupProcessingType[i]);
                         if (powder != null) {
                             ItemStack toDistribute = new ItemStack(powder, BATCH_OUTPUT_COUNT);
@@ -302,12 +329,14 @@ public class WindmillPulverizerMultiblockData extends MultiblockData implements 
                                 setGroupActive(i, false);
                                 setGroupProgress(i, 0);
                                 groupProcessingType[i] = ItemStack.EMPTY;
+                                markDirty();
                                 needsPacket = true;
                             }
                         } else {
                             setGroupActive(i, false);
                             setGroupProgress(i, 0);
                             groupProcessingType[i] = ItemStack.EMPTY;
+                            markDirty();
                             needsPacket = true;
                         }
                     }
@@ -349,27 +378,27 @@ public class WindmillPulverizerMultiblockData extends MultiblockData implements 
             return;
         }
         for (ValveData valve : valves) {
+            if (!WorldUtils.isBlockLoaded(world, valve.location)) {
+                continue;
+            }
             BlockState state = world.getBlockState(valve.location);
             if (!state.is(MCIBlocks.WINDMILL_OUTPUT_PORT.get())) {
                 continue;
             }
-            BlockEntity target = WorldUtils.getTileEntity(world, valve.location.relative(valve.side));
-            if (target != null && target.getLevel() != null) {
-                IItemHandler handler = target.getLevel().getCapability(
-                        Capabilities.ItemHandler.BLOCK,
-                        valve.location.relative(valve.side),
-                        valve.side.getOpposite()
-                );
-                if (handler != null) {
-                    for (OutputInventorySlot outSlot : outputSlots) {
-                        if (!outSlot.isEmpty()) {
-                            ItemStack toSend = outSlot.getStack().copy();
-                            toSend.setCount(Math.min(toSend.getCount(), 64));
-                            ItemStack remainder = ItemHandlerHelper.insertItem(handler, toSend, false);
-                            int sent = toSend.getCount() - remainder.getCount();
-                            if (sent > 0) {
-                                outSlot.extractItem(sent, Action.EXECUTE, AutomationType.INTERNAL);
-                            }
+            BlockPos targetPos = valve.location.relative(valve.side);
+            if (!WorldUtils.isBlockLoaded(world, targetPos)) {
+                continue;
+            }
+            IItemHandler handler = WorldUtils.getCapability(world, Capabilities.ItemHandler.BLOCK, targetPos, valve.side.getOpposite());
+            if (handler != null) {
+                for (OutputInventorySlot outSlot : outputSlots) {
+                    if (!outSlot.isEmpty()) {
+                        ItemStack toSend = outSlot.getStack().copy();
+                        toSend.setCount(Math.min(toSend.getCount(), 64));
+                        ItemStack remainder = ItemHandlerHelper.insertItem(handler, toSend, false);
+                        int sent = toSend.getCount() - remainder.getCount();
+                        if (sent > 0) {
+                            outSlot.extractItem(sent, Action.EXECUTE, AutomationType.INTERNAL);
                         }
                     }
                 }
@@ -391,6 +420,36 @@ public class WindmillPulverizerMultiblockData extends MultiblockData implements 
         super.remove(world, structure);
     }
 
+    public void saveProcessingState(CompoundTag tag, HolderLookup.Provider provider) {
+        for (int i = 0; i < GROUP_COUNT; i++) {
+            tag.putInt("prog_" + i, getGroupProgress(i));
+            tag.putInt("maxP_" + i, getGroupMaxProgress(i));
+            tag.putBoolean("act_" + i, isGroupActive(i));
+            if (groupProcessingType[i] != null && !groupProcessingType[i].isEmpty()) {
+                tag.put("item_" + i, groupProcessingType[i].saveOptional(provider));
+            }
+        }
+    }
+
+    public void loadProcessingState(CompoundTag tag, HolderLookup.Provider provider) {
+        for (int i = 0; i < GROUP_COUNT; i++) {
+            if (tag.contains("prog_" + i)) {
+                setGroupProgress(i, tag.getInt("prog_" + i));
+            }
+            if (tag.contains("maxP_" + i)) {
+                setGroupMaxProgress(i, Math.max(1, tag.getInt("maxP_" + i)));
+            }
+            if (tag.contains("act_" + i)) {
+                setGroupActive(i, tag.getBoolean("act_" + i));
+            }
+            if (tag.contains("item_" + i)) {
+                groupProcessingType[i] = ItemStack.parseOptional(provider, tag.getCompound("item_" + i));
+            } else {
+                groupProcessingType[i] = ItemStack.EMPTY;
+            }
+        }
+    }
+
     @Override
     public void readUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
         super.readUpdateTag(tag, provider);
@@ -399,17 +458,7 @@ public class WindmillPulverizerMultiblockData extends MultiblockData implements 
         rotorHeight = tag.getInt("rotorH");
         speedMultiplier = tag.getFloat("speedMult");
         lastEnergyUsage = tag.getLong("lastEU");
-
-        for (int i = 0; i < GROUP_COUNT; i++) {
-            setGroupProgress(i, tag.getInt("prog_" + i));
-            setGroupMaxProgress(i, tag.getInt("maxP_" + i));
-            setGroupActive(i, tag.getBoolean("act_" + i));
-            if (tag.contains("item_" + i)) {
-                groupProcessingType[i] = ItemStack.parseOptional(provider, tag.getCompound("item_" + i));
-            } else {
-                groupProcessingType[i] = ItemStack.EMPTY;
-            }
-        }
+        loadProcessingState(tag, provider);
         readValves(tag);
     }
 
@@ -421,15 +470,7 @@ public class WindmillPulverizerMultiblockData extends MultiblockData implements 
         tag.putInt("rotorH", rotorHeight);
         tag.putFloat("speedMult", speedMultiplier);
         tag.putLong("lastEU", lastEnergyUsage);
-
-        for (int i = 0; i < GROUP_COUNT; i++) {
-            tag.putInt("prog_" + i, getGroupProgress(i));
-            tag.putInt("maxP_" + i, getGroupMaxProgress(i));
-            tag.putBoolean("act_" + i, isGroupActive(i));
-            if (!groupProcessingType[i].isEmpty()) {
-                tag.put("item_" + i, groupProcessingType[i].saveOptional(provider));
-            }
-        }
+        saveProcessingState(tag, provider);
         writeValves(tag);
     }
 }
